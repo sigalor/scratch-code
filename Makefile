@@ -24,8 +24,8 @@ LIBRARIES=-lfl -lscratch-code-ast
 
 # names and options for used programs
 CXX=g++
-CXXFLAGS=-std=c++14 -Wall $(INCLUDE_PATHS)
-CXXFLAGS_FLEXBISON=-std=c++14 -Wall -Wno-unused-function -Wno-sign-compare $(INCLUDE_PATHS)
+CXXFLAGS=-g -std=c++14 -Wall $(INCLUDE_PATHS)
+CXXFLAGS_FLEXBISON=-g -std=c++14 -Wall -Wno-unused-function -Wno-sign-compare $(INCLUDE_PATHS)
 LDFLAGS=-Wall $(LIBRARY_PATHS) $(LIBRARIES)
 FLEX=flex
 FLEXFLAGS=

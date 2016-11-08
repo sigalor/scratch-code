@@ -49,7 +49,7 @@
 
 #line 51 "gen/scratch-code.tab.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 33 "src/scratch-code.ypp" // lalr1.cc:413
+#line 36 "src/scratch-code.ypp" // lalr1.cc:413
 
 	#include "ScratchCodeDriver.hpp"
 
@@ -251,11 +251,11 @@ namespace yy {
   {
       switch (that.type_get ())
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (that.value);
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.move< std::string > (that.value);
         break;
 
@@ -274,11 +274,11 @@ namespace yy {
     state = that.state;
       switch (that.type_get ())
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (that.value);
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.copy< std::string > (that.value);
         break;
 
@@ -318,17 +318,17 @@ namespace yy {
         << yysym.location << ": ";
     switch (yytype)
     {
-            case 3: // "identifier"
+            case 16: // "identifier"
 
-#line 42 "src/scratch-code.ypp" // lalr1.cc:636
+#line 59 "src/scratch-code.ypp" // lalr1.cc:636
         { yyoutput << yysym.value.template as< std::string > (); }
 #line 326 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
 
-      case 4: // "variable type"
+      case 17: // "variable type"
 
-#line 41 "src/scratch-code.ypp" // lalr1.cc:636
-        { yyoutput << static_cast<int>(yysym.value.template as< ast::Lexer::ParsedVariableType > ()); }
+#line 58 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << ast::Lexer::getParsedVariableTypeString(yysym.value.template as< ast::Lexer::ParsedVariableType > ()); }
 #line 333 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
 
@@ -450,9 +450,12 @@ namespace yy {
 	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
 	//"position" class is in gen/position.hh, has "filename" member of type std::string*
 	yyla.location.begin.filename = yyla.location.end.filename = driver.getFilenamePointer();
+	
+	//setup variables needed for parsing
+	std::shared_ptr<ast::StatementList> parentStatementList(driver.getParsedStatementList());
 }
 
-#line 456 "gen/scratch-code.tab.cpp" // lalr1.cc:741
+#line 459 "gen/scratch-code.tab.cpp" // lalr1.cc:741
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -542,11 +545,11 @@ namespace yy {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         yylhs.value.build< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         yylhs.value.build< std::string > ();
         break;
 
@@ -567,40 +570,20 @@ namespace yy {
         {
           switch (yyn)
             {
-  case 2:
-#line 49 "src/scratch-code.ypp" // lalr1.cc:859
-    {
-		std::cout << "done with a scratch-code file!" << std::endl;
-	}
-#line 576 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+  case 6:
+#line 72 "src/scratch-code.ypp" // lalr1.cc:859
+    { std::cout << "got a conditional" << std::endl; }
+#line 577 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
-  case 3:
-#line 55 "src/scratch-code.ypp" // lalr1.cc:859
-    {
-		std::cout << "there are some more typelines..." << std::endl;
-	}
-#line 584 "gen/scratch-code.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 4:
-#line 59 "src/scratch-code.ypp" // lalr1.cc:859
-    {
-		std::cout << "this was the last typeline" << std::endl;
-	}
-#line 592 "gen/scratch-code.tab.cpp" // lalr1.cc:859
-    break;
-
-  case 5:
-#line 65 "src/scratch-code.ypp" // lalr1.cc:859
-    {
-		std::cout << "new typeline: " << static_cast<int>(yystack_[1].value.as< ast::Lexer::ParsedVariableType > ()) << " " << yystack_[0].value.as< std::string > () << std::endl;
-	}
-#line 600 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+  case 8:
+#line 76 "src/scratch-code.ypp" // lalr1.cc:859
+    { driver.parentStatementList->addStatement(std::make_shared<ast::VariableDefinition>(driver.parentStatementList, yystack_[2].value.as< ast::Lexer::ParsedVariableType > (), yystack_[1].value.as< std::string > ())); }
+#line 583 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
 
-#line 604 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 587 "gen/scratch-code.tab.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -855,62 +838,72 @@ namespace yy {
   }
 
 
-  const signed char ScratchCodeParser::yypact_ninf_ = -5;
+  const signed char ScratchCodeParser::yypact_ninf_ = -12;
 
   const signed char ScratchCodeParser::yytable_ninf_ = -1;
 
   const signed char
   ScratchCodeParser::yypact_[] =
   {
-      -4,    -2,     2,    -4,    -5,    -5,    -5,    -5
+     -12,     2,     0,   -12,   -12,    -4,   -11,   -12,   -12,   -12,
+       3,    -3,    -7,     1,   -12,     1,   -12,   -12,   -12,   -12,
+      -2,   -12
   };
 
   const unsigned char
   ScratchCodeParser::yydefact_[] =
   {
-       0,     0,     0,     2,     4,     5,     1,     3
+       3,     0,     0,     1,     2,     0,     0,     4,     5,     6,
+       9,     0,     0,     0,    10,     0,     8,     3,    12,    11,
+       0,     7
   };
 
   const signed char
   ScratchCodeParser::yypgoto_[] =
   {
-      -5,    -5,    -5,     0
+     -12,   -12,    -8,   -12,    -5,   -12,   -12,   -12,   -12
   };
 
   const signed char
   ScratchCodeParser::yydefgoto_[] =
   {
-      -1,     2,     3,     4
+      -1,     1,     2,     7,    18,     8,     9,    10,    14
   };
 
   const unsigned char
   ScratchCodeParser::yytable_[] =
   {
-       1,     5,     6,     7
+       4,     5,     3,     5,    11,    12,    15,    13,    16,    20,
+      19,    21,     0,    17,     0,     6,     0,     6
   };
 
-  const unsigned char
+  const signed char
   ScratchCodeParser::yycheck_[] =
   {
-       4,     3,     0,     3
+       0,     3,     0,     3,     8,    16,     9,     4,    15,    17,
+      15,    13,    -1,    12,    -1,    17,    -1,    17
   };
 
   const unsigned char
   ScratchCodeParser::yystos_[] =
   {
-       0,     4,     6,     7,     8,     3,     0,     8
+       0,    19,    20,     0,     0,     3,    17,    21,    23,    24,
+      25,     8,    16,     4,    26,     9,    15,    12,    22,    22,
+      20,    13
   };
 
   const unsigned char
   ScratchCodeParser::yyr1_[] =
   {
-       0,     5,     6,     7,     7,     8
+       0,    18,    19,    20,    20,    21,    21,    22,    23,    24,
+      24,    25,    26
   };
 
   const unsigned char
   ScratchCodeParser::yyr2_[] =
   {
-       0,     2,     1,     2,     1,     2
+       0,     2,     2,     0,     2,     1,     1,     3,     3,     1,
+       2,     4,     2
   };
 
 
@@ -920,15 +913,20 @@ namespace yy {
   const char*
   const ScratchCodeParser::yytname_[] =
   {
-  "\"end of file\"", "error", "$undefined", "\"identifier\"",
-  "\"variable type\"", "$accept", "scratch_code", "typelines", "typeline", YY_NULLPTR
+  "\"end of file\"", "error", "$undefined", "\"if\"", "\"else\"",
+  "\"while\"", "\"for\"", "\"return\"", "\"(\"", "\")\"", "\"[\"", "\"]\"",
+  "\"{\"", "\"}\"", "\",\"", "\";\"", "\"identifier\"",
+  "\"variable type\"", "$accept", "unit", "expressions", "expression",
+  "expressionsBlock", "variableDefinition", "conditional", "conditionalIf",
+  "conditionalElse", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned char
   ScratchCodeParser::yyrline_[] =
   {
-       0,    48,    48,    54,    58,    64
+       0,    66,    66,    68,    69,    71,    72,    74,    76,    78,
+      79,    81,    83
   };
 
   // Print the state stack on the debug stream.
@@ -963,8 +961,8 @@ namespace yy {
 
 
 } // yy
-#line 967 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
-#line 69 "src/scratch-code.ypp" // lalr1.cc:1168
+#line 965 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
+#line 84 "src/scratch-code.ypp" // lalr1.cc:1168
 
 
 

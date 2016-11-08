@@ -8,14 +8,14 @@
 %code requires
 {
 	#include <string>
-	#include <ast/LexerTokenDefinitions.hpp>
+	#include <ast/AST.hpp>
 	class ScratchCodeDriver;
 }
 
 
 
 //the parsing context
-%param { ScratchCodeDriver& driver }
+%param { ScratchCodeDriver& driver }																				//a reference to a "ScratchCodeDriver" will become a parameter for the "ScratchCodeParser" class constructor
 %locations
 %initial-action
 {
@@ -25,6 +25,9 @@
 	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
 	//"position" class is in gen/position.hh, has "filename" member of type std::string*
 	@$.begin.filename = @$.end.filename = driver.getFilenamePointer();
+	
+	//setup variables needed for parsing
+	std::shared_ptr<ast::StatementList> parentStatementList(driver.getParsedStatementList());
 };
 %define parse.trace
 %define parse.error verbose
@@ -35,37 +38,49 @@
 }
 
 %define api.token.prefix {TOK_}
-%token END 0 "end of file"
+%token
+	END 0 "end of file"
+	IF "if"
+	ELSE "else"
+	WHILE "while"
+	FOR "for"
+	RETURN "return"
+	ROUND_BRACKET_OPEN "("
+	ROUND_BRACKET_CLOSED ")"
+	SQUARE_BRACKET_OPEN "["
+	SQUARE_BRACKET_CLOSED "]"
+	CURLY_BRACKET_OPEN "{"
+	CURLY_BRACKET_CLOSED "}"
+	COMMA ","
+	SEMICOLON ";";
 %token <std::string> IDENTIFIER "identifier"																		//define terminal symbol token types, each one needs to be associated with a field of the previous union
 %token <ast::Lexer::ParsedVariableType> PARSED_VARIABLE_TYPE "variable type"
-%printer { yyoutput << static_cast<int>($$); } <ast::Lexer::ParsedVariableType>
+%printer { yyoutput << ast::Lexer::getParsedVariableTypeString($$); } <ast::Lexer::ParsedVariableType>
 %printer { yyoutput << $$; } <*>
 
 
 
 %%
-scratch_code:																										//the first rule defined is the highest-level rule, which in our case is just the concept of a whole "scratch code file"
-	typelines
-	{
-		std::cout << "done with a scratch-code file!" << std::endl;
-	}
-	;
-typelines:
-	typelines typeline
-	{
-		std::cout << "there are some more typelines..." << std::endl;
-	}
-	| typeline
-	{
-		std::cout << "this was the last typeline" << std::endl;
-	}
-	;
-typeline:
-	PARSED_VARIABLE_TYPE IDENTIFIER
-	{
-		std::cout << "new typeline: " << static_cast<int>($1) << " " << $2 << std::endl;
-	}
-	;
+%start unit;
+unit:																												//the first rule defined is the highest-level rule, which in our case is just the concept of a whole "scratch code file"
+	expressions END;
+expressions:
+	%empty
+  | expressions expression;
+expression:
+	variableDefinition
+  | conditional { std::cout << "got a conditional" << std::endl; };
+expressionsBlock:
+	CURLY_BRACKET_OPEN expressions CURLY_BRACKET_CLOSED;
+variableDefinition:
+	PARSED_VARIABLE_TYPE IDENTIFIER SEMICOLON { driver.parentStatementList->addStatement(std::make_shared<ast::VariableDefinition>(driver.parentStatementList, $1, $2)); };
+conditional:
+	conditionalIf
+  | conditionalIf conditionalElse;
+conditionalIf:
+	IF ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSED expressionsBlock;
+conditionalElse:
+	ELSE expressionsBlock;
 %%
 
 

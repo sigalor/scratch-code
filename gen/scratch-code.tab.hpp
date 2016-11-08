@@ -43,7 +43,7 @@
 #line 9 "src/scratch-code.ypp" // lalr1.cc:377
 
 	#include <string>
-	#include <ast/LexerTokenDefinitions.hpp>
+	#include <ast/AST.hpp>
 	class ScratchCodeDriver;
 
 #line 50 "gen/scratch-code.tab.hpp" // lalr1.cc:377
@@ -318,8 +318,21 @@ namespace yy {
       enum yytokentype
       {
         TOK_END = 0,
-        TOK_IDENTIFIER = 258,
-        TOK_PARSED_VARIABLE_TYPE = 259
+        TOK_IF = 258,
+        TOK_ELSE = 259,
+        TOK_WHILE = 260,
+        TOK_FOR = 261,
+        TOK_RETURN = 262,
+        TOK_ROUND_BRACKET_OPEN = 263,
+        TOK_ROUND_BRACKET_CLOSED = 264,
+        TOK_SQUARE_BRACKET_OPEN = 265,
+        TOK_SQUARE_BRACKET_CLOSED = 266,
+        TOK_CURLY_BRACKET_OPEN = 267,
+        TOK_CURLY_BRACKET_CLOSED = 268,
+        TOK_COMMA = 269,
+        TOK_SEMICOLON = 270,
+        TOK_IDENTIFIER = 271,
+        TOK_PARSED_VARIABLE_TYPE = 272
       };
     };
 
@@ -434,6 +447,58 @@ namespace yy {
 
     static inline
     symbol_type
+    make_IF (const location_type& l);
+
+    static inline
+    symbol_type
+    make_ELSE (const location_type& l);
+
+    static inline
+    symbol_type
+    make_WHILE (const location_type& l);
+
+    static inline
+    symbol_type
+    make_FOR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_RETURN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_ROUND_BRACKET_OPEN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_ROUND_BRACKET_CLOSED (const location_type& l);
+
+    static inline
+    symbol_type
+    make_SQUARE_BRACKET_OPEN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_SQUARE_BRACKET_CLOSED (const location_type& l);
+
+    static inline
+    symbol_type
+    make_CURLY_BRACKET_OPEN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_CURLY_BRACKET_CLOSED (const location_type& l);
+
+    static inline
+    symbol_type
+    make_COMMA (const location_type& l);
+
+    static inline
+    symbol_type
+    make_SEMICOLON (const location_type& l);
+
+    static inline
+    symbol_type
     make_IDENTIFIER (const std::string& v, const location_type& l);
 
     static inline
@@ -525,7 +590,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -645,12 +710,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 3,     ///< Last index in yytable_.
-      yynnts_ = 4,  ///< Number of nonterminal symbols.
-      yyfinal_ = 6, ///< Termination state number.
+      yylast_ = 17,     ///< Last index in yytable_.
+      yynnts_ = 9,  ///< Number of nonterminal symbols.
+      yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 5  ///< Number of tokens.
+      yyntokens_ = 18  ///< Number of tokens.
     };
 
 
@@ -692,9 +757,11 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     4
+       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17
     };
-    const unsigned int user_token_number_max_ = 259;
+    const unsigned int user_token_number_max_ = 272;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -727,11 +794,11 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (other.value);
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.copy< std::string > (other.value);
         break;
 
@@ -752,11 +819,11 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (v);
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.copy< std::string > (v);
         break;
 
@@ -815,11 +882,11 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.template destroy< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.template destroy< std::string > ();
         break;
 
@@ -846,11 +913,11 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 4: // "variable type"
+      case 17: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (s.value);
         break;
 
-      case 3: // "identifier"
+      case 16: // "identifier"
         value.move< std::string > (s.value);
         break;
 
@@ -909,7 +976,8 @@ namespace yy {
     const unsigned short int
     yytoken_number_[] =
     {
-       0,   256,   257,   258,   259
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267,   268,   269,   270,   271,   272
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -918,6 +986,84 @@ namespace yy {
   ScratchCodeParser::make_END (const location_type& l)
   {
     return symbol_type (token::TOK_END, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_IF (const location_type& l)
+  {
+    return symbol_type (token::TOK_IF, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_ELSE (const location_type& l)
+  {
+    return symbol_type (token::TOK_ELSE, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_WHILE (const location_type& l)
+  {
+    return symbol_type (token::TOK_WHILE, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_FOR (const location_type& l)
+  {
+    return symbol_type (token::TOK_FOR, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_RETURN (const location_type& l)
+  {
+    return symbol_type (token::TOK_RETURN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_ROUND_BRACKET_OPEN (const location_type& l)
+  {
+    return symbol_type (token::TOK_ROUND_BRACKET_OPEN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_ROUND_BRACKET_CLOSED (const location_type& l)
+  {
+    return symbol_type (token::TOK_ROUND_BRACKET_CLOSED, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_SQUARE_BRACKET_OPEN (const location_type& l)
+  {
+    return symbol_type (token::TOK_SQUARE_BRACKET_OPEN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_SQUARE_BRACKET_CLOSED (const location_type& l)
+  {
+    return symbol_type (token::TOK_SQUARE_BRACKET_CLOSED, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_CURLY_BRACKET_OPEN (const location_type& l)
+  {
+    return symbol_type (token::TOK_CURLY_BRACKET_OPEN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_CURLY_BRACKET_CLOSED (const location_type& l)
+  {
+    return symbol_type (token::TOK_CURLY_BRACKET_CLOSED, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_COMMA (const location_type& l)
+  {
+    return symbol_type (token::TOK_COMMA, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_SEMICOLON (const location_type& l)
+  {
+    return symbol_type (token::TOK_SEMICOLON, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -935,7 +1081,7 @@ namespace yy {
 
 
 } // yy
-#line 939 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 1085 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 
