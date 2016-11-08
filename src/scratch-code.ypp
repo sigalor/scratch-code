@@ -1,0 +1,79 @@
+%require "3.0.4"																									//require a specific bison version (from https://www.gnu.org/software/bison/manual/html_node/Calc_002b_002b-Parser.html)
+%language "c++"
+%defines																											//many of the following directive are explained here: https://www.gnu.org/software/bison/manual/html_node/Decl-Summary.html
+%define parser_class_name {ScratchCodeParser}
+%define api.token.constructor
+%define api.value.type variant																						//use fancy variants to be compatible with C++ (from https://www.gnu.org/software/bison/manual/html_node/C_002b_002b-Variants.html)
+%define parse.assert																								//TODO: check this: https://www.gnu.org/software/bison/manual/html_node/Tracing.html
+%code requires
+{
+	#include <string>
+	#include <ast/LexerTokenDefinitions.hpp>
+	class ScratchCodeDriver;
+}
+
+
+
+//the parsing context
+%param { ScratchCodeDriver& driver }
+%locations
+%initial-action
+{
+	//initialize the initial location (@$ evaluates to "yyla.location", thus it is not directly associated with my code)
+	//"yyla" is in gen/scratch-code.tab.cpp and is a "symbol_type"=instance of "basic_symbol<by_type>" templated class
+	//"basic_symbol" class contains member "location" of type "location_type"=instance of "location" class
+	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
+	//"position" class is in gen/position.hh, has "filename" member of type std::string*
+	@$.begin.filename = @$.end.filename = driver.getFilenamePointer();
+};
+%define parse.trace
+%define parse.error verbose
+
+%code
+{
+	#include "ScratchCodeDriver.hpp"
+}
+
+%define api.token.prefix {TOK_}
+%token END 0 "end of file"
+%token <std::string> IDENTIFIER "identifier"																		//define terminal symbol token types, each one needs to be associated with a field of the previous union
+%token <ast::Lexer::ParsedVariableType> PARSED_VARIABLE_TYPE "variable type"
+%printer { yyoutput << static_cast<int>($$); } <ast::Lexer::ParsedVariableType>
+%printer { yyoutput << $$; } <*>
+
+
+
+%%
+scratch_code:																										//the first rule defined is the highest-level rule, which in our case is just the concept of a whole "scratch code file"
+	typelines
+	{
+		std::cout << "done with a scratch-code file!" << std::endl;
+	}
+	;
+typelines:
+	typelines typeline
+	{
+		std::cout << "there are some more typelines..." << std::endl;
+	}
+	| typeline
+	{
+		std::cout << "this was the last typeline" << std::endl;
+	}
+	;
+typeline:
+	PARSED_VARIABLE_TYPE IDENTIFIER
+	{
+		std::cout << "new typeline: " << static_cast<int>($1) << " " << $2 << std::endl;
+	}
+	;
+%%
+
+
+
+#include "Main.hpp"
+
+void yy::ScratchCodeParser::error(const location_type& loc, const std::string& message)
+{
+	driver.handleError(loc, message);
+}
+
