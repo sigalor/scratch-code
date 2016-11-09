@@ -25,9 +25,6 @@
 	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
 	//"position" class is in gen/position.hh, has "filename" member of type std::string*
 	@$.begin.filename = @$.end.filename = driver.getFilenamePointer();
-	
-	//setup variables needed for parsing
-	std::shared_ptr<ast::StatementList> parentStatementList(driver.getParsedStatementList());
 };
 %define parse.trace
 %define parse.error verbose
@@ -69,18 +66,48 @@ expressions:
   | expressions expression;
 expression:
 	variableDefinition
-  | conditional { std::cout << "got a conditional" << std::endl; };
+  | conditional;
 expressionsBlock:
-	CURLY_BRACKET_OPEN expressions CURLY_BRACKET_CLOSED;
+	CURLY_BRACKET_OPEN expressions CURLY_BRACKET_CLOSED expressionsBlockClosed
+  | expression expressionsBlockClosed;
+expressionsBlockClosed:
+	%empty { driver.parentStatementList = std::static_pointer_cast<ast::StatementList>(driver.parentStatementList->getParent()->getParent()); };
 variableDefinition:
-	PARSED_VARIABLE_TYPE IDENTIFIER SEMICOLON { driver.parentStatementList->addStatement(std::make_shared<ast::VariableDefinition>(driver.parentStatementList, $1, $2)); };
+	PARSED_VARIABLE_TYPE IDENTIFIER SEMICOLON
+	{
+		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getType() == $1  &&  varDef->getName() == $2); }) != driver.variableDefinitions.end())
+		{
+			auto loc = @$;
+			loc.begin.filename = loc.end.filename = driver.getFilenamePointer();
+			throw yy::ScratchCodeParser::syntax_error(loc, "'" + $2 + "' is already defined");
+		}
+		auto newVarDef = std::make_shared<ast::VariableDefinition>(driver.parentStatementList, $1, $2);
+		driver.parentStatementList->addStatement(newVarDef);
+		driver.variableDefinitions.push_back(newVarDef);
+	};
+/*lValue:
+	IDENTIFIER
+	{
+		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); }) == driver.variableDefinitions.end())
+			
+	};
+value:
+	lValue;*/
 conditional:
-	conditionalIf
-  | conditionalIf conditionalElse;
+	conditionalIf;
+//  | conditionalIf conditionalElse;
 conditionalIf:
-	IF ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSED expressionsBlock;
-conditionalElse:
-	ELSE expressionsBlock;
+	IF ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSED
+	{
+		auto newCond = std::make_shared<ast::Conditional>(driver.parentStatementList);
+		newCond->addCondition(std::make_shared<ast::Value>(newCond));
+		newCond->addConsequenceBody(std::make_shared<ast::StatementList>(newCond));
+		driver.parentStatementList->addStatement(newCond);
+		driver.parentStatementList = newCond->getConsequenceBodies()[0];
+		//throw yy::ScratchCodeParser::syntax_error(@$1, "Dammit, I'm mad");
+	} expressionsBlock;
+//conditionalElse:
+//	ELSE expressionsBlock;
 %%
 
 

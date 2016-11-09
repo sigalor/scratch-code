@@ -33,6 +33,8 @@ class ScratchCodeDriver
 
 	public:
 		std::shared_ptr<ast::StatementList>						parentStatementList;
+		std::vector<std::shared_ptr<ast::FunctionDefinition>>	functionDefinitions;
+		std::vector<std::shared_ptr<ast::VariableDefinition>>	variableDefinitions;
 	
 		ScratchCodeDriver();
 		ScratchCodeDriver(bool newTraceLexing, bool newTraceParsing);

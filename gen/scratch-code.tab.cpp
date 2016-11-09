@@ -49,7 +49,7 @@
 
 #line 51 "gen/scratch-code.tab.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 36 "src/scratch-code.ypp" // lalr1.cc:413
+#line 33 "src/scratch-code.ypp" // lalr1.cc:413
 
 	#include "ScratchCodeDriver.hpp"
 
@@ -320,14 +320,14 @@ namespace yy {
     {
             case 16: // "identifier"
 
-#line 59 "src/scratch-code.ypp" // lalr1.cc:636
+#line 56 "src/scratch-code.ypp" // lalr1.cc:636
         { yyoutput << yysym.value.template as< std::string > (); }
 #line 326 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
 
       case 17: // "variable type"
 
-#line 58 "src/scratch-code.ypp" // lalr1.cc:636
+#line 55 "src/scratch-code.ypp" // lalr1.cc:636
         { yyoutput << ast::Lexer::getParsedVariableTypeString(yysym.value.template as< ast::Lexer::ParsedVariableType > ()); }
 #line 333 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
@@ -450,12 +450,9 @@ namespace yy {
 	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
 	//"position" class is in gen/position.hh, has "filename" member of type std::string*
 	yyla.location.begin.filename = yyla.location.end.filename = driver.getFilenamePointer();
-	
-	//setup variables needed for parsing
-	std::shared_ptr<ast::StatementList> parentStatementList(driver.getParsedStatementList());
 }
 
-#line 459 "gen/scratch-code.tab.cpp" // lalr1.cc:741
+#line 456 "gen/scratch-code.tab.cpp" // lalr1.cc:741
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -570,20 +567,43 @@ namespace yy {
         {
           switch (yyn)
             {
-  case 6:
-#line 72 "src/scratch-code.ypp" // lalr1.cc:859
-    { std::cout << "got a conditional" << std::endl; }
-#line 577 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+  case 9:
+#line 74 "src/scratch-code.ypp" // lalr1.cc:859
+    { driver.parentStatementList = std::static_pointer_cast<ast::StatementList>(driver.parentStatementList->getParent()->getParent()); }
+#line 574 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
-  case 8:
-#line 76 "src/scratch-code.ypp" // lalr1.cc:859
-    { driver.parentStatementList->addStatement(std::make_shared<ast::VariableDefinition>(driver.parentStatementList, yystack_[2].value.as< ast::Lexer::ParsedVariableType > (), yystack_[1].value.as< std::string > ())); }
-#line 583 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+  case 10:
+#line 77 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getType() == yystack_[2].value.as< ast::Lexer::ParsedVariableType > ()  &&  varDef->getName() == yystack_[1].value.as< std::string > ()); }) != driver.variableDefinitions.end())
+		{
+			auto loc = yylhs.location;
+			loc.begin.filename = loc.end.filename = driver.getFilenamePointer();
+			throw yy::ScratchCodeParser::syntax_error(loc, "'" + yystack_[1].value.as< std::string > () + "' is already defined");
+		}
+		auto newVarDef = std::make_shared<ast::VariableDefinition>(driver.parentStatementList, yystack_[2].value.as< ast::Lexer::ParsedVariableType > (), yystack_[1].value.as< std::string > ());
+		driver.parentStatementList->addStatement(newVarDef);
+		driver.variableDefinitions.push_back(newVarDef);
+	}
+#line 590 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 12:
+#line 101 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		auto newCond = std::make_shared<ast::Conditional>(driver.parentStatementList);
+		newCond->addCondition(std::make_shared<ast::Value>(newCond));
+		newCond->addConsequenceBody(std::make_shared<ast::StatementList>(newCond));
+		driver.parentStatementList->addStatement(newCond);
+		driver.parentStatementList = newCond->getConsequenceBodies()[0];
+		//throw yy::ScratchCodeParser::syntax_error(@$1, "Dammit, I'm mad");
+	}
+#line 603 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
 
-#line 587 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 607 "gen/scratch-code.tab.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -838,72 +858,72 @@ namespace yy {
   }
 
 
-  const signed char ScratchCodeParser::yypact_ninf_ = -12;
+  const signed char ScratchCodeParser::yypact_ninf_ = -14;
 
   const signed char ScratchCodeParser::yytable_ninf_ = -1;
 
   const signed char
   ScratchCodeParser::yypact_[] =
   {
-     -12,     2,     0,   -12,   -12,    -4,   -11,   -12,   -12,   -12,
-       3,    -3,    -7,     1,   -12,     1,   -12,   -12,   -12,   -12,
-      -2,   -12
+     -14,     4,     0,   -14,   -14,    -3,   -10,   -14,   -14,   -14,
+     -14,     2,    -8,   -14,   -14,    -2,   -14,   -14,   -14,    -1,
+     -14,   -14,   -14
   };
 
   const unsigned char
   ScratchCodeParser::yydefact_[] =
   {
        3,     0,     0,     1,     2,     0,     0,     4,     5,     6,
-       9,     0,     0,     0,    10,     0,     8,     3,    12,    11,
-       0,     7
+      11,     0,     0,    12,    10,     0,     3,     9,    13,     0,
+       8,     9,     7
   };
 
   const signed char
   ScratchCodeParser::yypgoto_[] =
   {
-     -12,   -12,    -8,   -12,    -5,   -12,   -12,   -12,   -12
+     -14,   -14,    -7,     3,   -14,   -13,   -14,   -14,   -14,   -14
   };
 
   const signed char
   ScratchCodeParser::yydefgoto_[] =
   {
-      -1,     1,     2,     7,    18,     8,     9,    10,    14
+      -1,     1,     2,     7,    18,    20,     8,     9,    10,    15
   };
 
   const unsigned char
   ScratchCodeParser::yytable_[] =
   {
-       4,     5,     3,     5,    11,    12,    15,    13,    16,    20,
-      19,    21,     0,    17,     0,     6,     0,     6
+       4,     5,     5,     5,     3,    11,    12,    14,    22,    19,
+      16,    13,    21,     0,     0,     6,     6,     6,    17
   };
 
   const signed char
   ScratchCodeParser::yycheck_[] =
   {
-       0,     3,     0,     3,     8,    16,     9,     4,    15,    17,
-      15,    13,    -1,    12,    -1,    17,    -1,    17
+       0,     3,     3,     3,     0,     8,    16,    15,    21,    16,
+      12,     9,    13,    -1,    -1,    17,    17,    17,    15
   };
 
   const unsigned char
   ScratchCodeParser::yystos_[] =
   {
-       0,    19,    20,     0,     0,     3,    17,    21,    23,    24,
-      25,     8,    16,     4,    26,     9,    15,    12,    22,    22,
-      20,    13
+       0,    19,    20,     0,     0,     3,    17,    21,    24,    25,
+      26,     8,    16,     9,    15,    27,    12,    21,    22,    20,
+      23,    13,    23
   };
 
   const unsigned char
   ScratchCodeParser::yyr1_[] =
   {
-       0,    18,    19,    20,    20,    21,    21,    22,    23,    24,
-      24,    25,    26
+       0,    18,    19,    20,    20,    21,    21,    22,    22,    23,
+      24,    25,    27,    26
   };
 
   const unsigned char
   ScratchCodeParser::yyr2_[] =
   {
-       0,     2,     2,     0,     2,     1,     1,     3,     3,     1,
-       2,     4,     2
+       0,     2,     2,     0,     2,     1,     1,     4,     2,     0,
+       3,     1,     0,     5
   };
 
 
@@ -917,16 +937,16 @@ namespace yy {
   "\"while\"", "\"for\"", "\"return\"", "\"(\"", "\")\"", "\"[\"", "\"]\"",
   "\"{\"", "\"}\"", "\",\"", "\";\"", "\"identifier\"",
   "\"variable type\"", "$accept", "unit", "expressions", "expression",
-  "expressionsBlock", "variableDefinition", "conditional", "conditionalIf",
-  "conditionalElse", YY_NULLPTR
+  "expressionsBlock", "expressionsBlockClosed", "variableDefinition",
+  "conditional", "conditionalIf", "$@1", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned char
   ScratchCodeParser::yyrline_[] =
   {
-       0,    66,    66,    68,    69,    71,    72,    74,    76,    78,
-      79,    81,    83
+       0,    63,    63,    65,    66,    68,    69,    71,    72,    74,
+      76,    97,   101,   100
   };
 
   // Print the state stack on the debug stream.
@@ -961,8 +981,8 @@ namespace yy {
 
 
 } // yy
-#line 965 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
-#line 84 "src/scratch-code.ypp" // lalr1.cc:1168
+#line 985 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
+#line 111 "src/scratch-code.ypp" // lalr1.cc:1168
 
 
 

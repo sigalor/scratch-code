@@ -3,4 +3,8 @@ real b;
 if()
 {
 	string hey;
-
+	if()
+		int a;
+	int b;
+}
+bool hoho;
