@@ -8,6 +8,8 @@
 %code requires
 {
 	#include <string>
+	#include <memory>
+	#include <typeinfo>
 	#include <ast/AST.hpp>
 	class ScratchCodeDriver;
 }
@@ -38,6 +40,7 @@
 %token
 	END 0 "end of file"
 	IF "if"
+	THEN																											//dummy token to solve dangling-else-/shift-reduce-problem, from http://stackoverflow.com/a/12734499
 	ELSE "else"
 	WHILE "while"
 	FOR "for"
@@ -49,65 +52,197 @@
 	CURLY_BRACKET_OPEN "{"
 	CURLY_BRACKET_CLOSED "}"
 	COMMA ","
-	SEMICOLON ";";
-%token <std::string> IDENTIFIER "identifier"																		//define terminal symbol token types, each one needs to be associated with a field of the previous union
-%token <ast::Lexer::ParsedVariableType> PARSED_VARIABLE_TYPE "variable type"
+	SEMICOLON ";"
+	BINOP_MULTIPLY "*"
+	BINOP_DIVIDE "/"
+	BINOP_MODULO "%"
+	BINOP_ADD "+"
+	BINOP_SUBTRACT "-"
+	BINOP_ASSIGNMENT "=";
+%token <std::string>									IDENTIFIER "identifier"										//define terminal symbol token types
+%token <ast::Lexer::ParsedVariableType>					PARSED_VARIABLE_TYPE "variable type"
+%token <std::shared_ptr<ast::RValueValue>>				RVALUE_VALUE "rvalue value"
+%type <std::shared_ptr<ast::Statement>>					statement;													//define non-terminal symbol token types
+%type <std::shared_ptr<ast::StatementList>>				statements statementsBlockInternal statementsBlock;
+%type <std::shared_ptr<ast::VariableDefinition>>		localVariableDefinition;
+%type <std::shared_ptr<ast::VariableDefinitionList>>	localVariableDefinitions localVariableDefinitionList;
+%type <std::shared_ptr<ast::Conditional>>				conditional conditionalIf;
+%type <std::shared_ptr<ast::Value>>						value valueStandalone;
+%type <std::shared_ptr<ast::LValue>>					lValue;
+%type <std::shared_ptr<ast::RValueValue>>				rValueValue;
+%type <std::shared_ptr<ast::BinaryOperation>>			binaryOperation;
 %printer { yyoutput << ast::Lexer::getParsedVariableTypeString($$); } <ast::Lexer::ParsedVariableType>
-%printer { yyoutput << $$; } <*>
+%printer { yyoutput << typeid($$).name() << " at " << &$$; } <*>
+
+%right THEN ELSE																									//this way, shift will be preferred over reduce when parsing if-else-statements, like "then" dummy token from http://stackoverflow.com/a/12734499
+
+%right BINOP_ASSIGNMENT
+%left  BINOP_ADD BINOP_SUBTRACT
+%left  BINOP_MULTIPLY BINOP_DIVIDE BINOP_MODULO
 
 
 
 %%
-%start unit;
-unit:																												//the first rule defined is the highest-level rule, which in our case is just the concept of a whole "scratch code file"
-	expressions END;
-expressions:
-	%empty
-  | expressions expression;
-expression:
-	variableDefinition
-  | conditional;
-expressionsBlock:
-	CURLY_BRACKET_OPEN expressions CURLY_BRACKET_CLOSED expressionsBlockClosed
-  | expression expressionsBlockClosed;
-expressionsBlockClosed:
-	%empty { driver.parentStatementList = std::static_pointer_cast<ast::StatementList>(driver.parentStatementList->getParent()->getParent()); };
-variableDefinition:
-	PARSED_VARIABLE_TYPE IDENTIFIER SEMICOLON
+%start unit;																										//begin with the "unit" rule as the highest-level-rule
+unit:																												//this is the ONLY rule that writes to driver.parsedStatementList
+	statements END
 	{
-		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getType() == $1  &&  varDef->getName() == $2); }) != driver.variableDefinitions.end())
-		{
-			auto loc = @$;
-			loc.begin.filename = loc.end.filename = driver.getFilenamePointer();
-			throw yy::ScratchCodeParser::syntax_error(loc, "'" + $2 + "' is already defined");
-		}
-		auto newVarDef = std::make_shared<ast::VariableDefinition>(driver.parentStatementList, $1, $2);
-		driver.parentStatementList->addStatement(newVarDef);
-		driver.variableDefinitions.push_back(newVarDef);
+		*(driver.parsedStatementList) = *($1);
+		for(auto stmt : driver.parsedStatementList->getStatements())
+			stmt->setParent(driver.parsedStatementList);
 	};
-/*lValue:
+
+
+
+statement:																											//returns ast::Statement
+	valueStandalone		{ $$ = $1; }
+  | conditional			{ $$ = $1; };
+statements:																											//returns ast::StatementList
+	%empty
+	{
+		$$ = std::make_shared<ast::StatementList>(nullptr);
+	}
+  | statements statement
+	{
+		$1->addStatement($2);
+		$$ = $1;
+	}
+  | statements localVariableDefinitionList
+	{
+		for(auto varDef : $2->getVarDefs())
+			$1->addStatement(varDef);
+		$$ = $1;
+	};
+statementsBlockInternal:																							//returns ast::StatementList
+	CURLY_BRACKET_OPEN statements CURLY_BRACKET_CLOSED
+	{
+		$$ = $2;
+	}
+  | statement
+	{
+		auto stmtBlock = std::make_shared<ast::StatementList>(nullptr);
+		stmtBlock->addStatement($1);
+		$$ = stmtBlock;
+	};
+statementsBlock:																									//returns ast::StatementList (also cleans up variable definitions that went out of scope)
+	statementsBlockInternal
+	{
+		for(auto stmt : $1->getStatements())
+			stmt->setParent($1);
+		auto i = driver.variableDefinitions.begin();
+		while(i != driver.variableDefinitions.end())
+		{
+			if((*i)->hasParent<ast::StatementList>($1))
+				i = driver.variableDefinitions.erase(i);
+			else
+				++i;
+		}
+		$$ = $1;
+	};
+
+
+
+localVariableDefinition:																							//returns ast::VariableDefinition
 	IDENTIFIER
 	{
-		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); }) == driver.variableDefinitions.end())
-			
+		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); }) != driver.variableDefinitions.end())
+			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' is already declared");
+		$$ = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
 	};
-value:
-	lValue;*/
-conditional:
-	conditionalIf;
-//  | conditionalIf conditionalElse;
-conditionalIf:
-	IF ROUND_BRACKET_OPEN ROUND_BRACKET_CLOSED
+localVariableDefinitions:																							//returns ast::VariableDefinitionList
+	%empty
 	{
-		auto newCond = std::make_shared<ast::Conditional>(driver.parentStatementList);
-		newCond->addCondition(std::make_shared<ast::Value>(newCond));
-		newCond->addConsequenceBody(std::make_shared<ast::StatementList>(newCond));
-		driver.parentStatementList->addStatement(newCond);
-		driver.parentStatementList = newCond->getConsequenceBodies()[0];
-		//throw yy::ScratchCodeParser::syntax_error(@$1, "Dammit, I'm mad");
-	} expressionsBlock;
-//conditionalElse:
-//	ELSE expressionsBlock;
+		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
+	}
+  | localVariableDefinitions COMMA localVariableDefinition
+	{
+		$1->addVarDef($3);
+		$$ = $1;
+	};
+localVariableDefinitionList:
+	PARSED_VARIABLE_TYPE localVariableDefinition localVariableDefinitions SEMICOLON									//returns ast::VariableDefinitionList
+	{
+		$3->getVarDefs().insert($3->getVarDefs().begin(), $2);
+		for(auto varDef : $3->getVarDefs())
+		{
+			varDef->setType($1);
+			driver.variableDefinitions.push_back(varDef);
+		}
+		$$ = $3;
+	};
+
+
+
+conditional:																										//returns ast::Conditional
+	conditionalIf                 %prec THEN
+	{
+		$$ = $1;
+	}
+  | conditionalIf ELSE statementsBlock
+	{
+		$3->setParent($1);
+		$1->setAlternativeBody($3);
+		$$ = $1;
+	};
+conditionalIf:																										//returns ast::Conditional
+	IF ROUND_BRACKET_OPEN value ROUND_BRACKET_CLOSED statementsBlock
+	{
+		auto newCond = std::make_shared<ast::Conditional>(nullptr);
+		$3->setParent(newCond);
+		$5->setParent(newCond);
+		newCond->addCondition($3);
+		newCond->addConsequenceBody($5);
+		$$ = newCond;
+	};
+
+
+
+valueStandalone:																									//returns ast::Value
+	value SEMICOLON
+	{
+		$$ = $1;
+	};
+value:																												//returns ast::Value
+	lValue			{ $$ = $1; }
+  | rValueValue		{ $$ = $1; }
+  | binaryOperation	{ $$ = $1; };
+lValue:																												//returns ast::LValue
+	IDENTIFIER
+	{
+		std::vector<std::shared_ptr<ast::VariableDefinition>>::iterator assocVarDef = std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); });
+		if(assocVarDef == driver.variableDefinitions.end())
+			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' was not declared in this scope");
+		$$ = std::make_shared<ast::LValue>(nullptr, *assocVarDef);
+	};
+rValueValue:																										//returns ast::RValueValue
+	RVALUE_VALUE
+	{
+		$$ = $1;
+	};
+binaryOperation:																									//returns ast::BinaryOperation
+	value BINOP_ASSIGNMENT value
+	{
+		$$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Assignment, $3);
+	};
+/*binaryOperation:																									//needs: [-1]=new parent, output=ast::BinaryOperation
+	{
+		auto newBinOp = std::make_shared<ast::BinaryOperation>(driver.nodeStack.back());
+		newBinOp->setOperation(ast::Lexer::ParsedBinaryOperation::Assignment);
+		driver.nodeStack.pop_back();
+		driver.nodeStack.push_back(newBinOp);																		//once to keep for myself
+		driver.nodeStack.push_back(newBinOp);																		//once as "new parent" parameter to the "value" rule
+	} value BINOP_ASSIGNMENT
+	{
+		auto newBinOp = std::static_pointer_cast<ast::BinaryOperation>(driver.nodeStack.end()[-2]);
+		newBinOp->setLhs(std::static_pointer_cast<ast::Value>(driver.nodeStack.back()));
+		driver.nodeStack.pop_back();																				//the return value of the "value" rule has been processed in the previous line, it can be removed now from the stack
+		driver.nodeStack.push_back(driver.nodeStack.back());														//again, as parameter to the "value" rule
+	} value
+	{
+		auto newBinOp = std::static_pointer_cast<ast::BinaryOperation>(driver.nodeStack.end()[-2]);
+		newBinOp->setRhs(std::static_pointer_cast<ast::Value>(driver.nodeStack.back()));
+		driver.nodeStack.pop_back();
+	};*/
 %%
 
 

@@ -2,6 +2,7 @@
 
 
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -11,14 +12,6 @@
 
 
 
-//stuff for flex and bison
-/*extern "C" int									yylex();
-extern "C" int									yyparse();
-extern FILE*									yyin;
-void											yyerror(const char* s);*/												//function for flex error reporting
-
-
-
-extern std::shared_ptr<ast::StatementList>						parsedStatements;
+extern std::shared_ptr<ast::StatementList>						parsedStatementList;
 
 int																main(int argc, char** argv);

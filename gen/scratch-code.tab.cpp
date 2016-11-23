@@ -49,7 +49,7 @@
 
 #line 51 "gen/scratch-code.tab.cpp" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 33 "src/scratch-code.ypp" // lalr1.cc:413
+#line 35 "src/scratch-code.ypp" // lalr1.cc:413
 
 	#include "ScratchCodeDriver.hpp"
 
@@ -251,11 +251,53 @@ namespace yy {
   {
       switch (that.type_get ())
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (that.value);
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.move< std::shared_ptr<ast::BinaryOperation> > (that.value);
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.move< std::shared_ptr<ast::Conditional> > (that.value);
+        break;
+
+      case 39: // lValue
+        value.move< std::shared_ptr<ast::LValue> > (that.value);
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.move< std::shared_ptr<ast::RValueValue> > (that.value);
+        break;
+
+      case 28: // statement
+        value.move< std::shared_ptr<ast::Statement> > (that.value);
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.move< std::shared_ptr<ast::StatementList> > (that.value);
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.move< std::shared_ptr<ast::Value> > (that.value);
+        break;
+
+      case 32: // localVariableDefinition
+        value.move< std::shared_ptr<ast::VariableDefinition> > (that.value);
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.move< std::shared_ptr<ast::VariableDefinitionList> > (that.value);
+        break;
+
+      case 23: // "identifier"
         value.move< std::string > (that.value);
         break;
 
@@ -274,11 +316,53 @@ namespace yy {
     state = that.state;
       switch (that.type_get ())
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (that.value);
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.copy< std::shared_ptr<ast::BinaryOperation> > (that.value);
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.copy< std::shared_ptr<ast::Conditional> > (that.value);
+        break;
+
+      case 39: // lValue
+        value.copy< std::shared_ptr<ast::LValue> > (that.value);
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.copy< std::shared_ptr<ast::RValueValue> > (that.value);
+        break;
+
+      case 28: // statement
+        value.copy< std::shared_ptr<ast::Statement> > (that.value);
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.copy< std::shared_ptr<ast::StatementList> > (that.value);
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.copy< std::shared_ptr<ast::Value> > (that.value);
+        break;
+
+      case 32: // localVariableDefinition
+        value.copy< std::shared_ptr<ast::VariableDefinition> > (that.value);
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.copy< std::shared_ptr<ast::VariableDefinitionList> > (that.value);
+        break;
+
+      case 23: // "identifier"
         value.copy< std::string > (that.value);
         break;
 
@@ -318,18 +402,123 @@ namespace yy {
         << yysym.location << ": ";
     switch (yytype)
     {
-            case 16: // "identifier"
+            case 23: // "identifier"
 
-#line 56 "src/scratch-code.ypp" // lalr1.cc:636
-        { yyoutput << yysym.value.template as< std::string > (); }
-#line 326 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::string > ()).name() << " at " << &yysym.value.template as< std::string > (); }
+#line 410 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
 
-      case 17: // "variable type"
+      case 24: // "variable type"
 
-#line 55 "src/scratch-code.ypp" // lalr1.cc:636
+#line 74 "src/scratch-code.ypp" // lalr1.cc:636
         { yyoutput << ast::Lexer::getParsedVariableTypeString(yysym.value.template as< ast::Lexer::ParsedVariableType > ()); }
-#line 333 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+#line 417 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 25: // "rvalue value"
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::RValueValue> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::RValueValue> > (); }
+#line 424 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 28: // statement
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::Statement> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::Statement> > (); }
+#line 431 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 29: // statements
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::StatementList> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::StatementList> > (); }
+#line 438 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 30: // statementsBlockInternal
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::StatementList> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::StatementList> > (); }
+#line 445 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 31: // statementsBlock
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::StatementList> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::StatementList> > (); }
+#line 452 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 32: // localVariableDefinition
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::VariableDefinition> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::VariableDefinition> > (); }
+#line 459 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 33: // localVariableDefinitions
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::VariableDefinitionList> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::VariableDefinitionList> > (); }
+#line 466 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 34: // localVariableDefinitionList
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::VariableDefinitionList> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::VariableDefinitionList> > (); }
+#line 473 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 35: // conditional
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::Conditional> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::Conditional> > (); }
+#line 480 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 36: // conditionalIf
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::Conditional> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::Conditional> > (); }
+#line 487 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 37: // valueStandalone
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::Value> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::Value> > (); }
+#line 494 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 38: // value
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::Value> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::Value> > (); }
+#line 501 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 39: // lValue
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::LValue> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::LValue> > (); }
+#line 508 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 40: // rValueValue
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::RValueValue> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::RValueValue> > (); }
+#line 515 "gen/scratch-code.tab.cpp" // lalr1.cc:636
+        break;
+
+      case 41: // binaryOperation
+
+#line 75 "src/scratch-code.ypp" // lalr1.cc:636
+        { yyoutput << typeid(yysym.value.template as< std::shared_ptr<ast::BinaryOperation> > ()).name() << " at " << &yysym.value.template as< std::shared_ptr<ast::BinaryOperation> > (); }
+#line 522 "gen/scratch-code.tab.cpp" // lalr1.cc:636
         break;
 
 
@@ -442,7 +631,7 @@ namespace yy {
 
 
     // User initialization code.
-    #line 21 "src/scratch-code.ypp" // lalr1.cc:741
+    #line 23 "src/scratch-code.ypp" // lalr1.cc:741
 {
 	//initialize the initial location (@$ evaluates to "yyla.location", thus it is not directly associated with my code)
 	//"yyla" is in gen/scratch-code.tab.cpp and is a "symbol_type"=instance of "basic_symbol<by_type>" templated class
@@ -452,7 +641,7 @@ namespace yy {
 	yyla.location.begin.filename = yyla.location.end.filename = driver.getFilenamePointer();
 }
 
-#line 456 "gen/scratch-code.tab.cpp" // lalr1.cc:741
+#line 645 "gen/scratch-code.tab.cpp" // lalr1.cc:741
 
     /* Initialize the stack.  The initial state will be set in
        yynewstate, since the latter expects the semantical and the
@@ -542,11 +731,53 @@ namespace yy {
          when using variants.  */
         switch (yyr1_[yyn])
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         yylhs.value.build< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        yylhs.value.build< std::shared_ptr<ast::BinaryOperation> > ();
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        yylhs.value.build< std::shared_ptr<ast::Conditional> > ();
+        break;
+
+      case 39: // lValue
+        yylhs.value.build< std::shared_ptr<ast::LValue> > ();
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        yylhs.value.build< std::shared_ptr<ast::RValueValue> > ();
+        break;
+
+      case 28: // statement
+        yylhs.value.build< std::shared_ptr<ast::Statement> > ();
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        yylhs.value.build< std::shared_ptr<ast::StatementList> > ();
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        yylhs.value.build< std::shared_ptr<ast::Value> > ();
+        break;
+
+      case 32: // localVariableDefinition
+        yylhs.value.build< std::shared_ptr<ast::VariableDefinition> > ();
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        yylhs.value.build< std::shared_ptr<ast::VariableDefinitionList> > ();
+        break;
+
+      case 23: // "identifier"
         yylhs.value.build< std::string > ();
         break;
 
@@ -567,43 +798,218 @@ namespace yy {
         {
           switch (yyn)
             {
+  case 2:
+#line 89 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		*(driver.parsedStatementList) = *(yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ());
+		for(auto stmt : driver.parsedStatementList->getStatements())
+			stmt->setParent(driver.parsedStatementList);
+	}
+#line 809 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 3:
+#line 98 "src/scratch-code.ypp" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ast::Statement> > () = yystack_[0].value.as< std::shared_ptr<ast::Value> > (); }
+#line 815 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 4:
+#line 99 "src/scratch-code.ypp" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ast::Statement> > () = yystack_[0].value.as< std::shared_ptr<ast::Conditional> > (); }
+#line 821 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 5:
+#line 102 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = std::make_shared<ast::StatementList>(nullptr);
+	}
+#line 829 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 6:
+#line 106 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ()->addStatement(yystack_[0].value.as< std::shared_ptr<ast::Statement> > ());
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ();
+	}
+#line 838 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 7:
+#line 111 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		for(auto varDef : yystack_[0].value.as< std::shared_ptr<ast::VariableDefinitionList> > ()->getVarDefs())
+			yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ()->addStatement(varDef);
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ();
+	}
+#line 848 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 8:
+#line 118 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = yystack_[1].value.as< std::shared_ptr<ast::StatementList> > ();
+	}
+#line 856 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
   case 9:
-#line 74 "src/scratch-code.ypp" // lalr1.cc:859
-    { driver.parentStatementList = std::static_pointer_cast<ast::StatementList>(driver.parentStatementList->getParent()->getParent()); }
-#line 574 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 122 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		auto stmtBlock = std::make_shared<ast::StatementList>(nullptr);
+		stmtBlock->addStatement(yystack_[0].value.as< std::shared_ptr<ast::Statement> > ());
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = stmtBlock;
+	}
+#line 866 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
   case 10:
-#line 77 "src/scratch-code.ypp" // lalr1.cc:859
+#line 129 "src/scratch-code.ypp" // lalr1.cc:859
     {
-		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getType() == yystack_[2].value.as< ast::Lexer::ParsedVariableType > ()  &&  varDef->getName() == yystack_[1].value.as< std::string > ()); }) != driver.variableDefinitions.end())
+		for(auto stmt : yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ()->getStatements())
+			stmt->setParent(yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ());
+		auto i = driver.variableDefinitions.begin();
+		while(i != driver.variableDefinitions.end())
 		{
-			auto loc = yylhs.location;
-			loc.begin.filename = loc.end.filename = driver.getFilenamePointer();
-			throw yy::ScratchCodeParser::syntax_error(loc, "'" + yystack_[1].value.as< std::string > () + "' is already defined");
+			if((*i)->hasParent<ast::StatementList>(yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ()))
+				i = driver.variableDefinitions.erase(i);
+			else
+				++i;
 		}
-		auto newVarDef = std::make_shared<ast::VariableDefinition>(driver.parentStatementList, yystack_[2].value.as< ast::Lexer::ParsedVariableType > (), yystack_[1].value.as< std::string > ());
-		driver.parentStatementList->addStatement(newVarDef);
-		driver.variableDefinitions.push_back(newVarDef);
+		yylhs.value.as< std::shared_ptr<ast::StatementList> > () = yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ();
 	}
-#line 590 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 884 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 11:
+#line 147 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == yystack_[0].value.as< std::string > ()); }) != driver.variableDefinitions.end())
+			throw yy::ScratchCodeParser::syntax_error(yylhs.location, "'" + yystack_[0].value.as< std::string > () + "' is already declared");
+		yylhs.value.as< std::shared_ptr<ast::VariableDefinition> > () = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, yystack_[0].value.as< std::string > ());
+	}
+#line 894 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
   case 12:
-#line 101 "src/scratch-code.ypp" // lalr1.cc:859
+#line 154 "src/scratch-code.ypp" // lalr1.cc:859
     {
-		auto newCond = std::make_shared<ast::Conditional>(driver.parentStatementList);
-		newCond->addCondition(std::make_shared<ast::Value>(newCond));
-		newCond->addConsequenceBody(std::make_shared<ast::StatementList>(newCond));
-		driver.parentStatementList->addStatement(newCond);
-		driver.parentStatementList = newCond->getConsequenceBodies()[0];
-		//throw yy::ScratchCodeParser::syntax_error(@$1, "Dammit, I'm mad");
+		yylhs.value.as< std::shared_ptr<ast::VariableDefinitionList> > () = std::make_shared<ast::VariableDefinitionList>(nullptr);
 	}
-#line 603 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 902 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 13:
+#line 158 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yystack_[2].value.as< std::shared_ptr<ast::VariableDefinitionList> > ()->addVarDef(yystack_[0].value.as< std::shared_ptr<ast::VariableDefinition> > ());
+		yylhs.value.as< std::shared_ptr<ast::VariableDefinitionList> > () = yystack_[2].value.as< std::shared_ptr<ast::VariableDefinitionList> > ();
+	}
+#line 911 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 14:
+#line 164 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yystack_[1].value.as< std::shared_ptr<ast::VariableDefinitionList> > ()->getVarDefs().insert(yystack_[1].value.as< std::shared_ptr<ast::VariableDefinitionList> > ()->getVarDefs().begin(), yystack_[2].value.as< std::shared_ptr<ast::VariableDefinition> > ());
+		for(auto varDef : yystack_[1].value.as< std::shared_ptr<ast::VariableDefinitionList> > ()->getVarDefs())
+		{
+			varDef->setType(yystack_[3].value.as< ast::Lexer::ParsedVariableType > ());
+			driver.variableDefinitions.push_back(varDef);
+		}
+		yylhs.value.as< std::shared_ptr<ast::VariableDefinitionList> > () = yystack_[1].value.as< std::shared_ptr<ast::VariableDefinitionList> > ();
+	}
+#line 925 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 15:
+#line 178 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::Conditional> > () = yystack_[0].value.as< std::shared_ptr<ast::Conditional> > ();
+	}
+#line 933 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 16:
+#line 182 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ()->setParent(yystack_[2].value.as< std::shared_ptr<ast::Conditional> > ());
+		yystack_[2].value.as< std::shared_ptr<ast::Conditional> > ()->setAlternativeBody(yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ());
+		yylhs.value.as< std::shared_ptr<ast::Conditional> > () = yystack_[2].value.as< std::shared_ptr<ast::Conditional> > ();
+	}
+#line 943 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 17:
+#line 189 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		auto newCond = std::make_shared<ast::Conditional>(nullptr);
+		yystack_[2].value.as< std::shared_ptr<ast::Value> > ()->setParent(newCond);
+		yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ()->setParent(newCond);
+		newCond->addCondition(yystack_[2].value.as< std::shared_ptr<ast::Value> > ());
+		newCond->addConsequenceBody(yystack_[0].value.as< std::shared_ptr<ast::StatementList> > ());
+		yylhs.value.as< std::shared_ptr<ast::Conditional> > () = newCond;
+	}
+#line 956 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 18:
+#line 202 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::Value> > () = yystack_[1].value.as< std::shared_ptr<ast::Value> > ();
+	}
+#line 964 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 19:
+#line 206 "src/scratch-code.ypp" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ast::Value> > () = yystack_[0].value.as< std::shared_ptr<ast::LValue> > (); }
+#line 970 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 20:
+#line 207 "src/scratch-code.ypp" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ast::Value> > () = yystack_[0].value.as< std::shared_ptr<ast::RValueValue> > (); }
+#line 976 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 21:
+#line 208 "src/scratch-code.ypp" // lalr1.cc:859
+    { yylhs.value.as< std::shared_ptr<ast::Value> > () = yystack_[0].value.as< std::shared_ptr<ast::BinaryOperation> > (); }
+#line 982 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 22:
+#line 211 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		std::vector<std::shared_ptr<ast::VariableDefinition>>::iterator assocVarDef = std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == yystack_[0].value.as< std::string > ()); });
+		if(assocVarDef == driver.variableDefinitions.end())
+			throw yy::ScratchCodeParser::syntax_error(yylhs.location, "'" + yystack_[0].value.as< std::string > () + "' was not declared in this scope");
+		yylhs.value.as< std::shared_ptr<ast::LValue> > () = std::make_shared<ast::LValue>(nullptr, *assocVarDef);
+	}
+#line 993 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 23:
+#line 219 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::RValueValue> > () = yystack_[0].value.as< std::shared_ptr<ast::RValueValue> > ();
+	}
+#line 1001 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+    break;
+
+  case 24:
+#line 224 "src/scratch-code.ypp" // lalr1.cc:859
+    {
+		yylhs.value.as< std::shared_ptr<ast::BinaryOperation> > () = std::make_shared<ast::BinaryOperation>(nullptr, yystack_[2].value.as< std::shared_ptr<ast::Value> > (), ast::Lexer::ParsedBinaryOperation::Assignment, yystack_[0].value.as< std::shared_ptr<ast::Value> > ());
+	}
+#line 1009 "gen/scratch-code.tab.cpp" // lalr1.cc:859
     break;
 
 
-#line 607 "gen/scratch-code.tab.cpp" // lalr1.cc:859
+#line 1013 "gen/scratch-code.tab.cpp" // lalr1.cc:859
             default:
               break;
             }
@@ -858,72 +1264,83 @@ namespace yy {
   }
 
 
-  const signed char ScratchCodeParser::yypact_ninf_ = -14;
+  const signed char ScratchCodeParser::yypact_ninf_ = -20;
 
   const signed char ScratchCodeParser::yytable_ninf_ = -1;
 
   const signed char
   ScratchCodeParser::yypact_[] =
   {
-     -14,     4,     0,   -14,   -14,    -3,   -10,   -14,   -14,   -14,
-     -14,     2,    -8,   -14,   -14,    -2,   -14,   -14,   -14,    -1,
-     -14,   -14,   -14
+     -20,     8,     0,   -20,   -20,     9,   -20,    -3,   -20,   -20,
+     -20,   -20,    16,   -20,   -12,   -20,   -20,   -20,   -18,   -20,
+     -20,     6,   -20,   -18,    -9,    -1,   -20,   -20,   -20,   -20,
+      10,     6,    -3,   -20,     3,   -20,   -20,   -20
   };
 
   const unsigned char
   ScratchCodeParser::yydefact_[] =
   {
-       3,     0,     0,     1,     2,     0,     0,     4,     5,     6,
-      11,     0,     0,    12,    10,     0,     3,     9,    13,     0,
-       8,     9,     7
+       5,     0,     0,     1,     2,     0,    22,     0,    23,     6,
+       7,     4,    15,     3,     0,    19,    20,    21,     0,    11,
+      12,     0,    18,     0,     0,     0,     5,     9,    10,    16,
+      24,     0,     0,    14,     0,    17,    13,     8
   };
 
   const signed char
   ScratchCodeParser::yypgoto_[] =
   {
-     -14,   -14,    -7,     3,   -14,   -13,   -14,   -14,   -14,   -14
+     -20,   -20,   -19,    -4,   -20,     2,    -2,   -20,   -20,   -20,
+     -20,   -20,    -7,   -20,   -20,   -20
   };
 
   const signed char
   ScratchCodeParser::yydefgoto_[] =
   {
-      -1,     1,     2,     7,    18,    20,     8,     9,    10,    15
+      -1,     1,     9,     2,    28,    29,    20,    25,    10,    11,
+      12,    13,    14,    15,    16,    17
   };
 
   const unsigned char
   ScratchCodeParser::yytable_[] =
   {
-       4,     5,     5,     5,     3,    11,    12,    14,    22,    19,
-      16,    13,    21,     0,     0,     6,     6,     6,    17
+       4,    31,    27,     5,    22,     6,     5,     8,     3,     5,
+      23,    24,    27,    23,    32,    33,    30,    37,    18,    26,
+      19,    21,    34,     6,     7,     8,     6,     7,     8,     6,
+      36,     8,    23,    35
   };
 
-  const signed char
+  const unsigned char
   ScratchCodeParser::yycheck_[] =
   {
-       0,     3,     3,     3,     0,     8,    16,    15,    21,    16,
-      12,     9,    13,    -1,    -1,    17,    17,    17,    15
+       0,    10,    21,     3,    16,    23,     3,    25,     0,     3,
+      22,    18,    31,    22,    15,    16,    23,    14,     9,    13,
+      23,     5,    26,    23,    24,    25,    23,    24,    25,    23,
+      32,    25,    22,    31
   };
 
   const unsigned char
   ScratchCodeParser::yystos_[] =
   {
-       0,    19,    20,     0,     0,     3,    17,    21,    24,    25,
-      26,     8,    16,     9,    15,    27,    12,    21,    22,    20,
-      23,    13,    23
+       0,    27,    29,     0,     0,     3,    23,    24,    25,    28,
+      34,    35,    36,    37,    38,    39,    40,    41,     9,    23,
+      32,     5,    16,    22,    38,    33,    13,    28,    30,    31,
+      38,    10,    15,    16,    29,    31,    32,    14
   };
 
   const unsigned char
   ScratchCodeParser::yyr1_[] =
   {
-       0,    18,    19,    20,    20,    21,    21,    22,    22,    23,
-      24,    25,    27,    26
+       0,    26,    27,    28,    28,    29,    29,    29,    30,    30,
+      31,    32,    33,    33,    34,    35,    35,    36,    37,    38,
+      38,    38,    39,    40,    41
   };
 
   const unsigned char
   ScratchCodeParser::yyr2_[] =
   {
-       0,     2,     2,     0,     2,     1,     1,     4,     2,     0,
-       3,     1,     0,     5
+       0,     2,     2,     1,     1,     0,     2,     2,     3,     1,
+       1,     1,     0,     3,     4,     1,     3,     5,     2,     1,
+       1,     1,     1,     1,     3
   };
 
 
@@ -933,20 +1350,24 @@ namespace yy {
   const char*
   const ScratchCodeParser::yytname_[] =
   {
-  "\"end of file\"", "error", "$undefined", "\"if\"", "\"else\"",
+  "\"end of file\"", "error", "$undefined", "\"if\"", "THEN", "\"else\"",
   "\"while\"", "\"for\"", "\"return\"", "\"(\"", "\")\"", "\"[\"", "\"]\"",
-  "\"{\"", "\"}\"", "\",\"", "\";\"", "\"identifier\"",
-  "\"variable type\"", "$accept", "unit", "expressions", "expression",
-  "expressionsBlock", "expressionsBlockClosed", "variableDefinition",
-  "conditional", "conditionalIf", "$@1", YY_NULLPTR
+  "\"{\"", "\"}\"", "\",\"", "\";\"", "\"*\"", "\"/\"", "\"%\"", "\"+\"",
+  "\"-\"", "\"=\"", "\"identifier\"", "\"variable type\"",
+  "\"rvalue value\"", "$accept", "unit", "statement", "statements",
+  "statementsBlockInternal", "statementsBlock", "localVariableDefinition",
+  "localVariableDefinitions", "localVariableDefinitionList", "conditional",
+  "conditionalIf", "valueStandalone", "value", "lValue", "rValueValue",
+  "binaryOperation", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned char
   ScratchCodeParser::yyrline_[] =
   {
-       0,    63,    63,    65,    66,    68,    69,    71,    72,    74,
-      76,    97,   101,   100
+       0,    88,    88,    98,    99,   101,   105,   110,   117,   121,
+     128,   146,   153,   157,   163,   177,   181,   188,   201,   206,
+     207,   208,   210,   218,   223
   };
 
   // Print the state stack on the debug stream.
@@ -981,8 +1402,8 @@ namespace yy {
 
 
 } // yy
-#line 985 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
-#line 111 "src/scratch-code.ypp" // lalr1.cc:1168
+#line 1406 "gen/scratch-code.tab.cpp" // lalr1.cc:1167
+#line 246 "src/scratch-code.ypp" // lalr1.cc:1168
 
 
 

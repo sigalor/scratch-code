@@ -29,10 +29,9 @@ class ScratchCodeDriver
 		int														result;
 		std::string												filename;
 		bool													traceLexing, traceParsing;
-		std::shared_ptr<ast::StatementList>						parsedStatementList;
 
 	public:
-		std::shared_ptr<ast::StatementList>						parentStatementList;
+		std::shared_ptr<ast::StatementList>						parsedStatementList;
 		std::vector<std::shared_ptr<ast::FunctionDefinition>>	functionDefinitions;
 		std::vector<std::shared_ptr<ast::VariableDefinition>>	variableDefinitions;
 	

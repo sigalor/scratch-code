@@ -43,10 +43,12 @@
 #line 9 "src/scratch-code.ypp" // lalr1.cc:377
 
 	#include <string>
+	#include <memory>
+	#include <typeinfo>
 	#include <ast/AST.hpp>
 	class ScratchCodeDriver;
 
-#line 50 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 52 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -123,7 +125,7 @@
 
 
 namespace yy {
-#line 127 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 129 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 
@@ -293,8 +295,41 @@ namespace yy {
       // "variable type"
       char dummy1[sizeof(ast::Lexer::ParsedVariableType)];
 
+      // binaryOperation
+      char dummy2[sizeof(std::shared_ptr<ast::BinaryOperation>)];
+
+      // conditional
+      // conditionalIf
+      char dummy3[sizeof(std::shared_ptr<ast::Conditional>)];
+
+      // lValue
+      char dummy4[sizeof(std::shared_ptr<ast::LValue>)];
+
+      // "rvalue value"
+      // rValueValue
+      char dummy5[sizeof(std::shared_ptr<ast::RValueValue>)];
+
+      // statement
+      char dummy6[sizeof(std::shared_ptr<ast::Statement>)];
+
+      // statements
+      // statementsBlockInternal
+      // statementsBlock
+      char dummy7[sizeof(std::shared_ptr<ast::StatementList>)];
+
+      // valueStandalone
+      // value
+      char dummy8[sizeof(std::shared_ptr<ast::Value>)];
+
+      // localVariableDefinition
+      char dummy9[sizeof(std::shared_ptr<ast::VariableDefinition>)];
+
+      // localVariableDefinitions
+      // localVariableDefinitionList
+      char dummy10[sizeof(std::shared_ptr<ast::VariableDefinitionList>)];
+
       // "identifier"
-      char dummy2[sizeof(std::string)];
+      char dummy11[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -319,20 +354,28 @@ namespace yy {
       {
         TOK_END = 0,
         TOK_IF = 258,
-        TOK_ELSE = 259,
-        TOK_WHILE = 260,
-        TOK_FOR = 261,
-        TOK_RETURN = 262,
-        TOK_ROUND_BRACKET_OPEN = 263,
-        TOK_ROUND_BRACKET_CLOSED = 264,
-        TOK_SQUARE_BRACKET_OPEN = 265,
-        TOK_SQUARE_BRACKET_CLOSED = 266,
-        TOK_CURLY_BRACKET_OPEN = 267,
-        TOK_CURLY_BRACKET_CLOSED = 268,
-        TOK_COMMA = 269,
-        TOK_SEMICOLON = 270,
-        TOK_IDENTIFIER = 271,
-        TOK_PARSED_VARIABLE_TYPE = 272
+        TOK_THEN = 259,
+        TOK_ELSE = 260,
+        TOK_WHILE = 261,
+        TOK_FOR = 262,
+        TOK_RETURN = 263,
+        TOK_ROUND_BRACKET_OPEN = 264,
+        TOK_ROUND_BRACKET_CLOSED = 265,
+        TOK_SQUARE_BRACKET_OPEN = 266,
+        TOK_SQUARE_BRACKET_CLOSED = 267,
+        TOK_CURLY_BRACKET_OPEN = 268,
+        TOK_CURLY_BRACKET_CLOSED = 269,
+        TOK_COMMA = 270,
+        TOK_SEMICOLON = 271,
+        TOK_BINOP_MULTIPLY = 272,
+        TOK_BINOP_DIVIDE = 273,
+        TOK_BINOP_MODULO = 274,
+        TOK_BINOP_ADD = 275,
+        TOK_BINOP_SUBTRACT = 276,
+        TOK_BINOP_ASSIGNMENT = 277,
+        TOK_IDENTIFIER = 278,
+        TOK_PARSED_VARIABLE_TYPE = 279,
+        TOK_RVALUE_VALUE = 280
       };
     };
 
@@ -371,6 +414,24 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::BinaryOperation> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Conditional> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LValue> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::RValueValue> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Statement> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::StatementList> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Value> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinition> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinitionList> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
 
@@ -451,6 +512,10 @@ namespace yy {
 
     static inline
     symbol_type
+    make_THEN (const location_type& l);
+
+    static inline
+    symbol_type
     make_ELSE (const location_type& l);
 
     static inline
@@ -499,11 +564,39 @@ namespace yy {
 
     static inline
     symbol_type
+    make_BINOP_MULTIPLY (const location_type& l);
+
+    static inline
+    symbol_type
+    make_BINOP_DIVIDE (const location_type& l);
+
+    static inline
+    symbol_type
+    make_BINOP_MODULO (const location_type& l);
+
+    static inline
+    symbol_type
+    make_BINOP_ADD (const location_type& l);
+
+    static inline
+    symbol_type
+    make_BINOP_SUBTRACT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_BINOP_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
     make_IDENTIFIER (const std::string& v, const location_type& l);
 
     static inline
     symbol_type
     make_PARSED_VARIABLE_TYPE (const ast::Lexer::ParsedVariableType& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_RVALUE_VALUE (const std::shared_ptr<ast::RValueValue>& v, const location_type& l);
 
 
     /// Build a parser object.
@@ -590,7 +683,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -710,12 +803,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 18,     ///< Last index in yytable_.
-      yynnts_ = 10,  ///< Number of nonterminal symbols.
+      yylast_ = 33,     ///< Last index in yytable_.
+      yynnts_ = 16,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 18  ///< Number of tokens.
+      yyntokens_ = 26  ///< Number of tokens.
     };
 
 
@@ -759,9 +852,10 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25
     };
-    const unsigned int user_token_number_max_ = 272;
+    const unsigned int user_token_number_max_ = 280;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -794,11 +888,53 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (other.value);
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.copy< std::shared_ptr<ast::BinaryOperation> > (other.value);
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.copy< std::shared_ptr<ast::Conditional> > (other.value);
+        break;
+
+      case 39: // lValue
+        value.copy< std::shared_ptr<ast::LValue> > (other.value);
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.copy< std::shared_ptr<ast::RValueValue> > (other.value);
+        break;
+
+      case 28: // statement
+        value.copy< std::shared_ptr<ast::Statement> > (other.value);
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.copy< std::shared_ptr<ast::StatementList> > (other.value);
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.copy< std::shared_ptr<ast::Value> > (other.value);
+        break;
+
+      case 32: // localVariableDefinition
+        value.copy< std::shared_ptr<ast::VariableDefinition> > (other.value);
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.copy< std::shared_ptr<ast::VariableDefinitionList> > (other.value);
+        break;
+
+      case 23: // "identifier"
         value.copy< std::string > (other.value);
         break;
 
@@ -819,11 +955,53 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (v);
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.copy< std::shared_ptr<ast::BinaryOperation> > (v);
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.copy< std::shared_ptr<ast::Conditional> > (v);
+        break;
+
+      case 39: // lValue
+        value.copy< std::shared_ptr<ast::LValue> > (v);
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.copy< std::shared_ptr<ast::RValueValue> > (v);
+        break;
+
+      case 28: // statement
+        value.copy< std::shared_ptr<ast::Statement> > (v);
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.copy< std::shared_ptr<ast::StatementList> > (v);
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.copy< std::shared_ptr<ast::Value> > (v);
+        break;
+
+      case 32: // localVariableDefinition
+        value.copy< std::shared_ptr<ast::VariableDefinition> > (v);
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.copy< std::shared_ptr<ast::VariableDefinitionList> > (v);
+        break;
+
+      case 23: // "identifier"
         value.copy< std::string > (v);
         break;
 
@@ -844,6 +1022,69 @@ namespace yy {
 
   template <typename Base>
   ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::BinaryOperation> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Conditional> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LValue> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::RValueValue> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Statement> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::StatementList> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Value> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinition> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinitionList> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -882,11 +1123,53 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.template destroy< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.template destroy< std::shared_ptr<ast::BinaryOperation> > ();
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.template destroy< std::shared_ptr<ast::Conditional> > ();
+        break;
+
+      case 39: // lValue
+        value.template destroy< std::shared_ptr<ast::LValue> > ();
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.template destroy< std::shared_ptr<ast::RValueValue> > ();
+        break;
+
+      case 28: // statement
+        value.template destroy< std::shared_ptr<ast::Statement> > ();
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.template destroy< std::shared_ptr<ast::StatementList> > ();
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.template destroy< std::shared_ptr<ast::Value> > ();
+        break;
+
+      case 32: // localVariableDefinition
+        value.template destroy< std::shared_ptr<ast::VariableDefinition> > ();
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.template destroy< std::shared_ptr<ast::VariableDefinitionList> > ();
+        break;
+
+      case 23: // "identifier"
         value.template destroy< std::string > ();
         break;
 
@@ -913,11 +1196,53 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 17: // "variable type"
+      case 24: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (s.value);
         break;
 
-      case 16: // "identifier"
+      case 41: // binaryOperation
+        value.move< std::shared_ptr<ast::BinaryOperation> > (s.value);
+        break;
+
+      case 35: // conditional
+      case 36: // conditionalIf
+        value.move< std::shared_ptr<ast::Conditional> > (s.value);
+        break;
+
+      case 39: // lValue
+        value.move< std::shared_ptr<ast::LValue> > (s.value);
+        break;
+
+      case 25: // "rvalue value"
+      case 40: // rValueValue
+        value.move< std::shared_ptr<ast::RValueValue> > (s.value);
+        break;
+
+      case 28: // statement
+        value.move< std::shared_ptr<ast::Statement> > (s.value);
+        break;
+
+      case 29: // statements
+      case 30: // statementsBlockInternal
+      case 31: // statementsBlock
+        value.move< std::shared_ptr<ast::StatementList> > (s.value);
+        break;
+
+      case 37: // valueStandalone
+      case 38: // value
+        value.move< std::shared_ptr<ast::Value> > (s.value);
+        break;
+
+      case 32: // localVariableDefinition
+        value.move< std::shared_ptr<ast::VariableDefinition> > (s.value);
+        break;
+
+      case 33: // localVariableDefinitions
+      case 34: // localVariableDefinitionList
+        value.move< std::shared_ptr<ast::VariableDefinitionList> > (s.value);
+        break;
+
+      case 23: // "identifier"
         value.move< std::string > (s.value);
         break;
 
@@ -977,7 +1302,8 @@ namespace yy {
     yytoken_number_[] =
     {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,   272
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275,   276,   277,   278,   279,   280
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -992,6 +1318,12 @@ namespace yy {
   ScratchCodeParser::make_IF (const location_type& l)
   {
     return symbol_type (token::TOK_IF, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_THEN (const location_type& l)
+  {
+    return symbol_type (token::TOK_THEN, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -1067,6 +1399,42 @@ namespace yy {
   }
 
   ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_MULTIPLY (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_MULTIPLY, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_DIVIDE (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_DIVIDE, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_MODULO (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_MODULO, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_ADD (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_ADD, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_SUBTRACT (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_SUBTRACT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_BINOP_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_BINOP_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
   ScratchCodeParser::make_IDENTIFIER (const std::string& v, const location_type& l)
   {
     return symbol_type (token::TOK_IDENTIFIER, v, l);
@@ -1078,10 +1446,16 @@ namespace yy {
     return symbol_type (token::TOK_PARSED_VARIABLE_TYPE, v, l);
   }
 
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_RVALUE_VALUE (const std::shared_ptr<ast::RValueValue>& v, const location_type& l)
+  {
+    return symbol_type (token::TOK_RVALUE_VALUE, v, l);
+  }
+
 
 
 } // yy
-#line 1085 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 1459 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 

@@ -1,0 +1,481 @@
+Terminale, die in Grammatik unbenutzt sind
+
+   "while"
+   "for"
+   "return"
+   "["
+   "]"
+   "*"
+   "/"
+   "%"
+   "+"
+   "-"
+
+
+Grammatik
+
+    0 $accept: unit "end of file"
+
+    1 unit: statements "end of file"
+
+    2 statement: valueStandalone
+    3          | conditional
+
+    4 statements: %empty
+    5           | statements statement
+    6           | statements localVariableDefinitionList
+
+    7 statementsBlockInternal: "{" statements "}"
+    8                        | statement
+
+    9 statementsBlock: statementsBlockInternal
+
+   10 localVariableDefinition: "identifier"
+
+   11 localVariableDefinitions: %empty
+   12                         | localVariableDefinitions "," localVariableDefinition
+
+   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";"
+
+   14 conditional: conditionalIf
+   15            | conditionalIf "else" statementsBlock
+
+   16 conditionalIf: "if" "(" value ")" statementsBlock
+
+   17 valueStandalone: value ";"
+
+   18 value: lValue
+   19      | rValueValue
+   20      | binaryOperation
+
+   21 lValue: "identifier"
+
+   22 rValueValue: "rvalue value"
+
+   23 binaryOperation: value "=" value
+
+
+Terminale und die Regeln, in denen sie verwendet werden
+
+"end of file" (0) 0 1
+error (256)
+"if" (258) 16
+THEN (259)
+"else" (260) 15
+"while" (261)
+"for" (262)
+"return" (263)
+"(" (264) 16
+")" (265) 16
+"[" (266)
+"]" (267)
+"{" (268) 7
+"}" (269) 7
+"," (270) 12
+";" (271) 13 17
+"*" (272)
+"/" (273)
+"%" (274)
+"+" (275)
+"-" (276)
+"=" (277) 23
+"identifier" (278) 10 21
+"variable type" (279) 13
+"rvalue value" (280) 22
+
+
+Nicht-Terminal und die Regeln, in denen sie verwendet werden
+
+$accept (26)
+    auf der linken Seite: 0
+unit (27)
+    auf der linken Seite: 1, auf der rechten Seite: 0
+statement (28)
+    auf der linken Seite: 2 3, auf der rechten Seite: 5 8
+statements (29)
+    auf der linken Seite: 4 5 6, auf der rechten Seite: 1 5 6 7
+statementsBlockInternal (30)
+    auf der linken Seite: 7 8, auf der rechten Seite: 9
+statementsBlock (31)
+    auf der linken Seite: 9, auf der rechten Seite: 15 16
+localVariableDefinition (32)
+    auf der linken Seite: 10, auf der rechten Seite: 12 13
+localVariableDefinitions (33)
+    auf der linken Seite: 11 12, auf der rechten Seite: 12 13
+localVariableDefinitionList (34)
+    auf der linken Seite: 13, auf der rechten Seite: 6
+conditional (35)
+    auf der linken Seite: 14 15, auf der rechten Seite: 3
+conditionalIf (36)
+    auf der linken Seite: 16, auf der rechten Seite: 14 15
+valueStandalone (37)
+    auf der linken Seite: 17, auf der rechten Seite: 2
+value (38)
+    auf der linken Seite: 18 19 20, auf der rechten Seite: 16 17 23
+lValue (39)
+    auf der linken Seite: 21, auf der rechten Seite: 18
+rValueValue (40)
+    auf der linken Seite: 22, auf der rechten Seite: 19
+binaryOperation (41)
+    auf der linken Seite: 23, auf der rechten Seite: 20
+
+
+Zustand 0
+
+    0 $accept: . unit "end of file"
+
+    $default  reduziere mit Regel 4 (statements)
+
+    unit        gehe zu Zustand 1 über
+    statements  gehe zu Zustand 2 über
+
+
+Zustand 1
+
+    0 $accept: unit . "end of file"
+
+    "end of file"  schiebe und gehe zu Zustand 3 über
+
+
+Zustand 2
+
+    1 unit: statements . "end of file"
+    5 statements: statements . statement
+    6           | statements . localVariableDefinitionList
+
+    "end of file"    schiebe und gehe zu Zustand 4 über
+    "if"             schiebe und gehe zu Zustand 5 über
+    "identifier"     schiebe und gehe zu Zustand 6 über
+    "variable type"  schiebe und gehe zu Zustand 7 über
+    "rvalue value"   schiebe und gehe zu Zustand 8 über
+
+    statement                    gehe zu Zustand 9 über
+    localVariableDefinitionList  gehe zu Zustand 10 über
+    conditional                  gehe zu Zustand 11 über
+    conditionalIf                gehe zu Zustand 12 über
+    valueStandalone              gehe zu Zustand 13 über
+    value                        gehe zu Zustand 14 über
+    lValue                       gehe zu Zustand 15 über
+    rValueValue                  gehe zu Zustand 16 über
+    binaryOperation              gehe zu Zustand 17 über
+
+
+Zustand 3
+
+    0 $accept: unit "end of file" .
+
+    $default  annehmen
+
+
+Zustand 4
+
+    1 unit: statements "end of file" .
+
+    $default  reduziere mit Regel 1 (unit)
+
+
+Zustand 5
+
+   16 conditionalIf: "if" . "(" value ")" statementsBlock
+
+    "("  schiebe und gehe zu Zustand 18 über
+
+
+Zustand 6
+
+   21 lValue: "identifier" .
+
+    $default  reduziere mit Regel 21 (lValue)
+
+
+Zustand 7
+
+   13 localVariableDefinitionList: "variable type" . localVariableDefinition localVariableDefinitions ";"
+
+    "identifier"  schiebe und gehe zu Zustand 19 über
+
+    localVariableDefinition  gehe zu Zustand 20 über
+
+
+Zustand 8
+
+   22 rValueValue: "rvalue value" .
+
+    $default  reduziere mit Regel 22 (rValueValue)
+
+
+Zustand 9
+
+    5 statements: statements statement .
+
+    $default  reduziere mit Regel 5 (statements)
+
+
+Zustand 10
+
+    6 statements: statements localVariableDefinitionList .
+
+    $default  reduziere mit Regel 6 (statements)
+
+
+Zustand 11
+
+    3 statement: conditional .
+
+    $default  reduziere mit Regel 3 (statement)
+
+
+Zustand 12
+
+   14 conditional: conditionalIf .
+   15            | conditionalIf . "else" statementsBlock
+
+    "else"  schiebe und gehe zu Zustand 21 über
+
+    $default  reduziere mit Regel 14 (conditional)
+
+
+Zustand 13
+
+    2 statement: valueStandalone .
+
+    $default  reduziere mit Regel 2 (statement)
+
+
+Zustand 14
+
+   17 valueStandalone: value . ";"
+   23 binaryOperation: value . "=" value
+
+    ";"  schiebe und gehe zu Zustand 22 über
+    "="  schiebe und gehe zu Zustand 23 über
+
+
+Zustand 15
+
+   18 value: lValue .
+
+    $default  reduziere mit Regel 18 (value)
+
+
+Zustand 16
+
+   19 value: rValueValue .
+
+    $default  reduziere mit Regel 19 (value)
+
+
+Zustand 17
+
+   20 value: binaryOperation .
+
+    $default  reduziere mit Regel 20 (value)
+
+
+Zustand 18
+
+   16 conditionalIf: "if" "(" . value ")" statementsBlock
+
+    "identifier"    schiebe und gehe zu Zustand 6 über
+    "rvalue value"  schiebe und gehe zu Zustand 8 über
+
+    value            gehe zu Zustand 24 über
+    lValue           gehe zu Zustand 15 über
+    rValueValue      gehe zu Zustand 16 über
+    binaryOperation  gehe zu Zustand 17 über
+
+
+Zustand 19
+
+   10 localVariableDefinition: "identifier" .
+
+    $default  reduziere mit Regel 10 (localVariableDefinition)
+
+
+Zustand 20
+
+   13 localVariableDefinitionList: "variable type" localVariableDefinition . localVariableDefinitions ";"
+
+    $default  reduziere mit Regel 11 (localVariableDefinitions)
+
+    localVariableDefinitions  gehe zu Zustand 25 über
+
+
+Zustand 21
+
+   15 conditional: conditionalIf "else" . statementsBlock
+
+    "if"            schiebe und gehe zu Zustand 5 über
+    "{"             schiebe und gehe zu Zustand 26 über
+    "identifier"    schiebe und gehe zu Zustand 6 über
+    "rvalue value"  schiebe und gehe zu Zustand 8 über
+
+    statement                gehe zu Zustand 27 über
+    statementsBlockInternal  gehe zu Zustand 28 über
+    statementsBlock          gehe zu Zustand 29 über
+    conditional              gehe zu Zustand 11 über
+    conditionalIf            gehe zu Zustand 12 über
+    valueStandalone          gehe zu Zustand 13 über
+    value                    gehe zu Zustand 14 über
+    lValue                   gehe zu Zustand 15 über
+    rValueValue              gehe zu Zustand 16 über
+    binaryOperation          gehe zu Zustand 17 über
+
+
+Zustand 22
+
+   17 valueStandalone: value ";" .
+
+    $default  reduziere mit Regel 17 (valueStandalone)
+
+
+Zustand 23
+
+   23 binaryOperation: value "=" . value
+
+    "identifier"    schiebe und gehe zu Zustand 6 über
+    "rvalue value"  schiebe und gehe zu Zustand 8 über
+
+    value            gehe zu Zustand 30 über
+    lValue           gehe zu Zustand 15 über
+    rValueValue      gehe zu Zustand 16 über
+    binaryOperation  gehe zu Zustand 17 über
+
+
+Zustand 24
+
+   16 conditionalIf: "if" "(" value . ")" statementsBlock
+   23 binaryOperation: value . "=" value
+
+    ")"  schiebe und gehe zu Zustand 31 über
+    "="  schiebe und gehe zu Zustand 23 über
+
+
+Zustand 25
+
+   12 localVariableDefinitions: localVariableDefinitions . "," localVariableDefinition
+   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions . ";"
+
+    ","  schiebe und gehe zu Zustand 32 über
+    ";"  schiebe und gehe zu Zustand 33 über
+
+
+Zustand 26
+
+    7 statementsBlockInternal: "{" . statements "}"
+
+    $default  reduziere mit Regel 4 (statements)
+
+    statements  gehe zu Zustand 34 über
+
+
+Zustand 27
+
+    8 statementsBlockInternal: statement .
+
+    $default  reduziere mit Regel 8 (statementsBlockInternal)
+
+
+Zustand 28
+
+    9 statementsBlock: statementsBlockInternal .
+
+    $default  reduziere mit Regel 9 (statementsBlock)
+
+
+Zustand 29
+
+   15 conditional: conditionalIf "else" statementsBlock .
+
+    $default  reduziere mit Regel 15 (conditional)
+
+
+Zustand 30
+
+   23 binaryOperation: value . "=" value
+   23                | value "=" value .
+
+    "="  schiebe und gehe zu Zustand 23 über
+
+    $default  reduziere mit Regel 23 (binaryOperation)
+
+
+Zustand 31
+
+   16 conditionalIf: "if" "(" value ")" . statementsBlock
+
+    "if"            schiebe und gehe zu Zustand 5 über
+    "{"             schiebe und gehe zu Zustand 26 über
+    "identifier"    schiebe und gehe zu Zustand 6 über
+    "rvalue value"  schiebe und gehe zu Zustand 8 über
+
+    statement                gehe zu Zustand 27 über
+    statementsBlockInternal  gehe zu Zustand 28 über
+    statementsBlock          gehe zu Zustand 35 über
+    conditional              gehe zu Zustand 11 über
+    conditionalIf            gehe zu Zustand 12 über
+    valueStandalone          gehe zu Zustand 13 über
+    value                    gehe zu Zustand 14 über
+    lValue                   gehe zu Zustand 15 über
+    rValueValue              gehe zu Zustand 16 über
+    binaryOperation          gehe zu Zustand 17 über
+
+
+Zustand 32
+
+   12 localVariableDefinitions: localVariableDefinitions "," . localVariableDefinition
+
+    "identifier"  schiebe und gehe zu Zustand 19 über
+
+    localVariableDefinition  gehe zu Zustand 36 über
+
+
+Zustand 33
+
+   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";" .
+
+    $default  reduziere mit Regel 13 (localVariableDefinitionList)
+
+
+Zustand 34
+
+    5 statements: statements . statement
+    6           | statements . localVariableDefinitionList
+    7 statementsBlockInternal: "{" statements . "}"
+
+    "if"             schiebe und gehe zu Zustand 5 über
+    "}"              schiebe und gehe zu Zustand 37 über
+    "identifier"     schiebe und gehe zu Zustand 6 über
+    "variable type"  schiebe und gehe zu Zustand 7 über
+    "rvalue value"   schiebe und gehe zu Zustand 8 über
+
+    statement                    gehe zu Zustand 9 über
+    localVariableDefinitionList  gehe zu Zustand 10 über
+    conditional                  gehe zu Zustand 11 über
+    conditionalIf                gehe zu Zustand 12 über
+    valueStandalone              gehe zu Zustand 13 über
+    value                        gehe zu Zustand 14 über
+    lValue                       gehe zu Zustand 15 über
+    rValueValue                  gehe zu Zustand 16 über
+    binaryOperation              gehe zu Zustand 17 über
+
+
+Zustand 35
+
+   16 conditionalIf: "if" "(" value ")" statementsBlock .
+
+    $default  reduziere mit Regel 16 (conditionalIf)
+
+
+Zustand 36
+
+   12 localVariableDefinitions: localVariableDefinitions "," localVariableDefinition .
+
+    $default  reduziere mit Regel 12 (localVariableDefinitions)
+
+
+Zustand 37
+
+    7 statementsBlockInternal: "{" statements "}" .
+
+    $default  reduziere mit Regel 7 (statementsBlockInternal)

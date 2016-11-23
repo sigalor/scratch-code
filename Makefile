@@ -18,7 +18,7 @@ DEP_FILES=$(addprefix $(PROJECT_DEP_DIR)/,$(notdir $(CPP_FILES:.cpp=.d)))
 EXECUTABLE=$(PROJECT_BIN_DIR)/$(PROJECT_NAME)
 
 # include and library paths and needed libraries
-INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include
+INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include -I$(PROJECT_EXT_DIR)/boost
 LIBRARY_PATHS=-L$(PROJECT_EXT_DIR)/scratch-code-ast/lib
 LIBRARIES=-lfl -lscratch-code-ast
 
@@ -30,7 +30,7 @@ LDFLAGS=-Wall $(LIBRARY_PATHS) $(LIBRARIES)
 FLEX=flex
 FLEXFLAGS=
 BISON=bison
-BISONFLAGS=
+BISONFLAGS=-v
 DISCARD_OUTPUT=/dev/null
 DIR_GUARD=@mkdir -p $(@D)
 

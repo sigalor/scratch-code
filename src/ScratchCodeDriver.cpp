@@ -30,7 +30,6 @@ int ScratchCodeDriver::parse(const std::string& newFilename)
 	yy::ScratchCodeParser parser(*this);
 
 	filename = newFilename;
-	parentStatementList = parsedStatementList;
 	beginLexing();
 	parser.set_debug_level(traceParsing);
 	result = parser.parse();
@@ -41,7 +40,7 @@ int ScratchCodeDriver::parse(const std::string& newFilename)
 
 void ScratchCodeDriver::handleError(const yy::location& loc, const std::string& message)
 {
-	std::cerr << (loc.begin.filename==nullptr ? "<unknown>" : *loc.begin.filename) << ":" << loc.begin.line << ":" << loc.begin.column << ": " << message << std::endl;
+	std::cerr << filename << ":" << loc.begin.line << ":" << loc.begin.column << ": " << message << std::endl;
 }
 
 void ScratchCodeDriver::handleError(const std::string& message)
