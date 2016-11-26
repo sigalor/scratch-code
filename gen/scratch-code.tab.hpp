@@ -292,44 +292,58 @@ namespace yy {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // "variable type"
-      char dummy1[sizeof(ast::Lexer::ParsedVariableType)];
+      // "loop control statement"
+      char dummy1[sizeof(ast::Lexer::ParsedLoopControlStatement)];
 
-      // binaryOperation
-      char dummy2[sizeof(std::shared_ptr<ast::BinaryOperation>)];
+      // "variable type"
+      char dummy2[sizeof(ast::Lexer::ParsedVariableType)];
 
       // conditional
       // conditionalIf
       char dummy3[sizeof(std::shared_ptr<ast::Conditional>)];
 
+      // forLoop
+      char dummy4[sizeof(std::shared_ptr<ast::ForLoop>)];
+
       // lValue
-      char dummy4[sizeof(std::shared_ptr<ast::LValue>)];
+      char dummy5[sizeof(std::shared_ptr<ast::LValue>)];
+
+      // loopControlStatement
+      char dummy6[sizeof(std::shared_ptr<ast::LoopControlStatement>)];
+
+      // operation
+      char dummy7[sizeof(std::shared_ptr<ast::Operation>)];
+
+      // rValue
+      char dummy8[sizeof(std::shared_ptr<ast::RValue>)];
 
       // "rvalue value"
-      // rValueValue
-      char dummy5[sizeof(std::shared_ptr<ast::RValueValue>)];
+      char dummy9[sizeof(std::shared_ptr<ast::RValueValue>)];
 
       // statement
-      char dummy6[sizeof(std::shared_ptr<ast::Statement>)];
+      char dummy10[sizeof(std::shared_ptr<ast::Statement>)];
 
       // statements
       // statementsBlockInternal
       // statementsBlock
-      char dummy7[sizeof(std::shared_ptr<ast::StatementList>)];
+      char dummy11[sizeof(std::shared_ptr<ast::StatementList>)];
 
       // valueStandalone
       // value
-      char dummy8[sizeof(std::shared_ptr<ast::Value>)];
+      char dummy12[sizeof(std::shared_ptr<ast::Value>)];
 
       // localVariableDefinition
-      char dummy9[sizeof(std::shared_ptr<ast::VariableDefinition>)];
+      char dummy13[sizeof(std::shared_ptr<ast::VariableDefinition>)];
 
       // localVariableDefinitions
       // localVariableDefinitionList
-      char dummy10[sizeof(std::shared_ptr<ast::VariableDefinitionList>)];
+      char dummy14[sizeof(std::shared_ptr<ast::VariableDefinitionList>)];
+
+      // whileLoop
+      char dummy15[sizeof(std::shared_ptr<ast::WhileLoop>)];
 
       // "identifier"
-      char dummy11[sizeof(std::string)];
+      char dummy16[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -354,28 +368,59 @@ namespace yy {
       {
         TOK_END = 0,
         TOK_IF = 258,
-        TOK_THEN = 259,
-        TOK_ELSE = 260,
-        TOK_WHILE = 261,
-        TOK_FOR = 262,
-        TOK_RETURN = 263,
-        TOK_ROUND_BRACKET_OPEN = 264,
-        TOK_ROUND_BRACKET_CLOSED = 265,
-        TOK_SQUARE_BRACKET_OPEN = 266,
-        TOK_SQUARE_BRACKET_CLOSED = 267,
-        TOK_CURLY_BRACKET_OPEN = 268,
-        TOK_CURLY_BRACKET_CLOSED = 269,
-        TOK_COMMA = 270,
-        TOK_SEMICOLON = 271,
-        TOK_BINOP_MULTIPLY = 272,
-        TOK_BINOP_DIVIDE = 273,
-        TOK_BINOP_MODULO = 274,
-        TOK_BINOP_ADD = 275,
-        TOK_BINOP_SUBTRACT = 276,
-        TOK_BINOP_ASSIGNMENT = 277,
-        TOK_IDENTIFIER = 278,
-        TOK_PARSED_VARIABLE_TYPE = 279,
-        TOK_RVALUE_VALUE = 280
+        TOK_ELSE = 259,
+        TOK_WHILE = 260,
+        TOK_FOR = 261,
+        TOK_RETURN = 262,
+        TOK_ROUND_BRACKET_OPEN = 263,
+        TOK_ROUND_BRACKET_CLOSED = 264,
+        TOK_SQUARE_BRACKET_OPEN = 265,
+        TOK_SQUARE_BRACKET_CLOSED = 266,
+        TOK_CURLY_BRACKET_OPEN = 267,
+        TOK_CURLY_BRACKET_CLOSED = 268,
+        TOK_COMMA = 269,
+        TOK_SEMICOLON = 270,
+        TOK_OP_PLUS = 271,
+        TOK_OP_MINUS = 272,
+        TOK_OP_INCREMENT = 273,
+        TOK_OP_DECREMENT = 274,
+        TOK_OP_LOGICAL_NOT = 275,
+        TOK_OP_BITWISE_NOT = 276,
+        TOK_OP_MULTIPLY = 277,
+        TOK_OP_DIVIDE = 278,
+        TOK_OP_MODULO = 279,
+        TOK_OP_BITWISE_AND = 280,
+        TOK_OP_BITWISE_OR = 281,
+        TOK_OP_BITWISE_XOR = 282,
+        TOK_OP_BITSHIFT_LEFT = 283,
+        TOK_OP_BITSHIFT_RIGHT = 284,
+        TOK_OP_LOGICAL_AND = 285,
+        TOK_OP_LOGICAL_OR = 286,
+        TOK_OP_LESS_THAN = 287,
+        TOK_OP_LESS_THAN_OR_EQUAL = 288,
+        TOK_OP_GREATER_THAN = 289,
+        TOK_OP_GREATER_THAN_OR_EQUAL = 290,
+        TOK_OP_EQUAL = 291,
+        TOK_OP_NOT_EQUAL = 292,
+        TOK_OP_ASSIGNMENT = 293,
+        TOK_OP_ADD_ASSIGNMENT = 294,
+        TOK_OP_SUBTRACT_ASSIGNMENT = 295,
+        TOK_OP_MULTIPLY_ASSIGNMENT = 296,
+        TOK_OP_DIVIDE_ASSIGNMENT = 297,
+        TOK_OP_MODULO_ASSIGNMENT = 298,
+        TOK_OP_BITWISE_AND_ASSIGNMENT = 299,
+        TOK_OP_BITWISE_OR_ASSIGNMENT = 300,
+        TOK_OP_BITWISE_XOR_ASSIGNMENT = 301,
+        TOK_OP_BITSHIFT_LEFT_ASSIGNMENT = 302,
+        TOK_OP_BITSHIFT_RIGHT_ASSIGNMENT = 303,
+        TOK_IDENTIFIER = 304,
+        TOK_VARIABLE_TYPE = 305,
+        TOK_LOOP_CONTROL_STATEMENT = 306,
+        TOK_RVALUE_VALUE = 307,
+        TOK_UNOP_UNARY_PLUS = 309,
+        TOK_UNOP_UNARY_MINUS = 310,
+        TOK_UNOP_POSTFIX_INCREMENT = 311,
+        TOK_UNOP_POSTFIX_DECREMENT = 312
       };
     };
 
@@ -413,13 +458,21 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedLoopControlStatement v, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::BinaryOperation> v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Conditional> v, const location_type& l);
 
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::ForLoop> v, const location_type& l);
+
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LValue> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LoopControlStatement> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Operation> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::RValue> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::RValueValue> v, const location_type& l);
 
@@ -432,6 +485,8 @@ namespace yy {
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinition> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::VariableDefinitionList> v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::WhileLoop> v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
 
@@ -512,10 +567,6 @@ namespace yy {
 
     static inline
     symbol_type
-    make_THEN (const location_type& l);
-
-    static inline
-    symbol_type
     make_ELSE (const location_type& l);
 
     static inline
@@ -564,27 +615,135 @@ namespace yy {
 
     static inline
     symbol_type
-    make_BINOP_MULTIPLY (const location_type& l);
+    make_OP_PLUS (const location_type& l);
 
     static inline
     symbol_type
-    make_BINOP_DIVIDE (const location_type& l);
+    make_OP_MINUS (const location_type& l);
 
     static inline
     symbol_type
-    make_BINOP_MODULO (const location_type& l);
+    make_OP_INCREMENT (const location_type& l);
 
     static inline
     symbol_type
-    make_BINOP_ADD (const location_type& l);
+    make_OP_DECREMENT (const location_type& l);
 
     static inline
     symbol_type
-    make_BINOP_SUBTRACT (const location_type& l);
+    make_OP_LOGICAL_NOT (const location_type& l);
 
     static inline
     symbol_type
-    make_BINOP_ASSIGNMENT (const location_type& l);
+    make_OP_BITWISE_NOT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_MULTIPLY (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_DIVIDE (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_MODULO (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_AND (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_OR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_XOR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITSHIFT_LEFT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITSHIFT_RIGHT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_LOGICAL_AND (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_LOGICAL_OR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_LESS_THAN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_LESS_THAN_OR_EQUAL (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_GREATER_THAN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_GREATER_THAN_OR_EQUAL (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_EQUAL (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_NOT_EQUAL (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_ADD_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_SUBTRACT_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_MULTIPLY_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_DIVIDE_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_MODULO_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_AND_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_OR_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITWISE_XOR_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITSHIFT_LEFT_ASSIGNMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_OP_BITSHIFT_RIGHT_ASSIGNMENT (const location_type& l);
 
     static inline
     symbol_type
@@ -592,11 +751,31 @@ namespace yy {
 
     static inline
     symbol_type
-    make_PARSED_VARIABLE_TYPE (const ast::Lexer::ParsedVariableType& v, const location_type& l);
+    make_VARIABLE_TYPE (const ast::Lexer::ParsedVariableType& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_LOOP_CONTROL_STATEMENT (const ast::Lexer::ParsedLoopControlStatement& v, const location_type& l);
 
     static inline
     symbol_type
     make_RVALUE_VALUE (const std::shared_ptr<ast::RValueValue>& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_UNOP_UNARY_PLUS (const location_type& l);
+
+    static inline
+    symbol_type
+    make_UNOP_UNARY_MINUS (const location_type& l);
+
+    static inline
+    symbol_type
+    make_UNOP_POSTFIX_INCREMENT (const location_type& l);
+
+    static inline
+    symbol_type
+    make_UNOP_POSTFIX_DECREMENT (const location_type& l);
 
 
     /// Build a parser object.
@@ -665,7 +844,7 @@ namespace yy {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const signed char yypact_[];
+  static const short int yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -683,7 +862,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const short int yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -704,7 +883,7 @@ namespace yy {
     static const char* const yytname_[];
 #if YYDEBUG
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -803,12 +982,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 33,     ///< Last index in yytable_.
-      yynnts_ = 16,  ///< Number of nonterminal symbols.
+      yylast_ = 587,     ///< Last index in yytable_.
+      yynnts_ = 19,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 26  ///< Number of tokens.
+      yyntokens_ = 58  ///< Number of tokens.
     };
 
 
@@ -853,9 +1032,12 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57
     };
-    const unsigned int user_token_number_max_ = 280;
+    const unsigned int user_token_number_max_ = 312;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -888,53 +1070,72 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 24: // "variable type"
+      case 51: // "loop control statement"
+        value.copy< ast::Lexer::ParsedLoopControlStatement > (other.value);
+        break;
+
+      case 50: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (other.value);
         break;
 
-      case 41: // binaryOperation
-        value.copy< std::shared_ptr<ast::BinaryOperation> > (other.value);
-        break;
-
-      case 35: // conditional
-      case 36: // conditionalIf
+      case 67: // conditional
+      case 68: // conditionalIf
         value.copy< std::shared_ptr<ast::Conditional> > (other.value);
         break;
 
-      case 39: // lValue
+      case 69: // forLoop
+        value.copy< std::shared_ptr<ast::ForLoop> > (other.value);
+        break;
+
+      case 74: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (other.value);
         break;
 
-      case 25: // "rvalue value"
-      case 40: // rValueValue
+      case 71: // loopControlStatement
+        value.copy< std::shared_ptr<ast::LoopControlStatement> > (other.value);
+        break;
+
+      case 76: // operation
+        value.copy< std::shared_ptr<ast::Operation> > (other.value);
+        break;
+
+      case 75: // rValue
+        value.copy< std::shared_ptr<ast::RValue> > (other.value);
+        break;
+
+      case 52: // "rvalue value"
         value.copy< std::shared_ptr<ast::RValueValue> > (other.value);
         break;
 
-      case 28: // statement
+      case 60: // statement
         value.copy< std::shared_ptr<ast::Statement> > (other.value);
         break;
 
-      case 29: // statements
-      case 30: // statementsBlockInternal
-      case 31: // statementsBlock
+      case 61: // statements
+      case 62: // statementsBlockInternal
+      case 63: // statementsBlock
         value.copy< std::shared_ptr<ast::StatementList> > (other.value);
         break;
 
-      case 37: // valueStandalone
-      case 38: // value
+      case 72: // valueStandalone
+      case 73: // value
         value.copy< std::shared_ptr<ast::Value> > (other.value);
         break;
 
-      case 32: // localVariableDefinition
+      case 64: // localVariableDefinition
         value.copy< std::shared_ptr<ast::VariableDefinition> > (other.value);
         break;
 
-      case 33: // localVariableDefinitions
-      case 34: // localVariableDefinitionList
+      case 65: // localVariableDefinitions
+      case 66: // localVariableDefinitionList
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (other.value);
         break;
 
-      case 23: // "identifier"
+      case 70: // whileLoop
+        value.copy< std::shared_ptr<ast::WhileLoop> > (other.value);
+        break;
+
+      case 49: // "identifier"
         value.copy< std::string > (other.value);
         break;
 
@@ -955,53 +1156,72 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 24: // "variable type"
+      case 51: // "loop control statement"
+        value.copy< ast::Lexer::ParsedLoopControlStatement > (v);
+        break;
+
+      case 50: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (v);
         break;
 
-      case 41: // binaryOperation
-        value.copy< std::shared_ptr<ast::BinaryOperation> > (v);
-        break;
-
-      case 35: // conditional
-      case 36: // conditionalIf
+      case 67: // conditional
+      case 68: // conditionalIf
         value.copy< std::shared_ptr<ast::Conditional> > (v);
         break;
 
-      case 39: // lValue
+      case 69: // forLoop
+        value.copy< std::shared_ptr<ast::ForLoop> > (v);
+        break;
+
+      case 74: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (v);
         break;
 
-      case 25: // "rvalue value"
-      case 40: // rValueValue
+      case 71: // loopControlStatement
+        value.copy< std::shared_ptr<ast::LoopControlStatement> > (v);
+        break;
+
+      case 76: // operation
+        value.copy< std::shared_ptr<ast::Operation> > (v);
+        break;
+
+      case 75: // rValue
+        value.copy< std::shared_ptr<ast::RValue> > (v);
+        break;
+
+      case 52: // "rvalue value"
         value.copy< std::shared_ptr<ast::RValueValue> > (v);
         break;
 
-      case 28: // statement
+      case 60: // statement
         value.copy< std::shared_ptr<ast::Statement> > (v);
         break;
 
-      case 29: // statements
-      case 30: // statementsBlockInternal
-      case 31: // statementsBlock
+      case 61: // statements
+      case 62: // statementsBlockInternal
+      case 63: // statementsBlock
         value.copy< std::shared_ptr<ast::StatementList> > (v);
         break;
 
-      case 37: // valueStandalone
-      case 38: // value
+      case 72: // valueStandalone
+      case 73: // value
         value.copy< std::shared_ptr<ast::Value> > (v);
         break;
 
-      case 32: // localVariableDefinition
+      case 64: // localVariableDefinition
         value.copy< std::shared_ptr<ast::VariableDefinition> > (v);
         break;
 
-      case 33: // localVariableDefinitions
-      case 34: // localVariableDefinitionList
+      case 65: // localVariableDefinitions
+      case 66: // localVariableDefinitionList
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (v);
         break;
 
-      case 23: // "identifier"
+      case 70: // whileLoop
+        value.copy< std::shared_ptr<ast::WhileLoop> > (v);
+        break;
+
+      case 49: // "identifier"
         value.copy< std::string > (v);
         break;
 
@@ -1021,14 +1241,14 @@ namespace yy {
   {}
 
   template <typename Base>
-  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l)
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedLoopControlStatement v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
   {}
 
   template <typename Base>
-  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::BinaryOperation> v, const location_type& l)
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const ast::Lexer::ParsedVariableType v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1042,7 +1262,35 @@ namespace yy {
   {}
 
   template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::ForLoop> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
   ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LValue> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::LoopControlStatement> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::Operation> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::RValue> v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -1091,6 +1339,13 @@ namespace yy {
   {}
 
   template <typename Base>
+  ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::shared_ptr<ast::WhileLoop> v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
   ScratchCodeParser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l)
     : Base (t)
     , value (v)
@@ -1123,53 +1378,72 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 24: // "variable type"
+      case 51: // "loop control statement"
+        value.template destroy< ast::Lexer::ParsedLoopControlStatement > ();
+        break;
+
+      case 50: // "variable type"
         value.template destroy< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 41: // binaryOperation
-        value.template destroy< std::shared_ptr<ast::BinaryOperation> > ();
-        break;
-
-      case 35: // conditional
-      case 36: // conditionalIf
+      case 67: // conditional
+      case 68: // conditionalIf
         value.template destroy< std::shared_ptr<ast::Conditional> > ();
         break;
 
-      case 39: // lValue
+      case 69: // forLoop
+        value.template destroy< std::shared_ptr<ast::ForLoop> > ();
+        break;
+
+      case 74: // lValue
         value.template destroy< std::shared_ptr<ast::LValue> > ();
         break;
 
-      case 25: // "rvalue value"
-      case 40: // rValueValue
+      case 71: // loopControlStatement
+        value.template destroy< std::shared_ptr<ast::LoopControlStatement> > ();
+        break;
+
+      case 76: // operation
+        value.template destroy< std::shared_ptr<ast::Operation> > ();
+        break;
+
+      case 75: // rValue
+        value.template destroy< std::shared_ptr<ast::RValue> > ();
+        break;
+
+      case 52: // "rvalue value"
         value.template destroy< std::shared_ptr<ast::RValueValue> > ();
         break;
 
-      case 28: // statement
+      case 60: // statement
         value.template destroy< std::shared_ptr<ast::Statement> > ();
         break;
 
-      case 29: // statements
-      case 30: // statementsBlockInternal
-      case 31: // statementsBlock
+      case 61: // statements
+      case 62: // statementsBlockInternal
+      case 63: // statementsBlock
         value.template destroy< std::shared_ptr<ast::StatementList> > ();
         break;
 
-      case 37: // valueStandalone
-      case 38: // value
+      case 72: // valueStandalone
+      case 73: // value
         value.template destroy< std::shared_ptr<ast::Value> > ();
         break;
 
-      case 32: // localVariableDefinition
+      case 64: // localVariableDefinition
         value.template destroy< std::shared_ptr<ast::VariableDefinition> > ();
         break;
 
-      case 33: // localVariableDefinitions
-      case 34: // localVariableDefinitionList
+      case 65: // localVariableDefinitions
+      case 66: // localVariableDefinitionList
         value.template destroy< std::shared_ptr<ast::VariableDefinitionList> > ();
         break;
 
-      case 23: // "identifier"
+      case 70: // whileLoop
+        value.template destroy< std::shared_ptr<ast::WhileLoop> > ();
+        break;
+
+      case 49: // "identifier"
         value.template destroy< std::string > ();
         break;
 
@@ -1196,53 +1470,72 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 24: // "variable type"
+      case 51: // "loop control statement"
+        value.move< ast::Lexer::ParsedLoopControlStatement > (s.value);
+        break;
+
+      case 50: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (s.value);
         break;
 
-      case 41: // binaryOperation
-        value.move< std::shared_ptr<ast::BinaryOperation> > (s.value);
-        break;
-
-      case 35: // conditional
-      case 36: // conditionalIf
+      case 67: // conditional
+      case 68: // conditionalIf
         value.move< std::shared_ptr<ast::Conditional> > (s.value);
         break;
 
-      case 39: // lValue
+      case 69: // forLoop
+        value.move< std::shared_ptr<ast::ForLoop> > (s.value);
+        break;
+
+      case 74: // lValue
         value.move< std::shared_ptr<ast::LValue> > (s.value);
         break;
 
-      case 25: // "rvalue value"
-      case 40: // rValueValue
+      case 71: // loopControlStatement
+        value.move< std::shared_ptr<ast::LoopControlStatement> > (s.value);
+        break;
+
+      case 76: // operation
+        value.move< std::shared_ptr<ast::Operation> > (s.value);
+        break;
+
+      case 75: // rValue
+        value.move< std::shared_ptr<ast::RValue> > (s.value);
+        break;
+
+      case 52: // "rvalue value"
         value.move< std::shared_ptr<ast::RValueValue> > (s.value);
         break;
 
-      case 28: // statement
+      case 60: // statement
         value.move< std::shared_ptr<ast::Statement> > (s.value);
         break;
 
-      case 29: // statements
-      case 30: // statementsBlockInternal
-      case 31: // statementsBlock
+      case 61: // statements
+      case 62: // statementsBlockInternal
+      case 63: // statementsBlock
         value.move< std::shared_ptr<ast::StatementList> > (s.value);
         break;
 
-      case 37: // valueStandalone
-      case 38: // value
+      case 72: // valueStandalone
+      case 73: // value
         value.move< std::shared_ptr<ast::Value> > (s.value);
         break;
 
-      case 32: // localVariableDefinition
+      case 64: // localVariableDefinition
         value.move< std::shared_ptr<ast::VariableDefinition> > (s.value);
         break;
 
-      case 33: // localVariableDefinitions
-      case 34: // localVariableDefinitionList
+      case 65: // localVariableDefinitions
+      case 66: // localVariableDefinitionList
         value.move< std::shared_ptr<ast::VariableDefinitionList> > (s.value);
         break;
 
-      case 23: // "identifier"
+      case 70: // whileLoop
+        value.move< std::shared_ptr<ast::WhileLoop> > (s.value);
+        break;
+
+      case 49: // "identifier"
         value.move< std::string > (s.value);
         break;
 
@@ -1303,7 +1596,10 @@ namespace yy {
     {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280
+     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     305,   306,   307,   308,   309,   310,   311,   312
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -1318,12 +1614,6 @@ namespace yy {
   ScratchCodeParser::make_IF (const location_type& l)
   {
     return symbol_type (token::TOK_IF, l);
-  }
-
-  ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_THEN (const location_type& l)
-  {
-    return symbol_type (token::TOK_THEN, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -1399,39 +1689,201 @@ namespace yy {
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_MULTIPLY (const location_type& l)
+  ScratchCodeParser::make_OP_PLUS (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_MULTIPLY, l);
+    return symbol_type (token::TOK_OP_PLUS, l);
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_DIVIDE (const location_type& l)
+  ScratchCodeParser::make_OP_MINUS (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_DIVIDE, l);
+    return symbol_type (token::TOK_OP_MINUS, l);
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_MODULO (const location_type& l)
+  ScratchCodeParser::make_OP_INCREMENT (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_MODULO, l);
+    return symbol_type (token::TOK_OP_INCREMENT, l);
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_ADD (const location_type& l)
+  ScratchCodeParser::make_OP_DECREMENT (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_ADD, l);
+    return symbol_type (token::TOK_OP_DECREMENT, l);
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_SUBTRACT (const location_type& l)
+  ScratchCodeParser::make_OP_LOGICAL_NOT (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_SUBTRACT, l);
+    return symbol_type (token::TOK_OP_LOGICAL_NOT, l);
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_BINOP_ASSIGNMENT (const location_type& l)
+  ScratchCodeParser::make_OP_BITWISE_NOT (const location_type& l)
   {
-    return symbol_type (token::TOK_BINOP_ASSIGNMENT, l);
+    return symbol_type (token::TOK_OP_BITWISE_NOT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_MULTIPLY (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_MULTIPLY, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_DIVIDE (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_DIVIDE, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_MODULO (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_MODULO, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_AND (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_AND, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_OR (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_OR, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_XOR (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_XOR, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITSHIFT_LEFT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITSHIFT_LEFT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITSHIFT_RIGHT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITSHIFT_RIGHT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_LOGICAL_AND (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_LOGICAL_AND, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_LOGICAL_OR (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_LOGICAL_OR, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_LESS_THAN (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_LESS_THAN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_LESS_THAN_OR_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_LESS_THAN_OR_EQUAL, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_GREATER_THAN (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_GREATER_THAN, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_GREATER_THAN_OR_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_GREATER_THAN_OR_EQUAL, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_EQUAL, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_NOT_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_NOT_EQUAL, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_ADD_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_ADD_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_SUBTRACT_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_SUBTRACT_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_MULTIPLY_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_MULTIPLY_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_DIVIDE_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_DIVIDE_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_MODULO_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_MODULO_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_AND_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_AND_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_OR_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_OR_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITWISE_XOR_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITWISE_XOR_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITSHIFT_LEFT_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITSHIFT_LEFT_ASSIGNMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_OP_BITSHIFT_RIGHT_ASSIGNMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_OP_BITSHIFT_RIGHT_ASSIGNMENT, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -1441,9 +1893,15 @@ namespace yy {
   }
 
   ScratchCodeParser::symbol_type
-  ScratchCodeParser::make_PARSED_VARIABLE_TYPE (const ast::Lexer::ParsedVariableType& v, const location_type& l)
+  ScratchCodeParser::make_VARIABLE_TYPE (const ast::Lexer::ParsedVariableType& v, const location_type& l)
   {
-    return symbol_type (token::TOK_PARSED_VARIABLE_TYPE, v, l);
+    return symbol_type (token::TOK_VARIABLE_TYPE, v, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_LOOP_CONTROL_STATEMENT (const ast::Lexer::ParsedLoopControlStatement& v, const location_type& l)
+  {
+    return symbol_type (token::TOK_LOOP_CONTROL_STATEMENT, v, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -1452,10 +1910,34 @@ namespace yy {
     return symbol_type (token::TOK_RVALUE_VALUE, v, l);
   }
 
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_UNOP_UNARY_PLUS (const location_type& l)
+  {
+    return symbol_type (token::TOK_UNOP_UNARY_PLUS, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_UNOP_UNARY_MINUS (const location_type& l)
+  {
+    return symbol_type (token::TOK_UNOP_UNARY_MINUS, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_UNOP_POSTFIX_INCREMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_UNOP_POSTFIX_INCREMENT, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_UNOP_POSTFIX_DECREMENT (const location_type& l)
+  {
+    return symbol_type (token::TOK_UNOP_POSTFIX_DECREMENT, l);
+  }
+
 
 
 } // yy
-#line 1459 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 1941 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 

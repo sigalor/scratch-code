@@ -1,15 +1,8 @@
 Terminale, die in Grammatik unbenutzt sind
 
-   "while"
-   "for"
    "return"
    "["
    "]"
-   "*"
-   "/"
-   "%"
-   "+"
-   "-"
 
 
 Grammatik
@@ -20,111 +13,199 @@ Grammatik
 
     2 statement: valueStandalone
     3          | conditional
+    4          | forLoop
+    5          | whileLoop
+    6          | loopControlStatement
 
-    4 statements: %empty
-    5           | statements statement
-    6           | statements localVariableDefinitionList
+    7 statements: %empty
+    8           | statements statement
+    9           | statements localVariableDefinitionList
 
-    7 statementsBlockInternal: "{" statements "}"
-    8                        | statement
+   10 statementsBlockInternal: "{" statements "}"
+   11                        | statement
 
-    9 statementsBlock: statementsBlockInternal
+   12 statementsBlock: statementsBlockInternal
 
-   10 localVariableDefinition: "identifier"
+   13 localVariableDefinition: "identifier"
 
-   11 localVariableDefinitions: %empty
-   12                         | localVariableDefinitions "," localVariableDefinition
+   14 localVariableDefinitions: %empty
+   15                         | localVariableDefinitions "," localVariableDefinition
 
-   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";"
+   16 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";"
 
-   14 conditional: conditionalIf
-   15            | conditionalIf "else" statementsBlock
+   17 conditional: conditionalIf
+   18            | conditionalIf "else" statementsBlock
 
-   16 conditionalIf: "if" "(" value ")" statementsBlock
+   19 conditionalIf: "if" "(" value ")" statementsBlock
 
-   17 valueStandalone: value ";"
+   20 forLoop: "for" "(" value ";" value ";" value ")" statementsBlock
 
-   18 value: lValue
-   19      | rValueValue
-   20      | binaryOperation
+   21 whileLoop: "while" "(" value ")" statementsBlock
 
-   21 lValue: "identifier"
+   22 loopControlStatement: "loop control statement" ";"
 
-   22 rValueValue: "rvalue value"
+   23 valueStandalone: value ";"
 
-   23 binaryOperation: value "=" value
+   24 value: lValue
+   25      | rValue
+   26      | operation
+   27      | "(" value ")"
+
+   28 lValue: "identifier"
+
+   29 rValue: "rvalue value"
+
+   30 operation: value "=" value
+   31          | value "+=" value
+   32          | value "-=" value
+   33          | value "*=" value
+   34          | value "/=" value
+   35          | value "%=" value
+   36          | value "&=" value
+   37          | value "|=" value
+   38          | value "^=" value
+   39          | value "<<=" value
+   40          | value ">>=" value
+   41          | value "||" value
+   42          | value "&&" value
+   43          | value "|" value
+   44          | value "^" value
+   45          | value "&" value
+   46          | value "==" value
+   47          | value "!=" value
+   48          | value "<" value
+   49          | value "<=" value
+   50          | value ">" value
+   51          | value ">=" value
+   52          | value "<<" value
+   53          | value ">>" value
+   54          | value "+" value
+   55          | value "-" value
+   56          | value "*" value
+   57          | value "/" value
+   58          | value "%" value
+   59          | "++" value
+   60          | "--" value
+   61          | "+" value
+   62          | "-" value
+   63          | "!" value
+   64          | "~" value
+   65          | value "++"
+   66          | value "--"
 
 
 Terminale und die Regeln, in denen sie verwendet werden
 
 "end of file" (0) 0 1
 error (256)
-"if" (258) 16
-THEN (259)
-"else" (260) 15
-"while" (261)
-"for" (262)
-"return" (263)
-"(" (264) 16
-")" (265) 16
-"[" (266)
-"]" (267)
-"{" (268) 7
-"}" (269) 7
-"," (270) 12
-";" (271) 13 17
-"*" (272)
-"/" (273)
-"%" (274)
-"+" (275)
-"-" (276)
-"=" (277) 23
-"identifier" (278) 10 21
-"variable type" (279) 13
-"rvalue value" (280) 22
+"if" (258) 19
+"else" (259) 18
+"while" (260) 21
+"for" (261) 20
+"return" (262)
+"(" (263) 19 20 21 27
+")" (264) 19 20 21 27
+"[" (265)
+"]" (266)
+"{" (267) 10
+"}" (268) 10
+"," (269) 15
+";" (270) 16 20 22 23
+"+" (271) 54 61
+"-" (272) 55 62
+"++" (273) 59 65
+"--" (274) 60 66
+"!" (275) 63
+"~" (276) 64
+"*" (277) 56
+"/" (278) 57
+"%" (279) 58
+"&" (280) 45
+"|" (281) 43
+"^" (282) 44
+"<<" (283) 52
+">>" (284) 53
+"&&" (285) 42
+"||" (286) 41
+"<" (287) 48
+"<=" (288) 49
+">" (289) 50
+">=" (290) 51
+"==" (291) 46
+"!=" (292) 47
+"=" (293) 30
+"+=" (294) 31
+"-=" (295) 32
+"*=" (296) 33
+"/=" (297) 34
+"%=" (298) 35
+"&=" (299) 36
+"|=" (300) 37
+"^=" (301) 38
+"<<=" (302) 39
+">>=" (303) 40
+"identifier" (304) 13 28
+"variable type" (305) 16
+"loop control statement" (306) 22
+"rvalue value" (307) 29
+"then" (308)
+UNOP_UNARY_PLUS (309)
+UNOP_UNARY_MINUS (310)
+UNOP_POSTFIX_INCREMENT (311)
+UNOP_POSTFIX_DECREMENT (312)
 
 
 Nicht-Terminal und die Regeln, in denen sie verwendet werden
 
-$accept (26)
+$accept (58)
     auf der linken Seite: 0
-unit (27)
+unit (59)
     auf der linken Seite: 1, auf der rechten Seite: 0
-statement (28)
-    auf der linken Seite: 2 3, auf der rechten Seite: 5 8
-statements (29)
-    auf der linken Seite: 4 5 6, auf der rechten Seite: 1 5 6 7
-statementsBlockInternal (30)
-    auf der linken Seite: 7 8, auf der rechten Seite: 9
-statementsBlock (31)
-    auf der linken Seite: 9, auf der rechten Seite: 15 16
-localVariableDefinition (32)
-    auf der linken Seite: 10, auf der rechten Seite: 12 13
-localVariableDefinitions (33)
-    auf der linken Seite: 11 12, auf der rechten Seite: 12 13
-localVariableDefinitionList (34)
-    auf der linken Seite: 13, auf der rechten Seite: 6
-conditional (35)
-    auf der linken Seite: 14 15, auf der rechten Seite: 3
-conditionalIf (36)
-    auf der linken Seite: 16, auf der rechten Seite: 14 15
-valueStandalone (37)
-    auf der linken Seite: 17, auf der rechten Seite: 2
-value (38)
-    auf der linken Seite: 18 19 20, auf der rechten Seite: 16 17 23
-lValue (39)
-    auf der linken Seite: 21, auf der rechten Seite: 18
-rValueValue (40)
-    auf der linken Seite: 22, auf der rechten Seite: 19
-binaryOperation (41)
-    auf der linken Seite: 23, auf der rechten Seite: 20
+statement (60)
+    auf der linken Seite: 2 3 4 5 6, auf der rechten Seite: 8 11
+statements (61)
+    auf der linken Seite: 7 8 9, auf der rechten Seite: 1 8 9 10
+statementsBlockInternal (62)
+    auf der linken Seite: 10 11, auf der rechten Seite: 12
+statementsBlock (63)
+    auf der linken Seite: 12, auf der rechten Seite: 18 19 20 21
+localVariableDefinition (64)
+    auf der linken Seite: 13, auf der rechten Seite: 15 16
+localVariableDefinitions (65)
+    auf der linken Seite: 14 15, auf der rechten Seite: 15 16
+localVariableDefinitionList (66)
+    auf der linken Seite: 16, auf der rechten Seite: 9
+conditional (67)
+    auf der linken Seite: 17 18, auf der rechten Seite: 3
+conditionalIf (68)
+    auf der linken Seite: 19, auf der rechten Seite: 17 18
+forLoop (69)
+    auf der linken Seite: 20, auf der rechten Seite: 4
+whileLoop (70)
+    auf der linken Seite: 21, auf der rechten Seite: 5
+loopControlStatement (71)
+    auf der linken Seite: 22, auf der rechten Seite: 6
+valueStandalone (72)
+    auf der linken Seite: 23, auf der rechten Seite: 2
+value (73)
+    auf der linken Seite: 24 25 26 27, auf der rechten Seite: 19 20
+    21 23 27 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
+    48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66
+lValue (74)
+    auf der linken Seite: 28, auf der rechten Seite: 24
+rValue (75)
+    auf der linken Seite: 29, auf der rechten Seite: 25
+operation (76)
+    auf der linken Seite: 30 31 32 33 34 35 36 37 38 39 40 41 42 43
+    44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64
+    65 66, auf der rechten Seite: 26
 
 
 Zustand 0
 
     0 $accept: . unit "end of file"
 
-    $default  reduziere mit Regel 4 (statements)
+    $default  reduziere mit Regel 7 (statements)
 
     unit        gehe zu Zustand 1 über
     statements  gehe zu Zustand 2 über
@@ -140,24 +221,37 @@ Zustand 1
 Zustand 2
 
     1 unit: statements . "end of file"
-    5 statements: statements . statement
-    6           | statements . localVariableDefinitionList
+    8 statements: statements . statement
+    9           | statements . localVariableDefinitionList
 
-    "end of file"    schiebe und gehe zu Zustand 4 über
-    "if"             schiebe und gehe zu Zustand 5 über
-    "identifier"     schiebe und gehe zu Zustand 6 über
-    "variable type"  schiebe und gehe zu Zustand 7 über
-    "rvalue value"   schiebe und gehe zu Zustand 8 über
+    "end of file"             schiebe und gehe zu Zustand 4 über
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "variable type"           schiebe und gehe zu Zustand 16 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
 
-    statement                    gehe zu Zustand 9 über
-    localVariableDefinitionList  gehe zu Zustand 10 über
-    conditional                  gehe zu Zustand 11 über
-    conditionalIf                gehe zu Zustand 12 über
-    valueStandalone              gehe zu Zustand 13 über
-    value                        gehe zu Zustand 14 über
-    lValue                       gehe zu Zustand 15 über
-    rValueValue                  gehe zu Zustand 16 über
-    binaryOperation              gehe zu Zustand 17 über
+    statement                    gehe zu Zustand 19 über
+    localVariableDefinitionList  gehe zu Zustand 20 über
+    conditional                  gehe zu Zustand 21 über
+    conditionalIf                gehe zu Zustand 22 über
+    forLoop                      gehe zu Zustand 23 über
+    whileLoop                    gehe zu Zustand 24 über
+    loopControlStatement         gehe zu Zustand 25 über
+    valueStandalone              gehe zu Zustand 26 über
+    value                        gehe zu Zustand 27 über
+    lValue                       gehe zu Zustand 28 über
+    rValue                       gehe zu Zustand 29 über
+    operation                    gehe zu Zustand 30 über
 
 
 Zustand 3
@@ -176,306 +270,3641 @@ Zustand 4
 
 Zustand 5
 
-   16 conditionalIf: "if" . "(" value ")" statementsBlock
+   19 conditionalIf: "if" . "(" value ")" statementsBlock
 
-    "("  schiebe und gehe zu Zustand 18 über
+    "("  schiebe und gehe zu Zustand 31 über
 
 
 Zustand 6
 
-   21 lValue: "identifier" .
+   21 whileLoop: "while" . "(" value ")" statementsBlock
 
-    $default  reduziere mit Regel 21 (lValue)
+    "("  schiebe und gehe zu Zustand 32 über
 
 
 Zustand 7
 
-   13 localVariableDefinitionList: "variable type" . localVariableDefinition localVariableDefinitions ";"
+   20 forLoop: "for" . "(" value ";" value ";" value ")" statementsBlock
 
-    "identifier"  schiebe und gehe zu Zustand 19 über
-
-    localVariableDefinition  gehe zu Zustand 20 über
+    "("  schiebe und gehe zu Zustand 33 über
 
 
 Zustand 8
 
-   22 rValueValue: "rvalue value" .
+   27 value: "(" . value ")"
 
-    $default  reduziere mit Regel 22 (rValueValue)
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 34 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 9
 
-    5 statements: statements statement .
+   61 operation: "+" . value
 
-    $default  reduziere mit Regel 5 (statements)
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 35 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 10
 
-    6 statements: statements localVariableDefinitionList .
+   62 operation: "-" . value
 
-    $default  reduziere mit Regel 6 (statements)
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 36 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 11
+
+   59 operation: "++" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 37 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 12
+
+   60 operation: "--" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 38 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 13
+
+   63 operation: "!" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 39 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 14
+
+   64 operation: "~" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 40 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 15
+
+   28 lValue: "identifier" .
+
+    $default  reduziere mit Regel 28 (lValue)
+
+
+Zustand 16
+
+   16 localVariableDefinitionList: "variable type" . localVariableDefinition localVariableDefinitions ";"
+
+    "identifier"  schiebe und gehe zu Zustand 41 über
+
+    localVariableDefinition  gehe zu Zustand 42 über
+
+
+Zustand 17
+
+   22 loopControlStatement: "loop control statement" . ";"
+
+    ";"  schiebe und gehe zu Zustand 43 über
+
+
+Zustand 18
+
+   29 rValue: "rvalue value" .
+
+    $default  reduziere mit Regel 29 (rValue)
+
+
+Zustand 19
+
+    8 statements: statements statement .
+
+    $default  reduziere mit Regel 8 (statements)
+
+
+Zustand 20
+
+    9 statements: statements localVariableDefinitionList .
+
+    $default  reduziere mit Regel 9 (statements)
+
+
+Zustand 21
 
     3 statement: conditional .
 
     $default  reduziere mit Regel 3 (statement)
 
 
-Zustand 12
+Zustand 22
 
-   14 conditional: conditionalIf .
-   15            | conditionalIf . "else" statementsBlock
+   17 conditional: conditionalIf .
+   18            | conditionalIf . "else" statementsBlock
 
-    "else"  schiebe und gehe zu Zustand 21 über
+    "else"  schiebe und gehe zu Zustand 44 über
 
-    $default  reduziere mit Regel 14 (conditional)
+    $default  reduziere mit Regel 17 (conditional)
 
 
-Zustand 13
+Zustand 23
+
+    4 statement: forLoop .
+
+    $default  reduziere mit Regel 4 (statement)
+
+
+Zustand 24
+
+    5 statement: whileLoop .
+
+    $default  reduziere mit Regel 5 (statement)
+
+
+Zustand 25
+
+    6 statement: loopControlStatement .
+
+    $default  reduziere mit Regel 6 (statement)
+
+
+Zustand 26
 
     2 statement: valueStandalone .
 
     $default  reduziere mit Regel 2 (statement)
 
 
-Zustand 14
-
-   17 valueStandalone: value . ";"
-   23 binaryOperation: value . "=" value
-
-    ";"  schiebe und gehe zu Zustand 22 über
-    "="  schiebe und gehe zu Zustand 23 über
-
-
-Zustand 15
-
-   18 value: lValue .
-
-    $default  reduziere mit Regel 18 (value)
-
-
-Zustand 16
-
-   19 value: rValueValue .
-
-    $default  reduziere mit Regel 19 (value)
-
-
-Zustand 17
-
-   20 value: binaryOperation .
-
-    $default  reduziere mit Regel 20 (value)
-
-
-Zustand 18
-
-   16 conditionalIf: "if" "(" . value ")" statementsBlock
-
-    "identifier"    schiebe und gehe zu Zustand 6 über
-    "rvalue value"  schiebe und gehe zu Zustand 8 über
-
-    value            gehe zu Zustand 24 über
-    lValue           gehe zu Zustand 15 über
-    rValueValue      gehe zu Zustand 16 über
-    binaryOperation  gehe zu Zustand 17 über
-
-
-Zustand 19
-
-   10 localVariableDefinition: "identifier" .
-
-    $default  reduziere mit Regel 10 (localVariableDefinition)
-
-
-Zustand 20
-
-   13 localVariableDefinitionList: "variable type" localVariableDefinition . localVariableDefinitions ";"
-
-    $default  reduziere mit Regel 11 (localVariableDefinitions)
-
-    localVariableDefinitions  gehe zu Zustand 25 über
-
-
-Zustand 21
-
-   15 conditional: conditionalIf "else" . statementsBlock
-
-    "if"            schiebe und gehe zu Zustand 5 über
-    "{"             schiebe und gehe zu Zustand 26 über
-    "identifier"    schiebe und gehe zu Zustand 6 über
-    "rvalue value"  schiebe und gehe zu Zustand 8 über
-
-    statement                gehe zu Zustand 27 über
-    statementsBlockInternal  gehe zu Zustand 28 über
-    statementsBlock          gehe zu Zustand 29 über
-    conditional              gehe zu Zustand 11 über
-    conditionalIf            gehe zu Zustand 12 über
-    valueStandalone          gehe zu Zustand 13 über
-    value                    gehe zu Zustand 14 über
-    lValue                   gehe zu Zustand 15 über
-    rValueValue              gehe zu Zustand 16 über
-    binaryOperation          gehe zu Zustand 17 über
-
-
-Zustand 22
-
-   17 valueStandalone: value ";" .
-
-    $default  reduziere mit Regel 17 (valueStandalone)
-
-
-Zustand 23
-
-   23 binaryOperation: value "=" . value
-
-    "identifier"    schiebe und gehe zu Zustand 6 über
-    "rvalue value"  schiebe und gehe zu Zustand 8 über
-
-    value            gehe zu Zustand 30 über
-    lValue           gehe zu Zustand 15 über
-    rValueValue      gehe zu Zustand 16 über
-    binaryOperation  gehe zu Zustand 17 über
-
-
-Zustand 24
-
-   16 conditionalIf: "if" "(" value . ")" statementsBlock
-   23 binaryOperation: value . "=" value
-
-    ")"  schiebe und gehe zu Zustand 31 über
-    "="  schiebe und gehe zu Zustand 23 über
-
-
-Zustand 25
-
-   12 localVariableDefinitions: localVariableDefinitions . "," localVariableDefinition
-   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions . ";"
-
-    ","  schiebe und gehe zu Zustand 32 über
-    ";"  schiebe und gehe zu Zustand 33 über
-
-
-Zustand 26
-
-    7 statementsBlockInternal: "{" . statements "}"
-
-    $default  reduziere mit Regel 4 (statements)
-
-    statements  gehe zu Zustand 34 über
-
-
 Zustand 27
 
-    8 statementsBlockInternal: statement .
+   23 valueStandalone: value . ";"
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
 
-    $default  reduziere mit Regel 8 (statementsBlockInternal)
+    ";"    schiebe und gehe zu Zustand 45 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
 
 
 Zustand 28
 
-    9 statementsBlock: statementsBlockInternal .
+   24 value: lValue .
 
-    $default  reduziere mit Regel 9 (statementsBlock)
+    $default  reduziere mit Regel 24 (value)
 
 
 Zustand 29
 
-   15 conditional: conditionalIf "else" statementsBlock .
+   25 value: rValue .
 
-    $default  reduziere mit Regel 15 (conditional)
+    $default  reduziere mit Regel 25 (value)
 
 
 Zustand 30
 
-   23 binaryOperation: value . "=" value
-   23                | value "=" value .
+   26 value: operation .
 
-    "="  schiebe und gehe zu Zustand 23 über
-
-    $default  reduziere mit Regel 23 (binaryOperation)
+    $default  reduziere mit Regel 26 (value)
 
 
 Zustand 31
 
-   16 conditionalIf: "if" "(" value ")" . statementsBlock
+   19 conditionalIf: "if" "(" . value ")" statementsBlock
 
-    "if"            schiebe und gehe zu Zustand 5 über
-    "{"             schiebe und gehe zu Zustand 26 über
-    "identifier"    schiebe und gehe zu Zustand 6 über
-    "rvalue value"  schiebe und gehe zu Zustand 8 über
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
 
-    statement                gehe zu Zustand 27 über
-    statementsBlockInternal  gehe zu Zustand 28 über
-    statementsBlock          gehe zu Zustand 35 über
-    conditional              gehe zu Zustand 11 über
-    conditionalIf            gehe zu Zustand 12 über
-    valueStandalone          gehe zu Zustand 13 über
-    value                    gehe zu Zustand 14 über
-    lValue                   gehe zu Zustand 15 über
-    rValueValue              gehe zu Zustand 16 über
-    binaryOperation          gehe zu Zustand 17 über
+    value      gehe zu Zustand 77 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 32
 
-   12 localVariableDefinitions: localVariableDefinitions "," . localVariableDefinition
+   21 whileLoop: "while" "(" . value ")" statementsBlock
 
-    "identifier"  schiebe und gehe zu Zustand 19 über
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
 
-    localVariableDefinition  gehe zu Zustand 36 über
+    value      gehe zu Zustand 78 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 33
 
-   13 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";" .
+   20 forLoop: "for" "(" . value ";" value ";" value ")" statementsBlock
 
-    $default  reduziere mit Regel 13 (localVariableDefinitionList)
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 79 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
 
 
 Zustand 34
 
-    5 statements: statements . statement
-    6           | statements . localVariableDefinitionList
-    7 statementsBlockInternal: "{" statements . "}"
+   27 value: "(" value . ")"
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
 
-    "if"             schiebe und gehe zu Zustand 5 über
-    "}"              schiebe und gehe zu Zustand 37 über
-    "identifier"     schiebe und gehe zu Zustand 6 über
-    "variable type"  schiebe und gehe zu Zustand 7 über
-    "rvalue value"   schiebe und gehe zu Zustand 8 über
-
-    statement                    gehe zu Zustand 9 über
-    localVariableDefinitionList  gehe zu Zustand 10 über
-    conditional                  gehe zu Zustand 11 über
-    conditionalIf                gehe zu Zustand 12 über
-    valueStandalone              gehe zu Zustand 13 über
-    value                        gehe zu Zustand 14 über
-    lValue                       gehe zu Zustand 15 über
-    rValueValue                  gehe zu Zustand 16 über
-    binaryOperation              gehe zu Zustand 17 über
+    ")"    schiebe und gehe zu Zustand 80 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
 
 
 Zustand 35
 
-   16 conditionalIf: "if" "(" value ")" statementsBlock .
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   61          | "+" value .
+   65          | value . "++"
+   66          | value . "--"
 
-    $default  reduziere mit Regel 16 (conditionalIf)
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 61 (operation)
 
 
 Zustand 36
 
-   12 localVariableDefinitions: localVariableDefinitions "," localVariableDefinition .
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   62          | "-" value .
+   65          | value . "++"
+   66          | value . "--"
 
-    $default  reduziere mit Regel 12 (localVariableDefinitions)
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 62 (operation)
 
 
 Zustand 37
 
-    7 statementsBlockInternal: "{" statements "}" .
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   59          | "++" value .
+   65          | value . "++"
+   66          | value . "--"
 
-    $default  reduziere mit Regel 7 (statementsBlockInternal)
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 59 (operation)
+
+
+Zustand 38
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   60          | "--" value .
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 60 (operation)
+
+
+Zustand 39
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   63          | "!" value .
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 63 (operation)
+
+
+Zustand 40
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   64          | "~" value .
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 64 (operation)
+
+
+Zustand 41
+
+   13 localVariableDefinition: "identifier" .
+
+    $default  reduziere mit Regel 13 (localVariableDefinition)
+
+
+Zustand 42
+
+   16 localVariableDefinitionList: "variable type" localVariableDefinition . localVariableDefinitions ";"
+
+    $default  reduziere mit Regel 14 (localVariableDefinitions)
+
+    localVariableDefinitions  gehe zu Zustand 81 über
+
+
+Zustand 43
+
+   22 loopControlStatement: "loop control statement" ";" .
+
+    $default  reduziere mit Regel 22 (loopControlStatement)
+
+
+Zustand 44
+
+   18 conditional: conditionalIf "else" . statementsBlock
+
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "{"                       schiebe und gehe zu Zustand 82 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
+
+    statement                gehe zu Zustand 83 über
+    statementsBlockInternal  gehe zu Zustand 84 über
+    statementsBlock          gehe zu Zustand 85 über
+    conditional              gehe zu Zustand 21 über
+    conditionalIf            gehe zu Zustand 22 über
+    forLoop                  gehe zu Zustand 23 über
+    whileLoop                gehe zu Zustand 24 über
+    loopControlStatement     gehe zu Zustand 25 über
+    valueStandalone          gehe zu Zustand 26 über
+    value                    gehe zu Zustand 27 über
+    lValue                   gehe zu Zustand 28 über
+    rValue                   gehe zu Zustand 29 über
+    operation                gehe zu Zustand 30 über
+
+
+Zustand 45
+
+   23 valueStandalone: value ";" .
+
+    $default  reduziere mit Regel 23 (valueStandalone)
+
+
+Zustand 46
+
+   54 operation: value "+" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 86 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 47
+
+   55 operation: value "-" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 87 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 48
+
+   65 operation: value "++" .
+
+    $default  reduziere mit Regel 65 (operation)
+
+
+Zustand 49
+
+   66 operation: value "--" .
+
+    $default  reduziere mit Regel 66 (operation)
+
+
+Zustand 50
+
+   56 operation: value "*" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 88 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 51
+
+   57 operation: value "/" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 89 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 52
+
+   58 operation: value "%" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 90 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 53
+
+   45 operation: value "&" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 91 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 54
+
+   43 operation: value "|" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 92 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 55
+
+   44 operation: value "^" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 93 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 56
+
+   52 operation: value "<<" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 94 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 57
+
+   53 operation: value ">>" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 95 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 58
+
+   42 operation: value "&&" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 96 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 59
+
+   41 operation: value "||" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 97 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 60
+
+   48 operation: value "<" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 98 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 61
+
+   49 operation: value "<=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 99 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 62
+
+   50 operation: value ">" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 100 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 63
+
+   51 operation: value ">=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 101 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 64
+
+   46 operation: value "==" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 102 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 65
+
+   47 operation: value "!=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 103 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 66
+
+   30 operation: value "=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 104 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 67
+
+   31 operation: value "+=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 105 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 68
+
+   32 operation: value "-=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 106 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 69
+
+   33 operation: value "*=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 107 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 70
+
+   34 operation: value "/=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 108 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 71
+
+   35 operation: value "%=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 109 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 72
+
+   36 operation: value "&=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 110 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 73
+
+   37 operation: value "|=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 111 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 74
+
+   38 operation: value "^=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 112 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 75
+
+   39 operation: value "<<=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 113 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 76
+
+   40 operation: value ">>=" . value
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 114 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 77
+
+   19 conditionalIf: "if" "(" value . ")" statementsBlock
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    ")"    schiebe und gehe zu Zustand 115 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+
+Zustand 78
+
+   21 whileLoop: "while" "(" value . ")" statementsBlock
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    ")"    schiebe und gehe zu Zustand 116 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+
+Zustand 79
+
+   20 forLoop: "for" "(" value . ";" value ";" value ")" statementsBlock
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    ";"    schiebe und gehe zu Zustand 117 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+
+Zustand 80
+
+   27 value: "(" value ")" .
+
+    $default  reduziere mit Regel 27 (value)
+
+
+Zustand 81
+
+   15 localVariableDefinitions: localVariableDefinitions . "," localVariableDefinition
+   16 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions . ";"
+
+    ","  schiebe und gehe zu Zustand 118 über
+    ";"  schiebe und gehe zu Zustand 119 über
+
+
+Zustand 82
+
+   10 statementsBlockInternal: "{" . statements "}"
+
+    $default  reduziere mit Regel 7 (statements)
+
+    statements  gehe zu Zustand 120 über
+
+
+Zustand 83
+
+   11 statementsBlockInternal: statement .
+
+    $default  reduziere mit Regel 11 (statementsBlockInternal)
+
+
+Zustand 84
+
+   12 statementsBlock: statementsBlockInternal .
+
+    $default  reduziere mit Regel 12 (statementsBlock)
+
+
+Zustand 85
+
+   18 conditional: conditionalIf "else" statementsBlock .
+
+    $default  reduziere mit Regel 18 (conditional)
+
+
+Zustand 86
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   54          | value "+" value .
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+
+    $default  reduziere mit Regel 54 (operation)
+
+
+Zustand 87
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   55          | value "-" value .
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+
+    $default  reduziere mit Regel 55 (operation)
+
+
+Zustand 88
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   56          | value "*" value .
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 56 (operation)
+
+
+Zustand 89
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   57          | value "/" value .
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 57 (operation)
+
+
+Zustand 90
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   58          | value "%" value .
+   65          | value . "++"
+   66          | value . "--"
+
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+
+    $default  reduziere mit Regel 58 (operation)
+
+
+Zustand 91
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   45          | value "&" value .
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+    "=="  schiebe und gehe zu Zustand 64 über
+    "!="  schiebe und gehe zu Zustand 65 über
+
+    $default  reduziere mit Regel 45 (operation)
+
+
+Zustand 92
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   43          | value "|" value .
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "&"   schiebe und gehe zu Zustand 53 über
+    "^"   schiebe und gehe zu Zustand 55 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+    "=="  schiebe und gehe zu Zustand 64 über
+    "!="  schiebe und gehe zu Zustand 65 über
+
+    $default  reduziere mit Regel 43 (operation)
+
+
+Zustand 93
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   44          | value "^" value .
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "&"   schiebe und gehe zu Zustand 53 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+    "=="  schiebe und gehe zu Zustand 64 über
+    "!="  schiebe und gehe zu Zustand 65 über
+
+    $default  reduziere mit Regel 44 (operation)
+
+
+Zustand 94
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   52          | value "<<" value .
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+
+    $default  reduziere mit Regel 52 (operation)
+
+
+Zustand 95
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   53          | value ">>" value .
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+
+    $default  reduziere mit Regel 53 (operation)
+
+
+Zustand 96
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   42          | value "&&" value .
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "&"   schiebe und gehe zu Zustand 53 über
+    "|"   schiebe und gehe zu Zustand 54 über
+    "^"   schiebe und gehe zu Zustand 55 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+    "=="  schiebe und gehe zu Zustand 64 über
+    "!="  schiebe und gehe zu Zustand 65 über
+
+    $default  reduziere mit Regel 42 (operation)
+
+
+Zustand 97
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   41          | value "||" value .
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "&"   schiebe und gehe zu Zustand 53 über
+    "|"   schiebe und gehe zu Zustand 54 über
+    "^"   schiebe und gehe zu Zustand 55 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "&&"  schiebe und gehe zu Zustand 58 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+    "=="  schiebe und gehe zu Zustand 64 über
+    "!="  schiebe und gehe zu Zustand 65 über
+
+    $default  reduziere mit Regel 41 (operation)
+
+
+Zustand 98
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   48          | value "<" value .
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+
+    $default  reduziere mit Regel 48 (operation)
+
+
+Zustand 99
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   49          | value "<=" value .
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+
+    $default  reduziere mit Regel 49 (operation)
+
+
+Zustand 100
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   50          | value ">" value .
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+
+    $default  reduziere mit Regel 50 (operation)
+
+
+Zustand 101
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   51          | value ">=" value .
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+
+    $default  reduziere mit Regel 51 (operation)
+
+
+Zustand 102
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   46          | value "==" value .
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+
+    $default  reduziere mit Regel 46 (operation)
+
+
+Zustand 103
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   47          | value "!=" value .
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"   schiebe und gehe zu Zustand 46 über
+    "-"   schiebe und gehe zu Zustand 47 über
+    "++"  schiebe und gehe zu Zustand 48 über
+    "--"  schiebe und gehe zu Zustand 49 über
+    "*"   schiebe und gehe zu Zustand 50 über
+    "/"   schiebe und gehe zu Zustand 51 über
+    "%"   schiebe und gehe zu Zustand 52 über
+    "<<"  schiebe und gehe zu Zustand 56 über
+    ">>"  schiebe und gehe zu Zustand 57 über
+    "<"   schiebe und gehe zu Zustand 60 über
+    "<="  schiebe und gehe zu Zustand 61 über
+    ">"   schiebe und gehe zu Zustand 62 über
+    ">="  schiebe und gehe zu Zustand 63 über
+
+    $default  reduziere mit Regel 47 (operation)
+
+
+Zustand 104
+
+   30 operation: value . "=" value
+   30          | value "=" value .
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 30 (operation)
+
+
+Zustand 105
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   31          | value "+=" value .
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 31 (operation)
+
+
+Zustand 106
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   32          | value "-=" value .
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 32 (operation)
+
+
+Zustand 107
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   33          | value "*=" value .
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 33 (operation)
+
+
+Zustand 108
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   34          | value "/=" value .
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 34 (operation)
+
+
+Zustand 109
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   35          | value "%=" value .
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 35 (operation)
+
+
+Zustand 110
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   36          | value "&=" value .
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 36 (operation)
+
+
+Zustand 111
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   37          | value "|=" value .
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 37 (operation)
+
+
+Zustand 112
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   38          | value "^=" value .
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 38 (operation)
+
+
+Zustand 113
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   39          | value "<<=" value .
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 39 (operation)
+
+
+Zustand 114
+
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   40          | value ">>=" value .
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+    $default  reduziere mit Regel 40 (operation)
+
+
+Zustand 115
+
+   19 conditionalIf: "if" "(" value ")" . statementsBlock
+
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "{"                       schiebe und gehe zu Zustand 82 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
+
+    statement                gehe zu Zustand 83 über
+    statementsBlockInternal  gehe zu Zustand 84 über
+    statementsBlock          gehe zu Zustand 121 über
+    conditional              gehe zu Zustand 21 über
+    conditionalIf            gehe zu Zustand 22 über
+    forLoop                  gehe zu Zustand 23 über
+    whileLoop                gehe zu Zustand 24 über
+    loopControlStatement     gehe zu Zustand 25 über
+    valueStandalone          gehe zu Zustand 26 über
+    value                    gehe zu Zustand 27 über
+    lValue                   gehe zu Zustand 28 über
+    rValue                   gehe zu Zustand 29 über
+    operation                gehe zu Zustand 30 über
+
+
+Zustand 116
+
+   21 whileLoop: "while" "(" value ")" . statementsBlock
+
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "{"                       schiebe und gehe zu Zustand 82 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
+
+    statement                gehe zu Zustand 83 über
+    statementsBlockInternal  gehe zu Zustand 84 über
+    statementsBlock          gehe zu Zustand 122 über
+    conditional              gehe zu Zustand 21 über
+    conditionalIf            gehe zu Zustand 22 über
+    forLoop                  gehe zu Zustand 23 über
+    whileLoop                gehe zu Zustand 24 über
+    loopControlStatement     gehe zu Zustand 25 über
+    valueStandalone          gehe zu Zustand 26 über
+    value                    gehe zu Zustand 27 über
+    lValue                   gehe zu Zustand 28 über
+    rValue                   gehe zu Zustand 29 über
+    operation                gehe zu Zustand 30 über
+
+
+Zustand 117
+
+   20 forLoop: "for" "(" value ";" . value ";" value ")" statementsBlock
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 123 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 118
+
+   15 localVariableDefinitions: localVariableDefinitions "," . localVariableDefinition
+
+    "identifier"  schiebe und gehe zu Zustand 41 über
+
+    localVariableDefinition  gehe zu Zustand 124 über
+
+
+Zustand 119
+
+   16 localVariableDefinitionList: "variable type" localVariableDefinition localVariableDefinitions ";" .
+
+    $default  reduziere mit Regel 16 (localVariableDefinitionList)
+
+
+Zustand 120
+
+    8 statements: statements . statement
+    9           | statements . localVariableDefinitionList
+   10 statementsBlockInternal: "{" statements . "}"
+
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "}"                       schiebe und gehe zu Zustand 125 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "variable type"           schiebe und gehe zu Zustand 16 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
+
+    statement                    gehe zu Zustand 19 über
+    localVariableDefinitionList  gehe zu Zustand 20 über
+    conditional                  gehe zu Zustand 21 über
+    conditionalIf                gehe zu Zustand 22 über
+    forLoop                      gehe zu Zustand 23 über
+    whileLoop                    gehe zu Zustand 24 über
+    loopControlStatement         gehe zu Zustand 25 über
+    valueStandalone              gehe zu Zustand 26 über
+    value                        gehe zu Zustand 27 über
+    lValue                       gehe zu Zustand 28 über
+    rValue                       gehe zu Zustand 29 über
+    operation                    gehe zu Zustand 30 über
+
+
+Zustand 121
+
+   19 conditionalIf: "if" "(" value ")" statementsBlock .
+
+    $default  reduziere mit Regel 19 (conditionalIf)
+
+
+Zustand 122
+
+   21 whileLoop: "while" "(" value ")" statementsBlock .
+
+    $default  reduziere mit Regel 21 (whileLoop)
+
+
+Zustand 123
+
+   20 forLoop: "for" "(" value ";" value . ";" value ")" statementsBlock
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    ";"    schiebe und gehe zu Zustand 126 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+
+Zustand 124
+
+   15 localVariableDefinitions: localVariableDefinitions "," localVariableDefinition .
+
+    $default  reduziere mit Regel 15 (localVariableDefinitions)
+
+
+Zustand 125
+
+   10 statementsBlockInternal: "{" statements "}" .
+
+    $default  reduziere mit Regel 10 (statementsBlockInternal)
+
+
+Zustand 126
+
+   20 forLoop: "for" "(" value ";" value ";" . value ")" statementsBlock
+
+    "("             schiebe und gehe zu Zustand 8 über
+    "+"             schiebe und gehe zu Zustand 9 über
+    "-"             schiebe und gehe zu Zustand 10 über
+    "++"            schiebe und gehe zu Zustand 11 über
+    "--"            schiebe und gehe zu Zustand 12 über
+    "!"             schiebe und gehe zu Zustand 13 über
+    "~"             schiebe und gehe zu Zustand 14 über
+    "identifier"    schiebe und gehe zu Zustand 15 über
+    "rvalue value"  schiebe und gehe zu Zustand 18 über
+
+    value      gehe zu Zustand 127 über
+    lValue     gehe zu Zustand 28 über
+    rValue     gehe zu Zustand 29 über
+    operation  gehe zu Zustand 30 über
+
+
+Zustand 127
+
+   20 forLoop: "for" "(" value ";" value ";" value . ")" statementsBlock
+   30 operation: value . "=" value
+   31          | value . "+=" value
+   32          | value . "-=" value
+   33          | value . "*=" value
+   34          | value . "/=" value
+   35          | value . "%=" value
+   36          | value . "&=" value
+   37          | value . "|=" value
+   38          | value . "^=" value
+   39          | value . "<<=" value
+   40          | value . ">>=" value
+   41          | value . "||" value
+   42          | value . "&&" value
+   43          | value . "|" value
+   44          | value . "^" value
+   45          | value . "&" value
+   46          | value . "==" value
+   47          | value . "!=" value
+   48          | value . "<" value
+   49          | value . "<=" value
+   50          | value . ">" value
+   51          | value . ">=" value
+   52          | value . "<<" value
+   53          | value . ">>" value
+   54          | value . "+" value
+   55          | value . "-" value
+   56          | value . "*" value
+   57          | value . "/" value
+   58          | value . "%" value
+   65          | value . "++"
+   66          | value . "--"
+
+    ")"    schiebe und gehe zu Zustand 128 über
+    "+"    schiebe und gehe zu Zustand 46 über
+    "-"    schiebe und gehe zu Zustand 47 über
+    "++"   schiebe und gehe zu Zustand 48 über
+    "--"   schiebe und gehe zu Zustand 49 über
+    "*"    schiebe und gehe zu Zustand 50 über
+    "/"    schiebe und gehe zu Zustand 51 über
+    "%"    schiebe und gehe zu Zustand 52 über
+    "&"    schiebe und gehe zu Zustand 53 über
+    "|"    schiebe und gehe zu Zustand 54 über
+    "^"    schiebe und gehe zu Zustand 55 über
+    "<<"   schiebe und gehe zu Zustand 56 über
+    ">>"   schiebe und gehe zu Zustand 57 über
+    "&&"   schiebe und gehe zu Zustand 58 über
+    "||"   schiebe und gehe zu Zustand 59 über
+    "<"    schiebe und gehe zu Zustand 60 über
+    "<="   schiebe und gehe zu Zustand 61 über
+    ">"    schiebe und gehe zu Zustand 62 über
+    ">="   schiebe und gehe zu Zustand 63 über
+    "=="   schiebe und gehe zu Zustand 64 über
+    "!="   schiebe und gehe zu Zustand 65 über
+    "="    schiebe und gehe zu Zustand 66 über
+    "+="   schiebe und gehe zu Zustand 67 über
+    "-="   schiebe und gehe zu Zustand 68 über
+    "*="   schiebe und gehe zu Zustand 69 über
+    "/="   schiebe und gehe zu Zustand 70 über
+    "%="   schiebe und gehe zu Zustand 71 über
+    "&="   schiebe und gehe zu Zustand 72 über
+    "|="   schiebe und gehe zu Zustand 73 über
+    "^="   schiebe und gehe zu Zustand 74 über
+    "<<="  schiebe und gehe zu Zustand 75 über
+    ">>="  schiebe und gehe zu Zustand 76 über
+
+
+Zustand 128
+
+   20 forLoop: "for" "(" value ";" value ";" value ")" . statementsBlock
+
+    "if"                      schiebe und gehe zu Zustand 5 über
+    "while"                   schiebe und gehe zu Zustand 6 über
+    "for"                     schiebe und gehe zu Zustand 7 über
+    "("                       schiebe und gehe zu Zustand 8 über
+    "{"                       schiebe und gehe zu Zustand 82 über
+    "+"                       schiebe und gehe zu Zustand 9 über
+    "-"                       schiebe und gehe zu Zustand 10 über
+    "++"                      schiebe und gehe zu Zustand 11 über
+    "--"                      schiebe und gehe zu Zustand 12 über
+    "!"                       schiebe und gehe zu Zustand 13 über
+    "~"                       schiebe und gehe zu Zustand 14 über
+    "identifier"              schiebe und gehe zu Zustand 15 über
+    "loop control statement"  schiebe und gehe zu Zustand 17 über
+    "rvalue value"            schiebe und gehe zu Zustand 18 über
+
+    statement                gehe zu Zustand 83 über
+    statementsBlockInternal  gehe zu Zustand 84 über
+    statementsBlock          gehe zu Zustand 129 über
+    conditional              gehe zu Zustand 21 über
+    conditionalIf            gehe zu Zustand 22 über
+    forLoop                  gehe zu Zustand 23 über
+    whileLoop                gehe zu Zustand 24 über
+    loopControlStatement     gehe zu Zustand 25 über
+    valueStandalone          gehe zu Zustand 26 über
+    value                    gehe zu Zustand 27 über
+    lValue                   gehe zu Zustand 28 über
+    rValue                   gehe zu Zustand 29 über
+    operation                gehe zu Zustand 30 über
+
+
+Zustand 129
+
+   20 forLoop: "for" "(" value ";" value ";" value ")" statementsBlock .
+
+    $default  reduziere mit Regel 20 (forLoop)

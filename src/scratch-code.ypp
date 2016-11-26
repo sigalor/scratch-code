@@ -40,7 +40,6 @@
 %token
 	END 0 "end of file"
 	IF "if"
-	THEN																											//dummy token to solve dangling-else-/shift-reduce-problem, from http://stackoverflow.com/a/12734499
 	ELSE "else"
 	WHILE "while"
 	FOR "for"
@@ -53,32 +52,77 @@
 	CURLY_BRACKET_CLOSED "}"
 	COMMA ","
 	SEMICOLON ";"
-	BINOP_MULTIPLY "*"
-	BINOP_DIVIDE "/"
-	BINOP_MODULO "%"
-	BINOP_ADD "+"
-	BINOP_SUBTRACT "-"
-	BINOP_ASSIGNMENT "=";
+
+	OP_PLUS "+"
+	OP_MINUS "-"
+	OP_INCREMENT "++"
+	OP_DECREMENT "--"
+	OP_LOGICAL_NOT "!"
+	OP_BITWISE_NOT "~"
+	
+	OP_MULTIPLY "*"
+	OP_DIVIDE "/"
+	OP_MODULO "%"
+	OP_BITWISE_AND "&"
+	OP_BITWISE_OR "|"
+	OP_BITWISE_XOR "^"
+	OP_BITSHIFT_LEFT "<<"
+	OP_BITSHIFT_RIGHT ">>"
+	OP_LOGICAL_AND "&&"
+	OP_LOGICAL_OR "||"
+	OP_LESS_THAN "<"
+	OP_LESS_THAN_OR_EQUAL "<="
+	OP_GREATER_THAN ">"
+	OP_GREATER_THAN_OR_EQUAL ">="
+	OP_EQUAL "=="
+	OP_NOT_EQUAL "!="
+
+	OP_ASSIGNMENT "="
+	OP_ADD_ASSIGNMENT "+="
+	OP_SUBTRACT_ASSIGNMENT "-="
+	OP_MULTIPLY_ASSIGNMENT "*="
+	OP_DIVIDE_ASSIGNMENT "/="
+	OP_MODULO_ASSIGNMENT "%="
+	OP_BITWISE_AND_ASSIGNMENT "&="
+	OP_BITWISE_OR_ASSIGNMENT "|="
+	OP_BITWISE_XOR_ASSIGNMENT "^="
+	OP_BITSHIFT_LEFT_ASSIGNMENT "<<="
+	OP_BITSHIFT_RIGHT_ASSIGNMENT ">>=";
+	
 %token <std::string>									IDENTIFIER "identifier"										//define terminal symbol token types
-%token <ast::Lexer::ParsedVariableType>					PARSED_VARIABLE_TYPE "variable type"
+%token <ast::Lexer::ParsedVariableType>					VARIABLE_TYPE "variable type"
+%token <ast::Lexer::ParsedLoopControlStatement>			LOOP_CONTROL_STATEMENT "loop control statement"
 %token <std::shared_ptr<ast::RValueValue>>				RVALUE_VALUE "rvalue value"
 %type <std::shared_ptr<ast::Statement>>					statement;													//define non-terminal symbol token types
 %type <std::shared_ptr<ast::StatementList>>				statements statementsBlockInternal statementsBlock;
 %type <std::shared_ptr<ast::VariableDefinition>>		localVariableDefinition;
 %type <std::shared_ptr<ast::VariableDefinitionList>>	localVariableDefinitions localVariableDefinitionList;
 %type <std::shared_ptr<ast::Conditional>>				conditional conditionalIf;
+%type <std::shared_ptr<ast::ForLoop>>					forLoop;
+%type <std::shared_ptr<ast::WhileLoop>>					whileLoop;
+%type <std::shared_ptr<ast::LoopControlStatement>>		loopControlStatement;
 %type <std::shared_ptr<ast::Value>>						value valueStandalone;
 %type <std::shared_ptr<ast::LValue>>					lValue;
-%type <std::shared_ptr<ast::RValueValue>>				rValueValue;
-%type <std::shared_ptr<ast::BinaryOperation>>			binaryOperation;
+%type <std::shared_ptr<ast::RValue>>					rValue;
+%type <std::shared_ptr<ast::Operation>>					operation;
 %printer { yyoutput << ast::Lexer::getParsedVariableTypeString($$); } <ast::Lexer::ParsedVariableType>
 %printer { yyoutput << typeid($$).name() << " at " << &$$; } <*>
 
-%right THEN ELSE																									//this way, shift will be preferred over reduce when parsing if-else-statements, like "then" dummy token from http://stackoverflow.com/a/12734499
+%right "then" "else"																								//this way, shift will be preferred over reduce when parsing if-else-statements, from http://stackoverflow.com/a/12734499
 
-%right BINOP_ASSIGNMENT
-%left  BINOP_ADD BINOP_SUBTRACT
-%left  BINOP_MULTIPLY BINOP_DIVIDE BINOP_MODULO
+%right "=" "+=" "-=" "*=" "/=" "%=" "&=" "|=" "^=" "<<=" ">>="														//for more detailed information on the used precedences, see LexerTokenDefinitions.hpp from scratch-code-ast
+%left "||"
+%left "&&"
+%left "|"
+%left "^"
+%left "&"
+%left "==" "!="
+%left "<" "<=" ">" ">="
+%left "<<" ">>"
+%left "+" "-"																										//for dealing with the precedences of operators that look the same but have different meanings: http://dinosaur.compilertools.net/bison/bison_5.html#SEC27
+%left "*" "/" "%"
+%right "++" "--" UNOP_UNARY_PLUS UNOP_UNARY_MINUS "!" "~"
+%left UNOP_POSTFIX_INCREMENT UNOP_POSTFIX_DECREMENT
 
 
 
@@ -88,15 +132,28 @@ unit:																												//this is the ONLY rule that writes to driver.p
 	statements END
 	{
 		*(driver.parsedStatementList) = *($1);
+		
 		for(auto stmt : driver.parsedStatementList->getStatements())
+		{
+			//loop control statements are always invalid here, because there can be no loop statement block on the very first level
+			if(stmt->isA<ast::LoopControlStatement>())
+				throw yy::ScratchCodeParser::syntax_error(driver.loopControlStatementLocations.at(std::static_pointer_cast<ast::LoopControlStatement>(stmt)), "loop control statement has no loop to target");
+		
+			//parents of statements on first level need to be assigned manually here (as "unit" expects "statements" and not "statementsBlock")
 			stmt->setParent(driver.parsedStatementList);
+		}
+		
+		
 	};
 
 
 
 statement:																											//returns ast::Statement
-	valueStandalone		{ $$ = $1; }
-  | conditional			{ $$ = $1; };
+	valueStandalone			{ $$ = $1; }
+  | conditional				{ $$ = $1; }
+  | forLoop					{ $$ = $1; }
+  | whileLoop				{ $$ = $1; }
+  | loopControlStatement	{ $$ = $1; }
 statements:																											//returns ast::StatementList
 	%empty
 	{
@@ -114,21 +171,23 @@ statements:																											//returns ast::StatementList
 		$$ = $1;
 	};
 statementsBlockInternal:																							//returns ast::StatementList
-	CURLY_BRACKET_OPEN statements CURLY_BRACKET_CLOSED
+	"{" statements "}"
 	{
 		$$ = $2;
 	}
   | statement
 	{
-		auto stmtBlock = std::make_shared<ast::StatementList>(nullptr);
-		stmtBlock->addStatement($1);
-		$$ = stmtBlock;
+		auto newStmtList = std::make_shared<ast::StatementList>(nullptr);
+		newStmtList->addStatement($1);
+		$$ = newStmtList;
 	};
-statementsBlock:																									//returns ast::StatementList (also cleans up variable definitions that went out of scope)
+statementsBlock:																									//returns ast::StatementList
 	statementsBlockInternal
 	{
 		for(auto stmt : $1->getStatements())
 			stmt->setParent($1);
+		
+		//clean up variable definitions that went out of scope
 		auto i = driver.variableDefinitions.begin();
 		while(i != driver.variableDefinitions.end())
 		{
@@ -137,6 +196,24 @@ statementsBlock:																									//returns ast::StatementList (also clea
 			else
 				++i;
 		}
+		
+		//set target loops for loop control statements
+		for(auto stmt : $1->getStatements())
+		{
+			if(stmt->isA<ast::LoopControlStatement>())
+			{
+				auto lcs = std::static_pointer_cast<ast::LoopControlStatement>(stmt);
+				auto parentLoop = lcs->hasParentWithIdBase<ast::ControllableLoop>();
+				if(parentLoop == nullptr)
+					throw yy::ScratchCodeParser::syntax_error(driver.loopControlStatementLocations.at(lcs), "loop control statement has no loop to target");
+				else
+				{
+					lcs->setTargetLoop(parentLoop);
+					driver.loopControlStatementLocations.erase(lcs);
+				}
+			}
+		}
+		
 		$$ = $1;
 	};
 
@@ -154,13 +231,13 @@ localVariableDefinitions:																							//returns ast::VariableDefinitio
 	{
 		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
 	}
-  | localVariableDefinitions COMMA localVariableDefinition
+  | localVariableDefinitions "," localVariableDefinition
 	{
 		$1->addVarDef($3);
 		$$ = $1;
 	};
 localVariableDefinitionList:
-	PARSED_VARIABLE_TYPE localVariableDefinition localVariableDefinitions SEMICOLON									//returns ast::VariableDefinitionList
+	VARIABLE_TYPE localVariableDefinition localVariableDefinitions ";"												//returns ast::VariableDefinitionList
 	{
 		$3->getVarDefs().insert($3->getVarDefs().begin(), $2);
 		for(auto varDef : $3->getVarDefs())
@@ -174,18 +251,18 @@ localVariableDefinitionList:
 
 
 conditional:																										//returns ast::Conditional
-	conditionalIf                 %prec THEN
+	conditionalIf                 %prec "then"																		//"then" dummy token to solve dangling-else-/shift-reduce-problem, from http://stackoverflow.com/a/12734499
 	{
 		$$ = $1;
 	}
-  | conditionalIf ELSE statementsBlock
+  | conditionalIf "else" statementsBlock
 	{
 		$3->setParent($1);
 		$1->setAlternativeBody($3);
 		$$ = $1;
 	};
 conditionalIf:																										//returns ast::Conditional
-	IF ROUND_BRACKET_OPEN value ROUND_BRACKET_CLOSED statementsBlock
+	"if" "(" value ")" statementsBlock
 	{
 		auto newCond = std::make_shared<ast::Conditional>(nullptr);
 		$3->setParent(newCond);
@@ -194,18 +271,76 @@ conditionalIf:																										//returns ast::Conditional
 		newCond->addConsequenceBody($5);
 		$$ = newCond;
 	};
+forLoop:																											//returns ast::ForLoop
+	"for" "(" value ";" value ";" value ")" statementsBlock
+	{
+		auto newForLoop = std::make_shared<ast::ForLoop>(nullptr, $3, $5, $7, $9);
+		$3->setParent(newForLoop);
+		$5->setParent(newForLoop);
+		$7->setParent(newForLoop);
+		$9->setParent(newForLoop);
+		$$ = newForLoop;
+	};
+whileLoop:																											//returns ast::WhileLoop
+	"while" "(" value ")" statementsBlock
+	{
+		auto newWhileLoop = std::make_shared<ast::WhileLoop>(nullptr, $3, $5);
+		$3->setParent(newWhileLoop);
+		$5->setParent(newWhileLoop);
+		$$ = newWhileLoop;
+	};
+loopControlStatement:																								//returns ast::LoopControlStatement
+	LOOP_CONTROL_STATEMENT ";"
+	{
+		auto newLCS = std::make_shared<ast::LoopControlStatement>(nullptr, $1, nullptr);
+		driver.loopControlStatementLocations[newLCS] = @$;
+		$$ = newLCS;
+	};
 
 
 
 valueStandalone:																									//returns ast::Value
-	value SEMICOLON
+	value ";"
 	{
 		$$ = $1;
 	};
 value:																												//returns ast::Value
-	lValue			{ $$ = $1; }
-  | rValueValue		{ $$ = $1; }
-  | binaryOperation	{ $$ = $1; };
+	lValue					{ $$ = $1; }
+  | rValue					{ $$ = $1; }
+  | operation
+	{
+		if($1->isA<ast::UnaryOperation>())
+		{
+			auto unOp = std::static_pointer_cast<ast::UnaryOperation>($1);
+			auto valCat = unOp->getValue()->getValueCategory();
+			auto reqValCat = unOp->getRequiredValueCategory();
+			if(reqValCat != ast::Lexer::ValueCategory::Any  &&  reqValCat != valCat)
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(valCat) + " for value of " + ast::Lexer::getParsedUnaryOperationString(unOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(reqValCat));
+			unOp->getValue()->setParent(unOp);
+			$$ = unOp;
+		}
+		else if($1->isA<ast::BinaryOperation>())
+		{
+			auto binOp = std::static_pointer_cast<ast::BinaryOperation>($1);
+			auto lhsValCat = binOp->getLhs()->getValueCategory(), rhsValCat = binOp->getRhs()->getValueCategory();
+			auto lhsReqValCat = binOp->getRequiredLhsValueCategory(), rhsReqValCat = binOp->getRequiredRhsValueCategory();
+			if(lhsReqValCat != ast::Lexer::ValueCategory::Any  &&  lhsReqValCat != lhsValCat)
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(lhsValCat) + " for left hand side of " + ast::Lexer::getParsedBinaryOperationString(binOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(lhsReqValCat));
+			if(rhsReqValCat != ast::Lexer::ValueCategory::Any  &&  rhsReqValCat != rhsValCat)
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(rhsValCat) + " for right hand side of " + ast::Lexer::getParsedBinaryOperationString(binOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(rhsReqValCat));
+			binOp->getLhs()->setParent(binOp);
+			binOp->getRhs()->setParent(binOp);
+			$$ = binOp;
+		}
+		else
+		{
+			throw yy::ScratchCodeParser::syntax_error(@$, "fatal inconsistency error");
+		}
+	}
+  | "(" value ")"
+	{
+		$$ = $2;
+	};
 lValue:																												//returns ast::LValue
 	IDENTIFIER
 	{
@@ -214,35 +349,50 @@ lValue:																												//returns ast::LValue
 			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' was not declared in this scope");
 		$$ = std::make_shared<ast::LValue>(nullptr, *assocVarDef);
 	};
-rValueValue:																										//returns ast::RValueValue
-	RVALUE_VALUE
-	{
-		$$ = $1;
-	};
-binaryOperation:																									//returns ast::BinaryOperation
-	value BINOP_ASSIGNMENT value
-	{
-		$$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Assignment, $3);
-	};
-/*binaryOperation:																									//needs: [-1]=new parent, output=ast::BinaryOperation
-	{
-		auto newBinOp = std::make_shared<ast::BinaryOperation>(driver.nodeStack.back());
-		newBinOp->setOperation(ast::Lexer::ParsedBinaryOperation::Assignment);
-		driver.nodeStack.pop_back();
-		driver.nodeStack.push_back(newBinOp);																		//once to keep for myself
-		driver.nodeStack.push_back(newBinOp);																		//once as "new parent" parameter to the "value" rule
-	} value BINOP_ASSIGNMENT
-	{
-		auto newBinOp = std::static_pointer_cast<ast::BinaryOperation>(driver.nodeStack.end()[-2]);
-		newBinOp->setLhs(std::static_pointer_cast<ast::Value>(driver.nodeStack.back()));
-		driver.nodeStack.pop_back();																				//the return value of the "value" rule has been processed in the previous line, it can be removed now from the stack
-		driver.nodeStack.push_back(driver.nodeStack.back());														//again, as parameter to the "value" rule
-	} value
-	{
-		auto newBinOp = std::static_pointer_cast<ast::BinaryOperation>(driver.nodeStack.end()[-2]);
-		newBinOp->setRhs(std::static_pointer_cast<ast::Value>(driver.nodeStack.back()));
-		driver.nodeStack.pop_back();
-	};*/
+rValue:																												//returns ast::RValue
+	RVALUE_VALUE			{ $$ = $1; };
+
+
+
+
+operation:																											//returns ast::Operation (sadly one cannot create a rule like "binaryOperationSymbol" to group symbols, from http://stackoverflow.com/a/13567518)
+	value "=" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Assignment, $3); }
+  | value "+=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::AddAssignment, $3); }
+  | value "-=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::SubtractAssignment, $3); }
+  | value "*=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::MultiplyAssignment, $3); }
+  | value "/=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::DivideAssignment, $3); }
+  | value "%=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::ModuloAssignment, $3); }
+  | value "&=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseAndAssignment, $3); }
+  | value "|=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseOrAssignment, $3); }
+  | value "^=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseXorAssignment, $3); }
+  | value "<<=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitshiftLeftAssignment, $3); }
+  | value ">>=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitshiftRightAssignment, $3); }
+  | value "||" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::LogicalOr, $3); }
+  | value "&&" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::LogicalAnd, $3); }
+  | value "|" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseOr, $3); }
+  | value "^" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseXor, $3); }
+  | value "&" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitwiseAnd, $3); }
+  | value "==" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Equal, $3); }
+  | value "!=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::NotEqual, $3); }
+  | value "<" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::LessThan, $3); }
+  | value "<=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::LessThanOrEqual, $3); }
+  | value ">" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::GreaterThan, $3); }
+  | value ">=" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::GreaterThanOrEqual, $3); }
+  | value "<<" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitshiftLeft, $3); }
+  | value ">>" value	{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::BitshiftRight, $3); }
+  | value "+" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Add, $3); }
+  | value "-" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Subtract, $3); }
+  | value "*" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Multiply, $3); }
+  | value "/" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Divide, $3); }
+  | value "%" value		{ $$ = std::make_shared<ast::BinaryOperation>(nullptr, $1, ast::Lexer::ParsedBinaryOperation::Modulo, $3); }
+  | "++" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PrefixIncrement, $2); }
+  | "--" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PrefixDecrement, $2); }
+  | "+" value			%prec UNOP_UNARY_PLUS			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::UnaryPlus, $2); }
+  | "-" value			%prec UNOP_UNARY_MINUS			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::UnaryMinus, $2); }
+  | "!" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::LogicalNot, $2); }
+  | "~" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::BitwiseNot, $2); }
+  | value "++"			%prec UNOP_POSTFIX_INCREMENT	{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PostfixIncrement, $1); }
+  | value "--"			%prec UNOP_POSTFIX_DECREMENT	{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PostfixDecrement, $1); }
 %%
 
 

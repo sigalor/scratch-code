@@ -8,7 +8,7 @@
 #include <cerrno>
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
 #include <ast/LexerTokenDefinitions.hpp>
@@ -34,6 +34,7 @@ class ScratchCodeDriver
 		std::shared_ptr<ast::StatementList>						parsedStatementList;
 		std::vector<std::shared_ptr<ast::FunctionDefinition>>	functionDefinitions;
 		std::vector<std::shared_ptr<ast::VariableDefinition>>	variableDefinitions;
+		std::unordered_map<std::shared_ptr<ast::LoopControlStatement>, yy::ScratchCodeParser::location_type> loopControlStatementLocations;
 	
 		ScratchCodeDriver();
 		ScratchCodeDriver(bool newTraceLexing, bool newTraceParsing);

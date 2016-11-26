@@ -383,8 +383,7 @@ obj/Main.o: src/Main.cpp include/Main.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/ScratchCodeDriver.hpp gen/scratch-code.tab.hpp gen/stack.hh \
- gen/location.hh gen/position.hh
+ include/ScratchCodeDriver.hpp scratch-code.tab.hpp
 
 include/Main.hpp:
 
@@ -1282,10 +1281,4 @@ ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
 include/ScratchCodeDriver.hpp:
 
-gen/scratch-code.tab.hpp:
-
-gen/stack.hh:
-
-gen/location.hh:
-
-gen/position.hh:
+scratch-code.tab.hpp:
