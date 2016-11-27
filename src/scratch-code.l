@@ -19,7 +19,7 @@ static yy::location loc;
 
 
 %{
-	//code run each time a pattern in matched
+	//code run each time a pattern is matched
 	#define YY_USER_ACTION loc.columns(yyleng);
 %}
 
@@ -61,6 +61,10 @@ return               { return yy::ScratchCodeParser::make_RETURN(loc); }
 "--"                 { return yy::ScratchCodeParser::make_OP_DECREMENT(loc); }
 "!"                  { return yy::ScratchCodeParser::make_OP_LOGICAL_NOT(loc); }
 "~"                  { return yy::ScratchCodeParser::make_OP_BITWISE_NOT(loc); }
+"(bool)"             { return yy::ScratchCodeParser::make_OP_TYPECAST_BOOL(loc); }
+"(int)"              { return yy::ScratchCodeParser::make_OP_TYPECAST_INT(loc); }
+"(real)"             { return yy::ScratchCodeParser::make_OP_TYPECAST_REAL(loc); }
+"(string)"           { return yy::ScratchCodeParser::make_OP_TYPECAST_STRING(loc); }
 
 "*"                  { return yy::ScratchCodeParser::make_OP_MULTIPLY(loc); }
 "/"                  { return yy::ScratchCodeParser::make_OP_DIVIDE(loc); }

@@ -4,10 +4,11 @@
 %define parser_class_name {ScratchCodeParser}
 %define api.token.constructor
 %define api.value.type variant																						//use fancy variants to be compatible with C++ (from https://www.gnu.org/software/bison/manual/html_node/C_002b_002b-Variants.html)
-%define parse.assert																								//TODO: check this: https://www.gnu.org/software/bison/manual/html_node/Tracing.html
+%define parse.assert
 %code requires
 {
 	#include <string>
+	#include <algorithm>
 	#include <memory>
 	#include <typeinfo>
 	#include <ast/AST.hpp>
@@ -59,6 +60,10 @@
 	OP_DECREMENT "--"
 	OP_LOGICAL_NOT "!"
 	OP_BITWISE_NOT "~"
+	OP_TYPECAST_BOOL "(bool)"
+	OP_TYPECAST_INT "(int)"
+	OP_TYPECAST_REAL "(real)"
+	OP_TYPECAST_STRING "(string)"
 	
 	OP_MULTIPLY "*"
 	OP_DIVIDE "/"
@@ -101,11 +106,15 @@
 %type <std::shared_ptr<ast::ForLoop>>					forLoop;
 %type <std::shared_ptr<ast::WhileLoop>>					whileLoop;
 %type <std::shared_ptr<ast::LoopControlStatement>>		loopControlStatement;
+%type <std::shared_ptr<ast::FunctionDefinition>>		functionDefinition;
+%type <std::shared_ptr<ast::VariableDefinitionList>>	functionDefinitionParameters functionDefinitionParametersMore;
+%type <std::shared_ptr<ast::VariableDefinition>>		functionDefinitionParameter;
+%type <std::shared_ptr<ast::ReturnStatement>>			returnStatement;
 %type <std::shared_ptr<ast::Value>>						value valueStandalone;
 %type <std::shared_ptr<ast::LValue>>					lValue;
 %type <std::shared_ptr<ast::RValue>>					rValue;
 %type <std::shared_ptr<ast::Operation>>					operation;
-%printer { yyoutput << ast::Lexer::getParsedVariableTypeString($$); } <ast::Lexer::ParsedVariableType>
+%printer { yyoutput << ast::Lexer::getString($$); } <ast::Lexer::ParsedVariableType>
 %printer { yyoutput << typeid($$).name() << " at " << &$$; } <*>
 
 %right "then" "else"																								//this way, shift will be preferred over reduce when parsing if-else-statements, from http://stackoverflow.com/a/12734499
@@ -121,7 +130,7 @@
 %left "<<" ">>"
 %left "+" "-"																										//for dealing with the precedences of operators that look the same but have different meanings: http://dinosaur.compilertools.net/bison/bison_5.html#SEC27
 %left "*" "/" "%"
-%right "++" "--" UNOP_UNARY_PLUS UNOP_UNARY_MINUS "!" "~"
+%right "++" "--" UNOP_UNARY_PLUS UNOP_UNARY_MINUS "!" "~" "(bool)" "(int)" "(real)" "(string)"
 %left UNOP_POSTFIX_INCREMENT UNOP_POSTFIX_DECREMENT
 
 
@@ -137,13 +146,64 @@ unit:																												//this is the ONLY rule that writes to driver.p
 		{
 			//loop control statements are always invalid here, because there can be no loop statement block on the very first level
 			if(stmt->isA<ast::LoopControlStatement>())
-				throw yy::ScratchCodeParser::syntax_error(driver.loopControlStatementLocations.at(std::static_pointer_cast<ast::LoopControlStatement>(stmt)), "loop control statement has no loop to target");
+				throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(std::static_pointer_cast<ast::LoopControlStatement>(stmt)), "loop control statement has no loop to target");
 		
 			//parents of statements on first level need to be assigned manually here (as "unit" expects "statements" and not "statementsBlock")
 			stmt->setParent(driver.parsedStatementList);
 		}
 		
-		
+		//recFuncs needs to be an lvalue for ast::doRecursively
+		ast::RecursiveFunctionsType recFuncs =
+		{
+			{
+				//make sure that no function definition has another function definition as parent
+				//also make sure that all function definitions are at the uppermost level (i.e. number of steps to at has to be 1)
+				ast::FunctionDefinition::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					if(obj->hasParentWithId<ast::FunctionDefinition>())
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(obj), "nested function definitions are not allowed");
+					
+					std::size_t steps;
+					if(obj->hasParent<ast::StatementList>(driver.parsedStatementList, &steps)  &&  steps > 1)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(obj), "all function definitions need to be at the uppermost level");
+				}
+			},
+			{
+				//set target loops for loop control statements
+				ast::LoopControlStatement::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto lcs = std::static_pointer_cast<ast::LoopControlStatement>(obj);
+					auto parentLoop = lcs->hasParentWithIdBase<ast::ControllableLoop>();
+					if(parentLoop == nullptr)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(lcs), "loop control statement has no loop to target");
+					else
+					{
+						lcs->setTargetLoop(parentLoop);
+						driver.nodeLocations.erase(lcs);
+					}
+				}
+			},
+			{
+				//set target functions for return statements
+				ast::ReturnStatement::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto retStmt = std::static_pointer_cast<ast::ReturnStatement>(obj);
+					auto parentFuncDef = obj->hasParentWithId<ast::FunctionDefinition>();
+					if(parentFuncDef == nullptr)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(retStmt), "return statement has no function to target");
+					else
+					{
+						//TODO: check correct type
+						retStmt->setTargetFunc(parentFuncDef);
+						driver.nodeLocations.erase(retStmt);
+					}
+				}
+			}
+		};
+		ast::doRecursively(driver.parsedStatementList, recFuncs);
 	};
 
 
@@ -154,6 +214,8 @@ statement:																											//returns ast::Statement
   | forLoop					{ $$ = $1; }
   | whileLoop				{ $$ = $1; }
   | loopControlStatement	{ $$ = $1; }
+  | functionDefinition		{ $$ = $1; }
+  | returnStatement			{ $$ = $1; };
 statements:																											//returns ast::StatementList
 	%empty
 	{
@@ -192,26 +254,12 @@ statementsBlock:																									//returns ast::StatementList
 		while(i != driver.variableDefinitions.end())
 		{
 			if((*i)->hasParent<ast::StatementList>($1))
+			{
 				i = driver.variableDefinitions.erase(i);
+				driver.nodeLocations.erase(*i);
+			}
 			else
 				++i;
-		}
-		
-		//set target loops for loop control statements
-		for(auto stmt : $1->getStatements())
-		{
-			if(stmt->isA<ast::LoopControlStatement>())
-			{
-				auto lcs = std::static_pointer_cast<ast::LoopControlStatement>(stmt);
-				auto parentLoop = lcs->hasParentWithIdBase<ast::ControllableLoop>();
-				if(parentLoop == nullptr)
-					throw yy::ScratchCodeParser::syntax_error(driver.loopControlStatementLocations.at(lcs), "loop control statement has no loop to target");
-				else
-				{
-					lcs->setTargetLoop(parentLoop);
-					driver.loopControlStatementLocations.erase(lcs);
-				}
-			}
 		}
 		
 		$$ = $1;
@@ -222,9 +270,10 @@ statementsBlock:																									//returns ast::StatementList
 localVariableDefinition:																							//returns ast::VariableDefinition
 	IDENTIFIER
 	{
-		if(std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); }) != driver.variableDefinitions.end())
-			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' is already declared");
-		$$ = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
+		driver.throwIfDefined(@$, $1);
+		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
+		driver.nodeLocations[newVarDef] = @$;
+		$$ = newVarDef;
 	};
 localVariableDefinitions:																							//returns ast::VariableDefinitionList
 	%empty
@@ -293,9 +342,77 @@ loopControlStatement:																								//returns ast::LoopControlStatement
 	LOOP_CONTROL_STATEMENT ";"
 	{
 		auto newLCS = std::make_shared<ast::LoopControlStatement>(nullptr, $1, nullptr);
-		driver.loopControlStatementLocations[newLCS] = @$;
+		driver.nodeLocations[newLCS] = @$;
 		$$ = newLCS;
 	};
+
+
+
+functionDefinition:																									//returns ast::FunctionDefinition
+	VARIABLE_TYPE IDENTIFIER "(" functionDefinitionParameters ")" statementsBlock
+	{
+		driver.throwIfDefined(@$, $2);
+		auto newFuncDef = std::make_shared<ast::FunctionDefinition>(nullptr, $1, $2, $4, $6);
+		$4->setParent(newFuncDef);
+		$6->setParent(newFuncDef);
+		driver.functionDefinitions.push_back(newFuncDef);
+		driver.nodeLocations[newFuncDef] = @$;
+		
+		//clean up variable definitions of function defintion parameters as the function definition has ended at this point
+		for(auto vd : newFuncDef->getArgs()->getVarDefs())														//erase-remove stuff from http://stackoverflow.com/a/3385251
+		{
+			driver.variableDefinitions.erase(std::remove(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), vd), driver.variableDefinitions.end());
+			driver.nodeLocations.erase(vd);
+		}
+		
+		$$ = newFuncDef;
+	};
+functionDefinitionParameters:																						//returns ast::VariableDefinitionList
+	%empty
+	{
+		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
+	}
+  | functionDefinitionParameter functionDefinitionParametersMore
+	{
+		$2->getVarDefs().insert($2->getVarDefs().begin(), $1);
+		$$ = $2;
+	};
+functionDefinitionParametersMore:																					//returns ast::VariableDefinitionList
+	%empty
+	{
+		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
+	}
+  | functionDefinitionParametersMore "," functionDefinitionParameter
+	{
+		$1->addVarDef($3);
+		$3->setParent($1);
+		$$ = $1;
+	};
+functionDefinitionParameter:																						//returns ast::VariableDefinition
+	VARIABLE_TYPE IDENTIFIER
+	{
+		driver.throwIfDefined(@$, $2);
+		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, $1, $2);
+		driver.variableDefinitions.push_back(newVarDef);
+		driver.nodeLocations[newVarDef] = @$;
+		$$ = newVarDef;
+	};
+returnStatement:																									//returns ast::returnStatement
+	"return" value ";"
+	{
+		auto newRetStmt = std::make_shared<ast::ReturnStatement>(nullptr, $2, nullptr);
+		$2->setParent(newRetStmt);
+		driver.nodeLocations[newRetStmt] = @$;
+		$$ = newRetStmt;
+	}
+
+
+
+/*functionCall:
+	IDENTIFIER "(" functionCallParameters ")" ";"
+	{
+		//TODO
+	};*/
 
 
 
@@ -312,24 +429,42 @@ value:																												//returns ast::Value
 		if($1->isA<ast::UnaryOperation>())
 		{
 			auto unOp = std::static_pointer_cast<ast::UnaryOperation>($1);
+			unOp->getValue()->setParent(unOp);
+			
+			//check if allowed type for used operation is used
+			if(!ast::Lexer::isTypeAllowed(unOp->getOperation(), unOp->getValue()->getEffectiveType()))
+				throw yy::ScratchCodeParser::syntax_error(@$, "cannot apply '" + ast::Lexer::getString(unOp->getOperation()) + "' to instance of '" + ast::Lexer::getString(unOp->getValue()->getEffectiveType()) + "'");
+			
+			//check correct value category
 			auto valCat = unOp->getValue()->getValueCategory();
 			auto reqValCat = unOp->getRequiredValueCategory();
 			if(reqValCat != ast::Lexer::ValueCategory::Any  &&  reqValCat != valCat)
-				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(valCat) + " for value of " + ast::Lexer::getParsedUnaryOperationString(unOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(reqValCat));
-			unOp->getValue()->setParent(unOp);
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getString(valCat) + " for value of '" + ast::Lexer::getString(unOp->getOperation()) + "', expecting " + ast::Lexer::getString(reqValCat) + "");
+			
 			$$ = unOp;
 		}
 		else if($1->isA<ast::BinaryOperation>())
 		{
 			auto binOp = std::static_pointer_cast<ast::BinaryOperation>($1);
+			binOp->getLhs()->setParent(binOp);
+			binOp->getRhs()->setParent(binOp);
+			
+			//check if types on both sides are the same
+			if(binOp->getLhs()->getEffectiveType() != binOp->getRhs()->getEffectiveType())
+				throw yy::ScratchCodeParser::syntax_error(@$, "types for both sides of '" + ast::Lexer::getString(binOp->getOperation()) + "' need to be the same, are currently '" + ast::Lexer::getString(binOp->getLhs()->getEffectiveType()) + "' and '" + ast::Lexer::getString(binOp->getRhs()->getEffectiveType()) + "'");
+			
+			//check if allowed type for used operation is used (at this point, it's guaranteed that the types of lhs and rhs are the same)
+			if(!ast::Lexer::isTypeAllowed(binOp->getOperation(), binOp->getLhs()->getEffectiveType()))
+				throw yy::ScratchCodeParser::syntax_error(@$, "cannot apply '" + ast::Lexer::getString(binOp->getOperation()) + "' to two instances of '" + ast::Lexer::getString(binOp->getLhs()->getEffectiveType()) + "'");
+			
+			//check correct value categories for both sides
 			auto lhsValCat = binOp->getLhs()->getValueCategory(), rhsValCat = binOp->getRhs()->getValueCategory();
 			auto lhsReqValCat = binOp->getRequiredLhsValueCategory(), rhsReqValCat = binOp->getRequiredRhsValueCategory();
 			if(lhsReqValCat != ast::Lexer::ValueCategory::Any  &&  lhsReqValCat != lhsValCat)
-				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(lhsValCat) + " for left hand side of " + ast::Lexer::getParsedBinaryOperationString(binOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(lhsReqValCat));
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getString(lhsValCat) + " for lhs of '" + ast::Lexer::getString(binOp->getOperation()) + "', expecting '" + ast::Lexer::getString(lhsReqValCat) + "'");
 			if(rhsReqValCat != ast::Lexer::ValueCategory::Any  &&  rhsReqValCat != rhsValCat)
-				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getValueCategoryString(rhsValCat) + " for right hand side of " + ast::Lexer::getParsedBinaryOperationString(binOp->getOperation()) + ", expected " + ast::Lexer::getValueCategoryString(rhsReqValCat));
-			binOp->getLhs()->setParent(binOp);
-			binOp->getRhs()->setParent(binOp);
+				throw yy::ScratchCodeParser::syntax_error(@$, "unexpected " + ast::Lexer::getString(rhsValCat) + " for rhs of '" + ast::Lexer::getString(binOp->getOperation()) + "', expecting '" + ast::Lexer::getString(rhsReqValCat) + "'");
+			
 			$$ = binOp;
 		}
 		else
@@ -346,7 +481,7 @@ lValue:																												//returns ast::LValue
 	{
 		std::vector<std::shared_ptr<ast::VariableDefinition>>::iterator assocVarDef = std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); });
 		if(assocVarDef == driver.variableDefinitions.end())
-			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' was not declared in this scope");
+			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' was not defined as a variable in this scope");
 		$$ = std::make_shared<ast::LValue>(nullptr, *assocVarDef);
 	};
 rValue:																												//returns ast::RValue
@@ -391,6 +526,10 @@ operation:																											//returns ast::Operation (sadly one cannot 
   | "-" value			%prec UNOP_UNARY_MINUS			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::UnaryMinus, $2); }
   | "!" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::LogicalNot, $2); }
   | "~" value			{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::BitwiseNot, $2); }
+  | "(bool)" value		{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::TypecastBool, $2); }
+  | "(int)" value		{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::TypecastInt, $2); }
+  | "(real)" value		{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::TypecastReal, $2); }
+  | "(string)" value	{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::TypecastString, $2); }
   | value "++"			%prec UNOP_POSTFIX_INCREMENT	{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PostfixIncrement, $1); }
   | value "--"			%prec UNOP_POSTFIX_DECREMENT	{ $$ = std::make_shared<ast::UnaryOperation>(nullptr, ast::Lexer::ParsedUnaryOperation::PostfixDecrement, $1); }
 %%
@@ -399,7 +538,7 @@ operation:																											//returns ast::Operation (sadly one cannot 
 
 #include "Main.hpp"
 
-void yy::ScratchCodeParser::error(const location_type& loc, const std::string& message)
+void yy::ScratchCodeParser::error(const yy::location& loc, const std::string& message)
 {
 	driver.handleError(loc, message);
 }

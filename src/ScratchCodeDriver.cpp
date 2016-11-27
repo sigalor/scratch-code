@@ -38,9 +38,14 @@ int ScratchCodeDriver::parse(const std::string& newFilename)
 	return result;
 }
 
+std::string ScratchCodeDriver::locationToString(const yy::location& loc)
+{
+	return filename + ":" + std::to_string(loc.begin.line) + ":" + std::to_string(loc.begin.column);
+}
+
 void ScratchCodeDriver::handleError(const yy::location& loc, const std::string& message)
 {
-	std::cerr << filename << ":" << loc.begin.line << ":" << loc.begin.column << ": " << message << std::endl;
+	std::cerr << locationToString(loc) << ": " << message << std::endl;
 }
 
 void ScratchCodeDriver::handleError(const std::string& message)
@@ -77,3 +82,37 @@ void ScratchCodeDriver::setTraceParsing(bool newTraceParsing)
 {
 	traceParsing = newTraceParsing;
 }
+
+std::shared_ptr<ast::FunctionDefinition> ScratchCodeDriver::getDefinedFunction(const std::string& name)
+{
+	auto it = std::find_if(functionDefinitions.begin(), functionDefinitions.end(), [&](auto funcDef) { return (funcDef->getName() == name); });
+	return (it==functionDefinitions.end() ? nullptr : *it);
+}
+
+std::shared_ptr<ast::VariableDefinition> ScratchCodeDriver::getDefinedVariable(const std::string& name)
+{
+	auto it = std::find_if(variableDefinitions.begin(), variableDefinitions.end(), [&](auto varDef) { return (varDef->getName() == name); });
+	return (it==variableDefinitions.end() ? nullptr : *it);
+}
+
+bool ScratchCodeDriver::isFunctionDefined(const std::string& name)
+{
+	return (getDefinedFunction(name) != nullptr);
+}
+
+bool ScratchCodeDriver::isVariableDefined(const std::string& name)
+{
+	return (getDefinedVariable(name) != nullptr);
+}
+
+void ScratchCodeDriver::throwIfDefined(const yy::location& loc, const std::string& name)
+{
+	auto defFunc = getDefinedFunction(name);
+	if(defFunc != nullptr)
+		throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope here: function at " + locationToString(nodeLocations[defFunc]));
+	
+	auto defVar = getDefinedVariable(name);
+	if(defVar != nullptr)
+		throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope here: variable at " + locationToString(nodeLocations[defVar]));
+}
+

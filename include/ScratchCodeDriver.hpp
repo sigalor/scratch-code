@@ -34,7 +34,7 @@ class ScratchCodeDriver
 		std::shared_ptr<ast::StatementList>						parsedStatementList;
 		std::vector<std::shared_ptr<ast::FunctionDefinition>>	functionDefinitions;
 		std::vector<std::shared_ptr<ast::VariableDefinition>>	variableDefinitions;
-		std::unordered_map<std::shared_ptr<ast::LoopControlStatement>, yy::ScratchCodeParser::location_type> loopControlStatementLocations;
+		std::unordered_map<std::shared_ptr<ast::Node>, yy::location> nodeLocations;									//needed for nodes where the location needs to be stored for later, currently used for FunctionDefinition, LoopControlStatement and VariableDefinition
 	
 		ScratchCodeDriver();
 		ScratchCodeDriver(bool newTraceLexing, bool newTraceParsing);
@@ -45,6 +45,7 @@ class ScratchCodeDriver
 		void													beginLexing();
 		void													endLexing();
 		int														parse(const std::string& newFilename);
+		std::string												locationToString(const yy::location& loc);
 		void													handleError(const yy::location& loc, const std::string& message);
 		void													handleError(const std::string& message);
 		const std::string&										getFilename();
@@ -53,4 +54,9 @@ class ScratchCodeDriver
 		std::shared_ptr<ast::StatementList>						getParsedStatementList();
 		void													setTraceLexing(bool newTraceLexing);
 		void													setTraceParsing(bool newTraceParsing);
+		std::shared_ptr<ast::FunctionDefinition>				getDefinedFunction(const std::string& name);
+		std::shared_ptr<ast::VariableDefinition>				getDefinedVariable(const std::string& name);
+		bool													isFunctionDefined(const std::string& name);
+		bool													isVariableDefined(const std::string& name);
+		void													throwIfDefined(const yy::ScratchCodeParser::location_type& loc, const std::string& name);
 };

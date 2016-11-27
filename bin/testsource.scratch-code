@@ -5,5 +5,25 @@ for(a=3; a<5; ++a)
 	if(~b++ == a)
 	{
 		a %= 3;
+		break;
 	}
+	while(1)
+		continue;
+}
+
+int c(int d, real e)
+{
+	1234;
+}
+
+string f()
+{
+	real d;
+	d += (real)a;
+	return d;
+}
+
+real abc(real def)
+{
+
 }
