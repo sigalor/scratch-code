@@ -24,13 +24,13 @@ int main(int argc, char** argv)
 			outputFile = argv[i];
 		else if((result = driver.parse(argv[i])) != 0)
 		{
-			std::cout << "Compilation terminated due to parsing error " << driver.getResult() << std::endl;
+			std::cout << "compilation terminated due to parsing error " << driver.getResult() << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
 	}
 	
-	std::cout << "Result is " << result << std::endl;
-	std::cout << "Output file will be " << outputFile << std::endl;
+	std::cout << "result is " << result << std::endl;
+	std::cout << "output file will be " << outputFile << std::endl;
 	if(result == 0)
 		std::cout << "\n" << ast::stringify(parsedStatementList) << "\n";													//output the parsed abstract syntax tree
 	

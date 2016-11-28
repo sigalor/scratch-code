@@ -1,29 +1,37 @@
 int a, b;
-for(a=3; a<5; ++a)
+
+real abc(void def)
 {
-	b = a/4;
-	if(~b++ == a)
+	return (real)f();
+}
+
+void main()
+{
+	for(a=3; a<5; ++a)
 	{
-		a %= 3;
-		break;
+		b = a/4;
+		if(~b++ == a)
+		{
+			a %= 3;
+			break;
+		}
+		else
+		{
+			continue;
+		}
+		while(1)
+			continue;
 	}
-	while(1)
-		continue;
 }
 
 int c(int d, real e)
 {
-	1234;
+	return d;
 }
 
 string f()
 {
 	real d;
 	d += (real)a;
-	return d;
-}
-
-real abc(real def)
-{
-
+	return (string)d;
 }

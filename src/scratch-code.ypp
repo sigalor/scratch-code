@@ -94,14 +94,14 @@
 	OP_BITSHIFT_LEFT_ASSIGNMENT "<<="
 	OP_BITSHIFT_RIGHT_ASSIGNMENT ">>=";
 	
-%token <std::string>									IDENTIFIER "identifier"										//define terminal symbol token types
+%token <std::string>									IDENTIFIER "identifier"										//define complex terminal symbol token types
 %token <ast::Lexer::ParsedVariableType>					VARIABLE_TYPE "variable type"
 %token <ast::Lexer::ParsedLoopControlStatement>			LOOP_CONTROL_STATEMENT "loop control statement"
 %token <std::shared_ptr<ast::RValueValue>>				RVALUE_VALUE "rvalue value"
 %type <std::shared_ptr<ast::Statement>>					statement;													//define non-terminal symbol token types
 %type <std::shared_ptr<ast::StatementList>>				statements statementsBlockInternal statementsBlock;
+%type <std::shared_ptr<ast::VariableDefinitionList>>	localVariableDefinitionList localVariableDefinitions;
 %type <std::shared_ptr<ast::VariableDefinition>>		localVariableDefinition;
-%type <std::shared_ptr<ast::VariableDefinitionList>>	localVariableDefinitions localVariableDefinitionList;
 %type <std::shared_ptr<ast::Conditional>>				conditional conditionalIf;
 %type <std::shared_ptr<ast::ForLoop>>					forLoop;
 %type <std::shared_ptr<ast::WhileLoop>>					whileLoop;
@@ -113,6 +113,8 @@
 %type <std::shared_ptr<ast::Value>>						value valueStandalone;
 %type <std::shared_ptr<ast::LValue>>					lValue;
 %type <std::shared_ptr<ast::RValue>>					rValue;
+%type <std::shared_ptr<ast::FunctionCall>>				functionCall;
+%type <std::shared_ptr<ast::ValueList>>					functionCallParameters functionCallParametersMore;
 %type <std::shared_ptr<ast::Operation>>					operation;
 %printer { yyoutput << ast::Lexer::getString($$); } <ast::Lexer::ParsedVariableType>
 %printer { yyoutput << typeid($$).name() << " at " << &$$; } <*>
@@ -144,9 +146,9 @@ unit:																												//this is the ONLY rule that writes to driver.p
 		
 		for(auto stmt : driver.parsedStatementList->getStatements())
 		{
-			//loop control statements are always invalid here, because there can be no loop statement block on the very first level
-			if(stmt->isA<ast::LoopControlStatement>())
-				throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(std::static_pointer_cast<ast::LoopControlStatement>(stmt)), "loop control statement has no loop to target");
+			//there are only function definitions or variable definitions allowed at the very first level
+			if(!stmt->isA<ast::FunctionDefinition>()  &&  !stmt->isA<ast::VariableDefinition>())
+				throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations[stmt], "there may only be function or variable definitions at the uppermost level");
 		
 			//parents of statements on first level need to be assigned manually here (as "unit" expects "statements" and not "statementsBlock")
 			stmt->setParent(driver.parsedStatementList);
@@ -155,6 +157,33 @@ unit:																												//this is the ONLY rule that writes to driver.p
 		//recFuncs needs to be an lvalue for ast::doRecursively
 		ast::RecursiveFunctionsType recFuncs =
 		{
+			{
+				//add links to associated functions for all function calls
+				ast::FunctionCall::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto funcCall = std::static_pointer_cast<ast::FunctionCall>(obj);
+					
+					//search for associated function in all defined functions ("funcCall->getAssocFunc()" is a dummy function here that just contains the function's name)
+					std::vector<std::shared_ptr<ast::FunctionDefinition>>::iterator assocFunc = std::find_if(driver.functionDefinitions.begin(), driver.functionDefinitions.end(), [&](auto funcDef) { return (funcDef->getName() == funcCall->getAssocFunc()->getName()); });
+					if(assocFunc == driver.functionDefinitions.end())
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations[funcCall], "'" + funcCall->getAssocFunc()->getName() + "' was not defined as a function in this scope");
+					funcCall->setAssocFunc(*assocFunc);
+		
+					//check correct types for function call
+					auto& assocFuncVarDefs = (*assocFunc)->getArgs()->getVarDefs();
+					auto& funcCallArgsValues = funcCall->getArgs()->getValues();
+					if(assocFuncVarDefs.size() != funcCallArgsValues.size())
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations[funcCall], "wrong number of arguments for function '" + (*assocFunc)->getName() + "' provided, expected " + std::to_string(assocFuncVarDefs.size()) + ", not " + std::to_string(funcCallArgsValues.size()));
+					for(auto it = assocFuncVarDefs.begin(); it != assocFuncVarDefs.end(); ++it)
+					{
+						std::size_t i = std::distance(assocFuncVarDefs.begin(), it);
+						ast::Lexer::ParsedVariableType valType = funcCallArgsValues[i]->getEffectiveType();
+						if((*it)->getType() != valType)
+							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations[funcCall], "argument " + std::to_string(i+1) + " for function '" + (*assocFunc)->getName() + "' has wrong type, expected '" + ast::Lexer::getString((*it)->getType()) + "', not '" + ast::Lexer::getString(valType) + "'");
+					}
+				}
+			},
 			{
 				//make sure that no function definition has another function definition as parent
 				//also make sure that all function definitions are at the uppermost level (i.e. number of steps to at has to be 1)
@@ -196,7 +225,9 @@ unit:																												//this is the ONLY rule that writes to driver.p
 						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(retStmt), "return statement has no function to target");
 					else
 					{
-						//TODO: check correct type
+						ast::Lexer::ParsedVariableType retStmtValueType = (retStmt->getValue()==nullptr ? ast::Lexer::ParsedVariableType::Void : retStmt->getValue()->getEffectiveType());
+						if(parentFuncDef->getReturnType() != retStmtValueType)
+							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(retStmt), "mismatching types for 'return', function '" + parentFuncDef->getName() + "' expects '" + ast::Lexer::getString(parentFuncDef->getReturnType()) + "', not '" + ast::Lexer::getString(retStmtValueType) + "'");
 						retStmt->setTargetFunc(parentFuncDef);
 						driver.nodeLocations.erase(retStmt);
 					}
@@ -254,10 +285,7 @@ statementsBlock:																									//returns ast::StatementList
 		while(i != driver.variableDefinitions.end())
 		{
 			if((*i)->hasParent<ast::StatementList>($1))
-			{
 				i = driver.variableDefinitions.erase(i);
-				driver.nodeLocations.erase(*i);
-			}
 			else
 				++i;
 		}
@@ -267,24 +295,6 @@ statementsBlock:																									//returns ast::StatementList
 
 
 
-localVariableDefinition:																							//returns ast::VariableDefinition
-	IDENTIFIER
-	{
-		driver.throwIfDefined(@$, $1);
-		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
-		driver.nodeLocations[newVarDef] = @$;
-		$$ = newVarDef;
-	};
-localVariableDefinitions:																							//returns ast::VariableDefinitionList
-	%empty
-	{
-		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
-	}
-  | localVariableDefinitions "," localVariableDefinition
-	{
-		$1->addVarDef($3);
-		$$ = $1;
-	};
 localVariableDefinitionList:
 	VARIABLE_TYPE localVariableDefinition localVariableDefinitions ";"												//returns ast::VariableDefinitionList
 	{
@@ -296,18 +306,38 @@ localVariableDefinitionList:
 		}
 		$$ = $3;
 	};
+localVariableDefinitions:																							//returns ast::VariableDefinitionList
+	%empty
+	{
+		$$ = std::make_shared<ast::VariableDefinitionList>(nullptr);
+	}
+  | localVariableDefinitions "," localVariableDefinition
+	{
+		$1->addVarDef($3);
+		$$ = $1;
+	};
+localVariableDefinition:																							//returns ast::VariableDefinition
+	IDENTIFIER
+	{
+		driver.throwIfDefined(@$, $1);
+		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
+		driver.nodeLocations[newVarDef] = @$;
+		$$ = newVarDef;
+	};
 
 
 
 conditional:																										//returns ast::Conditional
 	conditionalIf                 %prec "then"																		//"then" dummy token to solve dangling-else-/shift-reduce-problem, from http://stackoverflow.com/a/12734499
 	{
+		driver.nodeLocations[$1] = @$;
 		$$ = $1;
 	}
   | conditionalIf "else" statementsBlock
 	{
 		$3->setParent($1);
 		$1->setAlternativeBody($3);
+		driver.nodeLocations[$1] = @$;
 		$$ = $1;
 	};
 conditionalIf:																										//returns ast::Conditional
@@ -328,6 +358,7 @@ forLoop:																											//returns ast::ForLoop
 		$5->setParent(newForLoop);
 		$7->setParent(newForLoop);
 		$9->setParent(newForLoop);
+		driver.nodeLocations[newForLoop] = @$;
 		$$ = newForLoop;
 	};
 whileLoop:																											//returns ast::WhileLoop
@@ -336,6 +367,7 @@ whileLoop:																											//returns ast::WhileLoop
 		auto newWhileLoop = std::make_shared<ast::WhileLoop>(nullptr, $3, $5);
 		$3->setParent(newWhileLoop);
 		$5->setParent(newWhileLoop);
+		driver.nodeLocations[newWhileLoop] = @$;
 		$$ = newWhileLoop;
 	};
 loopControlStatement:																								//returns ast::LoopControlStatement
@@ -359,7 +391,7 @@ functionDefinition:																									//returns ast::FunctionDefinition
 		driver.nodeLocations[newFuncDef] = @$;
 		
 		//clean up variable definitions of function defintion parameters as the function definition has ended at this point
-		for(auto vd : newFuncDef->getArgs()->getVarDefs())														//erase-remove stuff from http://stackoverflow.com/a/3385251
+		for(auto vd : newFuncDef->getArgs()->getVarDefs())															//erase-remove stuff from http://stackoverflow.com/a/3385251
 		{
 			driver.variableDefinitions.erase(std::remove(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), vd), driver.variableDefinitions.end());
 			driver.nodeLocations.erase(vd);
@@ -397,33 +429,37 @@ functionDefinitionParameter:																						//returns ast::VariableDefinit
 		driver.nodeLocations[newVarDef] = @$;
 		$$ = newVarDef;
 	};
-returnStatement:																									//returns ast::returnStatement
-	"return" value ";"
+returnStatement:																									//returns ast::ReturnStatement
+	"return" ";"
+	{
+		auto newRetStmt = std::make_shared<ast::ReturnStatement>(nullptr);
+		driver.nodeLocations[newRetStmt] = @$;
+		$$ = newRetStmt;
+	}
+  | "return" value ";"
 	{
 		auto newRetStmt = std::make_shared<ast::ReturnStatement>(nullptr, $2, nullptr);
 		$2->setParent(newRetStmt);
 		driver.nodeLocations[newRetStmt] = @$;
 		$$ = newRetStmt;
-	}
-
-
-
-/*functionCall:
-	IDENTIFIER "(" functionCallParameters ")" ";"
-	{
-		//TODO
-	};*/
+	};
 
 
 
 valueStandalone:																									//returns ast::Value
 	value ";"
 	{
+		driver.nodeLocations[$1] = @$;
 		$$ = $1;
 	};
 value:																												//returns ast::Value
 	lValue					{ $$ = $1; }
   | rValue					{ $$ = $1; }
+  | functionCall			{ $$ = $1; }
+  | "(" value ")"
+	{
+		$$ = $2;
+	};
   | operation
 	{
 		if($1->isA<ast::UnaryOperation>())
@@ -471,15 +507,11 @@ value:																												//returns ast::Value
 		{
 			throw yy::ScratchCodeParser::syntax_error(@$, "fatal inconsistency error");
 		}
-	}
-  | "(" value ")"
-	{
-		$$ = $2;
 	};
 lValue:																												//returns ast::LValue
 	IDENTIFIER
 	{
-		std::vector<std::shared_ptr<ast::VariableDefinition>>::iterator assocVarDef = std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto& varDef) { return (varDef->getName() == $1); });
+		std::vector<std::shared_ptr<ast::VariableDefinition>>::iterator assocVarDef = std::find_if(driver.variableDefinitions.begin(), driver.variableDefinitions.end(), [&](auto varDef) { return (varDef->getName() == $1); });
 		if(assocVarDef == driver.variableDefinitions.end())
 			throw yy::ScratchCodeParser::syntax_error(@$, "'" + $1 + "' was not defined as a variable in this scope");
 		$$ = std::make_shared<ast::LValue>(nullptr, *assocVarDef);
@@ -487,6 +519,39 @@ lValue:																												//returns ast::LValue
 rValue:																												//returns ast::RValue
 	RVALUE_VALUE			{ $$ = $1; };
 
+
+
+functionCall:																										//returns ast::FunctionCall
+	IDENTIFIER "(" functionCallParameters ")"
+	{
+		//associated function is searched for at the very end to not make function predeclarations necessary
+		//also use a dummy function for later that just keeps the function's name
+		auto newFuncCall = std::make_shared<ast::FunctionCall>(nullptr, std::make_shared<ast::FunctionDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1, nullptr, nullptr), $3);
+		$3->setParent(newFuncCall);
+		driver.nodeLocations[newFuncCall] = @$;
+		$$ = newFuncCall;
+	};
+functionCallParameters:																								//returns ast::ValueList
+	%empty
+	{
+		$$ = std::make_shared<ast::ValueList>(nullptr);
+	}
+  | value functionCallParametersMore
+	{
+		$2->getValues().insert($2->getValues().begin(), $1);
+		$$ = $2;
+	};
+functionCallParametersMore:																							//returns ast::ValueList
+	%empty
+	{
+		$$ = std::make_shared<ast::ValueList>(nullptr);
+	}
+  | functionCallParametersMore "," value
+	{
+		$1->addValue($3);
+		$3->setParent($1);
+		$$ = $1;
+	};
 
 
 
