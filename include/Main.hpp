@@ -12,6 +12,6 @@
 
 
 
-extern std::shared_ptr<ast::StatementList>						parsedStatementList;
+extern std::shared_ptr<ast::StatementList>						syntaxTree;
 
 int																main(int argc, char** argv);

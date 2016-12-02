@@ -2,7 +2,7 @@
 
 
 
-std::shared_ptr<ast::StatementList> parsedStatementList = std::make_shared<ast::StatementList>(nullptr);
+std::shared_ptr<ast::StatementList> syntaxTree = std::make_shared<ast::StatementList>(nullptr);
 
 
 
@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
 	int					result = 0;
 	std::string			outputFile("a.sb2");
-	ScratchCodeDriver	driver(parsedStatementList);
+	ScratchCodeDriver	driver(syntaxTree);
 	
 	for(int i=1; i<argc; ++i)
 	{
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	std::cout << "result is " << result << std::endl;
 	std::cout << "output file will be " << outputFile << std::endl;
 	if(result == 0)
-		std::cout << "\n" << ast::stringify(parsedStatementList) << "\n";													//output the parsed abstract syntax tree
+		std::cout << "\n" << ast::stringify(syntaxTree) << "\n";													//output the parsed abstract syntax tree
 	
 	return (result ? 1 : 0);
 }

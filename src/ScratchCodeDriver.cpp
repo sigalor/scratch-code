@@ -4,8 +4,8 @@
 
 ScratchCodeDriver::ScratchCodeDriver() : result(0), traceLexing(false), traceParsing(false) { }
 ScratchCodeDriver::ScratchCodeDriver(bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing) { }
-ScratchCodeDriver::ScratchCodeDriver(std::shared_ptr<ast::StatementList> newParsedStatementList) : result(0), traceLexing(false), traceParsing(false), parsedStatementList(newParsedStatementList) { }
-ScratchCodeDriver::ScratchCodeDriver(std::shared_ptr<ast::StatementList> newParsedStatementList, bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing), parsedStatementList(newParsedStatementList) { }
+ScratchCodeDriver::ScratchCodeDriver(std::shared_ptr<ast::StatementList> newSyntaxTree) : result(0), traceLexing(false), traceParsing(false), syntaxTree(newSyntaxTree) { }
+ScratchCodeDriver::ScratchCodeDriver(std::shared_ptr<ast::StatementList> newSyntaxTree, bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing), syntaxTree(newSyntaxTree) { }
 ScratchCodeDriver::~ScratchCodeDriver() { }
 
 void ScratchCodeDriver::beginLexing()
@@ -68,9 +68,9 @@ int ScratchCodeDriver::getResult()
 	return result;
 }
 
-std::shared_ptr<ast::StatementList> ScratchCodeDriver::getParsedStatementList()
+std::shared_ptr<ast::StatementList> ScratchCodeDriver::getSyntaxTree()
 {
-	return parsedStatementList;
+	return syntaxTree;
 }
 
 void ScratchCodeDriver::setTraceLexing(bool newTraceLexing)
