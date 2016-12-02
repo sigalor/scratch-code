@@ -1,4 +1,34 @@
-obj/Main.o: src/Main.cpp include/Main.hpp \
+obj/ScratchCodeTranslator.o: src/ScratchCodeTranslator.cpp \
+ include/ScratchCodeTranslator.hpp \
+ ext/rapidjson/include/rapidjson/document.h \
+ ext/rapidjson/include/rapidjson/reader.h \
+ ext/rapidjson/include/rapidjson/allocators.h \
+ ext/rapidjson/include/rapidjson/rapidjson.h \
+ ext/rapidjson/include/rapidjson/stream.h \
+ ext/rapidjson/include/rapidjson/encodings.h \
+ ext/rapidjson/include/rapidjson/encodedstream.h \
+ ext/rapidjson/include/rapidjson/memorystream.h \
+ ext/rapidjson/include/rapidjson/internal/meta.h \
+ ext/rapidjson/include/rapidjson/internal/../rapidjson.h \
+ ext/rapidjson/include/rapidjson/internal/stack.h \
+ ext/rapidjson/include/rapidjson/internal/../allocators.h \
+ ext/rapidjson/include/rapidjson/internal/swap.h \
+ ext/rapidjson/include/rapidjson/internal/strtod.h \
+ ext/rapidjson/include/rapidjson/internal/ieee754.h \
+ ext/rapidjson/include/rapidjson/internal/biginteger.h \
+ ext/rapidjson/include/rapidjson/internal/diyfp.h \
+ ext/rapidjson/include/rapidjson/internal/pow10.h \
+ ext/rapidjson/include/rapidjson/error/error.h \
+ ext/rapidjson/include/rapidjson/error/../rapidjson.h \
+ ext/rapidjson/include/rapidjson/internal/strfunc.h \
+ ext/rapidjson/include/rapidjson/internal/../stream.h \
+ ext/rapidjson/include/rapidjson/internal/../rapidjson.h \
+ ext/rapidjson/include/rapidjson/writer.h \
+ ext/rapidjson/include/rapidjson/internal/dtoa.h \
+ ext/rapidjson/include/rapidjson/internal/itoa.h \
+ ext/rapidjson/include/rapidjson/internal/itoa.h \
+ ext/rapidjson/include/rapidjson/stringbuffer.h \
+ ext/rapidjson/include/rapidjson/stringbuffer.h \
  ext/scratch-code-ast/include/ast/AST.hpp \
  ext/scratch-code-ast/include/ast/Node.hpp \
  ext/scratch-code-ast/include/ast/Statement.hpp \
@@ -381,40 +411,67 @@ obj/Main.o: src/Main.cpp include/Main.hpp \
  ext/scratch-code-ast/include/ast/ForLoop.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
- ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/ScratchCodeDriver.hpp scratch-code.tab.hpp \
- include/ScratchCodeTranslator.hpp \
- ext/rapidjson/include/rapidjson/document.h \
- ext/rapidjson/include/rapidjson/reader.h \
- ext/rapidjson/include/rapidjson/allocators.h \
- ext/rapidjson/include/rapidjson/rapidjson.h \
- ext/rapidjson/include/rapidjson/stream.h \
- ext/rapidjson/include/rapidjson/encodings.h \
- ext/rapidjson/include/rapidjson/encodedstream.h \
- ext/rapidjson/include/rapidjson/memorystream.h \
- ext/rapidjson/include/rapidjson/internal/meta.h \
- ext/rapidjson/include/rapidjson/internal/../rapidjson.h \
- ext/rapidjson/include/rapidjson/internal/stack.h \
- ext/rapidjson/include/rapidjson/internal/../allocators.h \
- ext/rapidjson/include/rapidjson/internal/swap.h \
- ext/rapidjson/include/rapidjson/internal/strtod.h \
- ext/rapidjson/include/rapidjson/internal/ieee754.h \
- ext/rapidjson/include/rapidjson/internal/biginteger.h \
- ext/rapidjson/include/rapidjson/internal/diyfp.h \
- ext/rapidjson/include/rapidjson/internal/pow10.h \
- ext/rapidjson/include/rapidjson/error/error.h \
- ext/rapidjson/include/rapidjson/error/../rapidjson.h \
- ext/rapidjson/include/rapidjson/internal/strfunc.h \
- ext/rapidjson/include/rapidjson/internal/../stream.h \
- ext/rapidjson/include/rapidjson/internal/../rapidjson.h \
- ext/rapidjson/include/rapidjson/writer.h \
- ext/rapidjson/include/rapidjson/internal/dtoa.h \
- ext/rapidjson/include/rapidjson/internal/itoa.h \
- ext/rapidjson/include/rapidjson/internal/itoa.h \
- ext/rapidjson/include/rapidjson/stringbuffer.h \
- ext/rapidjson/include/rapidjson/stringbuffer.h
+ ext/scratch-code-ast/include/ast/ReturnStatement.hpp
 
-include/Main.hpp:
+include/ScratchCodeTranslator.hpp:
+
+ext/rapidjson/include/rapidjson/document.h:
+
+ext/rapidjson/include/rapidjson/reader.h:
+
+ext/rapidjson/include/rapidjson/allocators.h:
+
+ext/rapidjson/include/rapidjson/rapidjson.h:
+
+ext/rapidjson/include/rapidjson/stream.h:
+
+ext/rapidjson/include/rapidjson/encodings.h:
+
+ext/rapidjson/include/rapidjson/encodedstream.h:
+
+ext/rapidjson/include/rapidjson/memorystream.h:
+
+ext/rapidjson/include/rapidjson/internal/meta.h:
+
+ext/rapidjson/include/rapidjson/internal/../rapidjson.h:
+
+ext/rapidjson/include/rapidjson/internal/stack.h:
+
+ext/rapidjson/include/rapidjson/internal/../allocators.h:
+
+ext/rapidjson/include/rapidjson/internal/swap.h:
+
+ext/rapidjson/include/rapidjson/internal/strtod.h:
+
+ext/rapidjson/include/rapidjson/internal/ieee754.h:
+
+ext/rapidjson/include/rapidjson/internal/biginteger.h:
+
+ext/rapidjson/include/rapidjson/internal/diyfp.h:
+
+ext/rapidjson/include/rapidjson/internal/pow10.h:
+
+ext/rapidjson/include/rapidjson/error/error.h:
+
+ext/rapidjson/include/rapidjson/error/../rapidjson.h:
+
+ext/rapidjson/include/rapidjson/internal/strfunc.h:
+
+ext/rapidjson/include/rapidjson/internal/../stream.h:
+
+ext/rapidjson/include/rapidjson/internal/../rapidjson.h:
+
+ext/rapidjson/include/rapidjson/writer.h:
+
+ext/rapidjson/include/rapidjson/internal/dtoa.h:
+
+ext/rapidjson/include/rapidjson/internal/itoa.h:
+
+ext/rapidjson/include/rapidjson/internal/itoa.h:
+
+ext/rapidjson/include/rapidjson/stringbuffer.h:
+
+ext/rapidjson/include/rapidjson/stringbuffer.h:
 
 ext/scratch-code-ast/include/ast/AST.hpp:
 
@@ -1305,67 +1362,3 @@ ext/scratch-code-ast/include/ast/WhileLoop.hpp:
 ext/scratch-code-ast/include/ast/LoopControlStatement.hpp:
 
 ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
-
-include/ScratchCodeDriver.hpp:
-
-scratch-code.tab.hpp:
-
-include/ScratchCodeTranslator.hpp:
-
-ext/rapidjson/include/rapidjson/document.h:
-
-ext/rapidjson/include/rapidjson/reader.h:
-
-ext/rapidjson/include/rapidjson/allocators.h:
-
-ext/rapidjson/include/rapidjson/rapidjson.h:
-
-ext/rapidjson/include/rapidjson/stream.h:
-
-ext/rapidjson/include/rapidjson/encodings.h:
-
-ext/rapidjson/include/rapidjson/encodedstream.h:
-
-ext/rapidjson/include/rapidjson/memorystream.h:
-
-ext/rapidjson/include/rapidjson/internal/meta.h:
-
-ext/rapidjson/include/rapidjson/internal/../rapidjson.h:
-
-ext/rapidjson/include/rapidjson/internal/stack.h:
-
-ext/rapidjson/include/rapidjson/internal/../allocators.h:
-
-ext/rapidjson/include/rapidjson/internal/swap.h:
-
-ext/rapidjson/include/rapidjson/internal/strtod.h:
-
-ext/rapidjson/include/rapidjson/internal/ieee754.h:
-
-ext/rapidjson/include/rapidjson/internal/biginteger.h:
-
-ext/rapidjson/include/rapidjson/internal/diyfp.h:
-
-ext/rapidjson/include/rapidjson/internal/pow10.h:
-
-ext/rapidjson/include/rapidjson/error/error.h:
-
-ext/rapidjson/include/rapidjson/error/../rapidjson.h:
-
-ext/rapidjson/include/rapidjson/internal/strfunc.h:
-
-ext/rapidjson/include/rapidjson/internal/../stream.h:
-
-ext/rapidjson/include/rapidjson/internal/../rapidjson.h:
-
-ext/rapidjson/include/rapidjson/writer.h:
-
-ext/rapidjson/include/rapidjson/internal/dtoa.h:
-
-ext/rapidjson/include/rapidjson/internal/itoa.h:
-
-ext/rapidjson/include/rapidjson/internal/itoa.h:
-
-ext/rapidjson/include/rapidjson/stringbuffer.h:
-
-ext/rapidjson/include/rapidjson/stringbuffer.h:

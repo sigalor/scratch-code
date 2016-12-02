@@ -642,13 +642,13 @@ int yy_flex_debug = 1;
 
 static yyconst flex_int16_t yy_rule_linenum[66] =
     {   0,
-       35,   36,   37,   38,   39,   40,   41,   42,   43,   44,
-       45,   46,   47,   48,   49,   50,   51,   52,   53,   54,
-       55,   56,   58,   59,   60,   61,   62,   63,   64,   65,
-       66,   67,   69,   70,   71,   72,   73,   74,   75,   76,
-       77,   78,   79,   80,   81,   82,   83,   84,   86,   87,
-       88,   89,   90,   91,   92,   93,   94,   95,   96,   98,
-       99,  100,  101,  102,  103
+       55,   56,   57,   58,   59,   60,   61,   62,   63,   64,
+       65,   66,   67,   68,   69,   70,   71,   72,   73,   74,
+       75,   76,   78,   79,   80,   81,   82,   83,   84,   85,
+       86,   87,   89,   90,   91,   92,   93,   94,   95,   96,
+       97,   98,   99,  100,  101,  102,  103,  104,  106,  107,
+      108,  109,  110,  111,  112,  113,  114,  115,  116,  118,
+      119,  120,  121,  122,  123
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -660,7 +660,24 @@ static yyconst flex_int16_t yy_rule_linenum[66] =
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "src/scratch-code.l"
-#line 2 "src/scratch-code.l"
+/*
+ *   Copyright 2016 sigalor
+ *
+ *   File: scratch-code/src/scratch-code.l
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
+#line 22 "src/scratch-code.l"
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -675,10 +692,10 @@ char *yytext;
 
 static yy::location loc;
 #define YY_NO_INPUT 1
-#line 22 "src/scratch-code.l"
+#line 42 "src/scratch-code.l"
 	//code run each time a pattern is matched
 	#define YY_USER_ACTION loc.columns(yyleng);
-#line 682 "gen/scratch-code.lex.cpp"
+#line 699 "gen/scratch-code.lex.cpp"
 
 #define INITIAL 0
 
@@ -961,7 +978,7 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 26 "src/scratch-code.l"
+#line 46 "src/scratch-code.l"
 
 
 
@@ -971,7 +988,7 @@ YY_DECL
 
 
 
-#line 975 "gen/scratch-code.lex.cpp"
+#line 992 "gen/scratch-code.lex.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1049,340 +1066,340 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 35 "src/scratch-code.l"
+#line 55 "src/scratch-code.l"
 { loc.step(); }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 36 "src/scratch-code.l"
+#line 56 "src/scratch-code.l"
 { loc.lines(yyleng); loc.step(); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 37 "src/scratch-code.l"
+#line 57 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_VARIABLE_TYPE(ast::Lexer::ParsedVariableType::Void, loc); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 38 "src/scratch-code.l"
+#line 58 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_VARIABLE_TYPE(ast::Lexer::ParsedVariableType::Bool, loc); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 39 "src/scratch-code.l"
+#line 59 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_VARIABLE_TYPE(ast::Lexer::ParsedVariableType::Int, loc); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 40 "src/scratch-code.l"
+#line 60 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_VARIABLE_TYPE(ast::Lexer::ParsedVariableType::Real, loc); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 41 "src/scratch-code.l"
+#line 61 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_VARIABLE_TYPE(ast::Lexer::ParsedVariableType::String, loc); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 42 "src/scratch-code.l"
+#line 62 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_LOOP_CONTROL_STATEMENT(ast::Lexer::ParsedLoopControlStatement::Break, loc); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 43 "src/scratch-code.l"
+#line 63 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_LOOP_CONTROL_STATEMENT(ast::Lexer::ParsedLoopControlStatement::Continue, loc); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "src/scratch-code.l"
+#line 64 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_IF(loc); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 45 "src/scratch-code.l"
+#line 65 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_ELSE(loc); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 46 "src/scratch-code.l"
+#line 66 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_WHILE(loc); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 47 "src/scratch-code.l"
+#line 67 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_FOR(loc); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 48 "src/scratch-code.l"
+#line 68 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_RETURN(loc); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 49 "src/scratch-code.l"
+#line 69 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_ROUND_BRACKET_OPEN(loc); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 50 "src/scratch-code.l"
+#line 70 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_ROUND_BRACKET_CLOSED(loc); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 51 "src/scratch-code.l"
+#line 71 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_SQUARE_BRACKET_OPEN(loc); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 52 "src/scratch-code.l"
+#line 72 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_SQUARE_BRACKET_CLOSED(loc); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 53 "src/scratch-code.l"
+#line 73 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_CURLY_BRACKET_OPEN(loc); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 54 "src/scratch-code.l"
+#line 74 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_CURLY_BRACKET_CLOSED(loc); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 55 "src/scratch-code.l"
+#line 75 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_COMMA(loc); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 56 "src/scratch-code.l"
+#line 76 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_SEMICOLON(loc); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 58 "src/scratch-code.l"
+#line 78 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_PLUS(loc); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 59 "src/scratch-code.l"
+#line 79 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_MINUS(loc); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 60 "src/scratch-code.l"
+#line 80 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_INCREMENT(loc); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 61 "src/scratch-code.l"
+#line 81 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_DECREMENT(loc); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 62 "src/scratch-code.l"
+#line 82 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_LOGICAL_NOT(loc); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 63 "src/scratch-code.l"
+#line 83 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_NOT(loc); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 64 "src/scratch-code.l"
+#line 84 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_TYPECAST_BOOL(loc); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 65 "src/scratch-code.l"
+#line 85 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_TYPECAST_INT(loc); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 66 "src/scratch-code.l"
+#line 86 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_TYPECAST_REAL(loc); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 67 "src/scratch-code.l"
+#line 87 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_TYPECAST_STRING(loc); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 69 "src/scratch-code.l"
+#line 89 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_MULTIPLY(loc); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 70 "src/scratch-code.l"
+#line 90 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_DIVIDE(loc); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 71 "src/scratch-code.l"
+#line 91 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_MODULO(loc); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 72 "src/scratch-code.l"
+#line 92 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_AND(loc); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 73 "src/scratch-code.l"
+#line 93 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_OR(loc); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 74 "src/scratch-code.l"
+#line 94 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_XOR(loc); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 75 "src/scratch-code.l"
+#line 95 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITSHIFT_LEFT(loc); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 76 "src/scratch-code.l"
+#line 96 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITSHIFT_RIGHT(loc); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 77 "src/scratch-code.l"
+#line 97 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_LOGICAL_AND(loc); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 78 "src/scratch-code.l"
+#line 98 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_LOGICAL_OR(loc); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 79 "src/scratch-code.l"
+#line 99 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_LESS_THAN(loc); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 80 "src/scratch-code.l"
+#line 100 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_LESS_THAN_OR_EQUAL(loc); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 81 "src/scratch-code.l"
+#line 101 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_GREATER_THAN(loc); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 82 "src/scratch-code.l"
+#line 102 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_GREATER_THAN_OR_EQUAL(loc); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 83 "src/scratch-code.l"
+#line 103 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_EQUAL(loc); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 84 "src/scratch-code.l"
+#line 104 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_NOT_EQUAL(loc); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 86 "src/scratch-code.l"
+#line 106 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_ASSIGNMENT(loc); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 87 "src/scratch-code.l"
+#line 107 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_ADD_ASSIGNMENT(loc); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 88 "src/scratch-code.l"
+#line 108 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_SUBTRACT_ASSIGNMENT(loc); }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 89 "src/scratch-code.l"
+#line 109 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_MULTIPLY_ASSIGNMENT(loc); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 90 "src/scratch-code.l"
+#line 110 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_DIVIDE_ASSIGNMENT(loc); }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 91 "src/scratch-code.l"
+#line 111 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_MODULO_ASSIGNMENT(loc); }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 92 "src/scratch-code.l"
+#line 112 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_AND_ASSIGNMENT(loc); }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 93 "src/scratch-code.l"
+#line 113 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_OR_ASSIGNMENT(loc); }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 94 "src/scratch-code.l"
+#line 114 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITWISE_XOR_ASSIGNMENT(loc); }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 95 "src/scratch-code.l"
+#line 115 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITSHIFT_LEFT_ASSIGNMENT(loc); }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 96 "src/scratch-code.l"
+#line 116 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_OP_BITSHIFT_RIGHT_ASSIGNMENT(loc); };
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 98 "src/scratch-code.l"
+#line 118 "src/scratch-code.l"
 { std::string str(yytext, yyleng); return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, str=="true"), loc); }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 99 "src/scratch-code.l"
+#line 119 "src/scratch-code.l"
 { std::string str(yytext, yyleng); uint64_t val; try { val = boost::lexical_cast<uint64_t>(str); } catch(const boost::bad_lexical_cast& ex) { throw yy::ScratchCodeParser::syntax_error(loc, "invalid integer value: " + str + ": " + ex.what()); } return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, val), loc); }		//there are no [+-]? at the beginning, as + and - become UnaryOperations
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 100 "src/scratch-code.l"
+#line 120 "src/scratch-code.l"
 { std::string str(yytext, yyleng); double val; try { val = boost::lexical_cast<double>(str); } catch(const boost::bad_lexical_cast& ex) { throw yy::ScratchCodeParser::syntax_error(loc, "invalid floating point value: " + str + ": " + ex.what()); } return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, val), loc); }		//regex from http://stackoverflow.com/a/2293793
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 101 "src/scratch-code.l"
+#line 121 "src/scratch-code.l"
 { std::string str(yytext+1, yyleng-2); return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, str), loc); }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 102 "src/scratch-code.l"
+#line 122 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_IDENTIFIER(yytext, loc); }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 103 "src/scratch-code.l"
+#line 123 "src/scratch-code.l"
 { throw yy::ScratchCodeParser::syntax_error(loc, "invalid character: '" + std::string(yytext, yyleng) + "'"); }		//from http://stackoverflow.com/a/18888761
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 104 "src/scratch-code.l"
+#line 124 "src/scratch-code.l"
 { return yy::ScratchCodeParser::make_END(loc); }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 105 "src/scratch-code.l"
+#line 125 "src/scratch-code.l"
 ECHO;
 	YY_BREAK
-#line 1386 "gen/scratch-code.lex.cpp"
+#line 1403 "gen/scratch-code.lex.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2485,7 +2502,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 105 "src/scratch-code.l"
+#line 125 "src/scratch-code.l"
 
 
 

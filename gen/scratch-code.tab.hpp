@@ -40,7 +40,7 @@
 #ifndef YY_YY_GEN_SCRATCH_CODE_TAB_HPP_INCLUDED
 # define YY_YY_GEN_SCRATCH_CODE_TAB_HPP_INCLUDED
 // //                    "%code requires" blocks.
-#line 9 "src/scratch-code.ypp" // lalr1.cc:377
+#line 29 "src/scratch-code.ypp" // lalr1.cc:377
 
 	#include <string>
 	#include <algorithm>

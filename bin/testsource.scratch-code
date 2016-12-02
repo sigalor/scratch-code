@@ -1,6 +1,6 @@
 int a, b;
 
-real abc(void def)
+real abc()
 {
 	return (real)f();
 }
@@ -26,7 +26,7 @@ void main()
 
 int c(int d, real e)
 {
-	return ~main();
+	return ~(int)f();
 }
 
 string f()

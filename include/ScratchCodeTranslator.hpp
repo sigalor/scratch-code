@@ -1,7 +1,7 @@
 /*
  *   Copyright 2016 sigalor
  *
- *   File: scratch-code/include/Main.hpp
+ *   File: scratch-code/include/ScratchCodeTranslator.hpp
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,14 +23,23 @@
 
 
 #include <cstdlib>
-#include <iostream>
 #include <string>
+#include <fstream>
+#include <memory>
 
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 #include <ast/AST.hpp>
 
-#include "ScratchCodeDriver.hpp"
-#include "ScratchCodeTranslator.hpp"
 
 
+namespace ScratchCodeTranslator
+{
+	namespace detail
+	{
+		void													writeDocumentToFile(rapidjson::Document& doc, const std::string& filename);
+	}
 
-int																main(int argc, char** argv);
+	void														translate(std::shared_ptr<ast::StatementList> input, const std::string& filename);
+};
