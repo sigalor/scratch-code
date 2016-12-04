@@ -342,6 +342,7 @@ namespace yy {
       // value
       char dummy15[sizeof(std::shared_ptr<ast::Value>)];
 
+      // forLoopHeader
       // functionCallParameters
       // functionCallParametersMore
       char dummy16[sizeof(std::shared_ptr<ast::ValueList>)];
@@ -1027,8 +1028,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 736,     ///< Last index in yytable_.
-      yynnts_ = 27,  ///< Number of nonterminal symbols.
+      yylast_ = 798,     ///< Last index in yytable_.
+      yynnts_ = 28,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -1128,31 +1129,31 @@ namespace yy {
         value.copy< std::shared_ptr<ast::Conditional> > (other.value);
         break;
 
-      case 73: // forLoop
+      case 74: // forLoop
         value.copy< std::shared_ptr<ast::ForLoop> > (other.value);
         break;
 
-      case 85: // functionCall
+      case 86: // functionCall
         value.copy< std::shared_ptr<ast::FunctionCall> > (other.value);
         break;
 
-      case 76: // functionDefinition
+      case 77: // functionDefinition
         value.copy< std::shared_ptr<ast::FunctionDefinition> > (other.value);
         break;
 
-      case 83: // lValue
+      case 84: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (other.value);
         break;
 
-      case 75: // loopControlStatement
+      case 76: // loopControlStatement
         value.copy< std::shared_ptr<ast::LoopControlStatement> > (other.value);
         break;
 
-      case 88: // operation
+      case 89: // operation
         value.copy< std::shared_ptr<ast::Operation> > (other.value);
         break;
 
-      case 84: // rValue
+      case 85: // rValue
         value.copy< std::shared_ptr<ast::RValue> > (other.value);
         break;
 
@@ -1160,7 +1161,7 @@ namespace yy {
         value.copy< std::shared_ptr<ast::RValueValue> > (other.value);
         break;
 
-      case 80: // returnStatement
+      case 81: // returnStatement
         value.copy< std::shared_ptr<ast::ReturnStatement> > (other.value);
         break;
 
@@ -1174,29 +1175,30 @@ namespace yy {
         value.copy< std::shared_ptr<ast::StatementList> > (other.value);
         break;
 
-      case 81: // valueStandalone
-      case 82: // value
+      case 82: // valueStandalone
+      case 83: // value
         value.copy< std::shared_ptr<ast::Value> > (other.value);
         break;
 
-      case 86: // functionCallParameters
-      case 87: // functionCallParametersMore
+      case 73: // forLoopHeader
+      case 87: // functionCallParameters
+      case 88: // functionCallParametersMore
         value.copy< std::shared_ptr<ast::ValueList> > (other.value);
         break;
 
       case 70: // localVariableDefinition
-      case 79: // functionDefinitionParameter
+      case 80: // functionDefinitionParameter
         value.copy< std::shared_ptr<ast::VariableDefinition> > (other.value);
         break;
 
       case 68: // localVariableDefinitionList
       case 69: // localVariableDefinitions
-      case 77: // functionDefinitionParameters
-      case 78: // functionDefinitionParametersMore
+      case 78: // functionDefinitionParameters
+      case 79: // functionDefinitionParametersMore
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (other.value);
         break;
 
-      case 74: // whileLoop
+      case 75: // whileLoop
         value.copy< std::shared_ptr<ast::WhileLoop> > (other.value);
         break;
 
@@ -1234,31 +1236,31 @@ namespace yy {
         value.copy< std::shared_ptr<ast::Conditional> > (v);
         break;
 
-      case 73: // forLoop
+      case 74: // forLoop
         value.copy< std::shared_ptr<ast::ForLoop> > (v);
         break;
 
-      case 85: // functionCall
+      case 86: // functionCall
         value.copy< std::shared_ptr<ast::FunctionCall> > (v);
         break;
 
-      case 76: // functionDefinition
+      case 77: // functionDefinition
         value.copy< std::shared_ptr<ast::FunctionDefinition> > (v);
         break;
 
-      case 83: // lValue
+      case 84: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (v);
         break;
 
-      case 75: // loopControlStatement
+      case 76: // loopControlStatement
         value.copy< std::shared_ptr<ast::LoopControlStatement> > (v);
         break;
 
-      case 88: // operation
+      case 89: // operation
         value.copy< std::shared_ptr<ast::Operation> > (v);
         break;
 
-      case 84: // rValue
+      case 85: // rValue
         value.copy< std::shared_ptr<ast::RValue> > (v);
         break;
 
@@ -1266,7 +1268,7 @@ namespace yy {
         value.copy< std::shared_ptr<ast::RValueValue> > (v);
         break;
 
-      case 80: // returnStatement
+      case 81: // returnStatement
         value.copy< std::shared_ptr<ast::ReturnStatement> > (v);
         break;
 
@@ -1280,29 +1282,30 @@ namespace yy {
         value.copy< std::shared_ptr<ast::StatementList> > (v);
         break;
 
-      case 81: // valueStandalone
-      case 82: // value
+      case 82: // valueStandalone
+      case 83: // value
         value.copy< std::shared_ptr<ast::Value> > (v);
         break;
 
-      case 86: // functionCallParameters
-      case 87: // functionCallParametersMore
+      case 73: // forLoopHeader
+      case 87: // functionCallParameters
+      case 88: // functionCallParametersMore
         value.copy< std::shared_ptr<ast::ValueList> > (v);
         break;
 
       case 70: // localVariableDefinition
-      case 79: // functionDefinitionParameter
+      case 80: // functionDefinitionParameter
         value.copy< std::shared_ptr<ast::VariableDefinition> > (v);
         break;
 
       case 68: // localVariableDefinitionList
       case 69: // localVariableDefinitions
-      case 77: // functionDefinitionParameters
-      case 78: // functionDefinitionParametersMore
+      case 78: // functionDefinitionParameters
+      case 79: // functionDefinitionParametersMore
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (v);
         break;
 
-      case 74: // whileLoop
+      case 75: // whileLoop
         value.copy< std::shared_ptr<ast::WhileLoop> > (v);
         break;
 
@@ -1504,31 +1507,31 @@ namespace yy {
         value.template destroy< std::shared_ptr<ast::Conditional> > ();
         break;
 
-      case 73: // forLoop
+      case 74: // forLoop
         value.template destroy< std::shared_ptr<ast::ForLoop> > ();
         break;
 
-      case 85: // functionCall
+      case 86: // functionCall
         value.template destroy< std::shared_ptr<ast::FunctionCall> > ();
         break;
 
-      case 76: // functionDefinition
+      case 77: // functionDefinition
         value.template destroy< std::shared_ptr<ast::FunctionDefinition> > ();
         break;
 
-      case 83: // lValue
+      case 84: // lValue
         value.template destroy< std::shared_ptr<ast::LValue> > ();
         break;
 
-      case 75: // loopControlStatement
+      case 76: // loopControlStatement
         value.template destroy< std::shared_ptr<ast::LoopControlStatement> > ();
         break;
 
-      case 88: // operation
+      case 89: // operation
         value.template destroy< std::shared_ptr<ast::Operation> > ();
         break;
 
-      case 84: // rValue
+      case 85: // rValue
         value.template destroy< std::shared_ptr<ast::RValue> > ();
         break;
 
@@ -1536,7 +1539,7 @@ namespace yy {
         value.template destroy< std::shared_ptr<ast::RValueValue> > ();
         break;
 
-      case 80: // returnStatement
+      case 81: // returnStatement
         value.template destroy< std::shared_ptr<ast::ReturnStatement> > ();
         break;
 
@@ -1550,29 +1553,30 @@ namespace yy {
         value.template destroy< std::shared_ptr<ast::StatementList> > ();
         break;
 
-      case 81: // valueStandalone
-      case 82: // value
+      case 82: // valueStandalone
+      case 83: // value
         value.template destroy< std::shared_ptr<ast::Value> > ();
         break;
 
-      case 86: // functionCallParameters
-      case 87: // functionCallParametersMore
+      case 73: // forLoopHeader
+      case 87: // functionCallParameters
+      case 88: // functionCallParametersMore
         value.template destroy< std::shared_ptr<ast::ValueList> > ();
         break;
 
       case 70: // localVariableDefinition
-      case 79: // functionDefinitionParameter
+      case 80: // functionDefinitionParameter
         value.template destroy< std::shared_ptr<ast::VariableDefinition> > ();
         break;
 
       case 68: // localVariableDefinitionList
       case 69: // localVariableDefinitions
-      case 77: // functionDefinitionParameters
-      case 78: // functionDefinitionParametersMore
+      case 78: // functionDefinitionParameters
+      case 79: // functionDefinitionParametersMore
         value.template destroy< std::shared_ptr<ast::VariableDefinitionList> > ();
         break;
 
-      case 74: // whileLoop
+      case 75: // whileLoop
         value.template destroy< std::shared_ptr<ast::WhileLoop> > ();
         break;
 
@@ -1616,31 +1620,31 @@ namespace yy {
         value.move< std::shared_ptr<ast::Conditional> > (s.value);
         break;
 
-      case 73: // forLoop
+      case 74: // forLoop
         value.move< std::shared_ptr<ast::ForLoop> > (s.value);
         break;
 
-      case 85: // functionCall
+      case 86: // functionCall
         value.move< std::shared_ptr<ast::FunctionCall> > (s.value);
         break;
 
-      case 76: // functionDefinition
+      case 77: // functionDefinition
         value.move< std::shared_ptr<ast::FunctionDefinition> > (s.value);
         break;
 
-      case 83: // lValue
+      case 84: // lValue
         value.move< std::shared_ptr<ast::LValue> > (s.value);
         break;
 
-      case 75: // loopControlStatement
+      case 76: // loopControlStatement
         value.move< std::shared_ptr<ast::LoopControlStatement> > (s.value);
         break;
 
-      case 88: // operation
+      case 89: // operation
         value.move< std::shared_ptr<ast::Operation> > (s.value);
         break;
 
-      case 84: // rValue
+      case 85: // rValue
         value.move< std::shared_ptr<ast::RValue> > (s.value);
         break;
 
@@ -1648,7 +1652,7 @@ namespace yy {
         value.move< std::shared_ptr<ast::RValueValue> > (s.value);
         break;
 
-      case 80: // returnStatement
+      case 81: // returnStatement
         value.move< std::shared_ptr<ast::ReturnStatement> > (s.value);
         break;
 
@@ -1662,29 +1666,30 @@ namespace yy {
         value.move< std::shared_ptr<ast::StatementList> > (s.value);
         break;
 
-      case 81: // valueStandalone
-      case 82: // value
+      case 82: // valueStandalone
+      case 83: // value
         value.move< std::shared_ptr<ast::Value> > (s.value);
         break;
 
-      case 86: // functionCallParameters
-      case 87: // functionCallParametersMore
+      case 73: // forLoopHeader
+      case 87: // functionCallParameters
+      case 88: // functionCallParametersMore
         value.move< std::shared_ptr<ast::ValueList> > (s.value);
         break;
 
       case 70: // localVariableDefinition
-      case 79: // functionDefinitionParameter
+      case 80: // functionDefinitionParameter
         value.move< std::shared_ptr<ast::VariableDefinition> > (s.value);
         break;
 
       case 68: // localVariableDefinitionList
       case 69: // localVariableDefinitions
-      case 77: // functionDefinitionParameters
-      case 78: // functionDefinitionParametersMore
+      case 78: // functionDefinitionParameters
+      case 79: // functionDefinitionParametersMore
         value.move< std::shared_ptr<ast::VariableDefinitionList> > (s.value);
         break;
 
-      case 74: // whileLoop
+      case 75: // whileLoop
         value.move< std::shared_ptr<ast::WhileLoop> > (s.value);
         break;
 
@@ -2115,7 +2120,7 @@ namespace yy {
 
 
 } // yy
-#line 2119 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 2124 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 

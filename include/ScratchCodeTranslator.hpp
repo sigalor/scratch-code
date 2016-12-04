@@ -30,6 +30,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <ZipLib/ZipFile.h>
 #include <ast/AST.hpp>
 
 
@@ -42,4 +43,4 @@ namespace ScratchCodeTranslator
 	}
 
 	void														translate(std::shared_ptr<ast::StatementList> input, const std::string& filename);
-};
+}

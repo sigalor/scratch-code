@@ -28,8 +28,10 @@ namespace ScratchCodeTranslator
 	{
 		void writeDocumentToFile(rapidjson::Document& doc, const std::string& filename)
 		{
-			rapidjson::StringBuffer buffer;
-			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+			using namespace rapidjson;
+		
+			StringBuffer buffer;
+			Writer<StringBuffer> writer(buffer);
 			doc.Accept(writer);
 			
 			std::ofstream outFile(filename);
@@ -45,12 +47,18 @@ namespace ScratchCodeTranslator
 
 	void translate(std::shared_ptr<ast::StatementList> input, const std::string& filename)
 	{
-		rapidjson::Document doc;
-		rapidjson::Document::AllocatorType& alloc = doc.GetAllocator();
+		using namespace rapidjson;
+	
+		Document doc;
+		Document::AllocatorType& alloc = doc.GetAllocator();
 		
 		doc.SetObject();
 		doc.AddMember("hello", 42, alloc);
 		
 		detail::writeDocumentToFile(doc, filename);
+		
+		
+		
+		ZipFile::AddFile("archive.zip", "testsource.sc");
 	}
 }

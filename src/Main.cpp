@@ -22,33 +22,72 @@
 
 
 
+void printBasicUsage(const std::string& appName)
+{
+	std::cout << "usage: " << appName << " init|build|clean <parameters>" << std::endl;
+	std::exit(EXIT_SUCCESS);
+}
+
+void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
+{
+	std::string		appName = argv[0], action, projectName;
+	ProjectManager	projMgr;
+	
+	if(argc == 1)
+		printBasicUsage(appName);
+	action = argv[1];
+	
+	try
+	{
+		if(action == "init")
+		{
+			if(argc == 2)
+			{
+				std::cout << "usage: " << argv[1] << " init <project_name>" << std::endl;
+				std::exit(EXIT_SUCCESS);
+			}
+			projMgr.setPathPrefix(boost::filesystem::current_path().string());
+			projMgr.setProjectName(argv[2]);
+			projMgr.initialize();
+		}
+		else if(action == "build"  ||  action == "clean")
+		{
+			projMgr.setProjectPath(boost::filesystem::current_path().string());
+			if(action == "build")
+				projMgr.build();
+			else if(action == "clean")
+				projMgr.clean();
+		}
+		else
+			printBasicUsage(appName);
+	}
+	catch(const ScratchCodeException& e)
+	{
+		std::cerr << "error: " << e.what() << std::endl;
+	}
+}
+
 int main(int argc, char** argv)
 {
-	int									result = 0;
-	std::string							outputFile("a.sb2");
-	std::shared_ptr<ast::StatementList>	syntaxTree = std::make_shared<ast::StatementList>(nullptr);
-	ScratchCodeDriver					driver(syntaxTree);
+	ScratchCodeDriver driver;
+
+	processParameters(argc, argv, driver);
 	
-	for(int i=1; i<argc; ++i)
+
+
+	/*if(argv[i] == std::string("-l"))
+		driver.setTraceLexing(true);
+	else if(argv[i] == std::string("-p"))
+		driver.setTraceParsing(true);
+	else if((result = driver.parse(argv[i])) != 0)
 	{
-		if(argv[i] == std::string("-l"))
-			driver.setTraceLexing(true);
-		else if(argv[i] == std::string("-p"))
-			driver.setTraceParsing(true);
-		else if(argv[i] == std::string("-o"))
-			outputFile.clear();
-		else if(outputFile.empty())
-			outputFile = argv[i];
-		else if((result = driver.parse(argv[i])) != 0)
-		{
-			std::cerr << "compilation terminated due to parsing error " << driver.getResult() << std::endl;
-			std::exit(EXIT_FAILURE);
-		}
+		std::cerr << "compilation terminated due to parsing error " << driver.getResult() << std::endl;
+		std::exit(EXIT_FAILURE);
 	}
-	
+
 	if(result == 0)
 		std::cout << "\n" << ast::stringify(syntaxTree) << "\n";													//output the parsed abstract syntax tree
-	ScratchCodeTranslator::translate(syntaxTree, outputFile);
+	ScratchCodeTranslator::translate(syntaxTree, outputFile);*/
 	
-	return (result ? 1 : 0);
+	return 0;
 }

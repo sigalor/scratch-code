@@ -123,6 +123,7 @@
 %type <std::shared_ptr<ast::VariableDefinitionList>>	localVariableDefinitionList localVariableDefinitions;
 %type <std::shared_ptr<ast::VariableDefinition>>		localVariableDefinition;
 %type <std::shared_ptr<ast::Conditional>>				conditional conditionalIf;
+%type <std::shared_ptr<ast::ValueList>>					forLoopHeader;
 %type <std::shared_ptr<ast::ForLoop>>					forLoop;
 %type <std::shared_ptr<ast::WhileLoop>>					whileLoop;
 %type <std::shared_ptr<ast::LoopControlStatement>>		loopControlStatement;
@@ -258,6 +259,25 @@ unit:																												//this is the ONLY rule that writes to driver.s
 				}
 			},
 			{
+				//check that the if condition evaluates to bool
+				ast::Conditional::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+				
+				}
+			},
+			{
+				//check that the for loop condition evaluates to bool
+				ast::ForLoop::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto forLoop = std::static_pointer_cast<ast::ForLoop>(obj);
+					ast::Lexer::ParsedVariableType forLoopCondType = (forLoop->getCondition()==nullptr ? ast::Lexer::ParsedVariableType::Bool : forLoop->getCondition()->getEffectiveType());
+					if(forLoopCondType != ast::Lexer::ParsedVariableType::Bool)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(forLoop), "for loop condition needs to be of type '" + ast::Lexer::getString(ast::Lexer::ParsedVariableType::Bool) + "', not '" + ast::Lexer::getString(forLoopCondType) + "'");
+				}
+			},
+			{
 				//set target functions for return statements and check correct type
 				ast::ReturnStatement::uniqueId,
 				[&](std::shared_ptr<ast::Node> obj)
@@ -284,6 +304,17 @@ unit:																												//this is the ONLY rule that writes to driver.s
 					auto unOp = std::static_pointer_cast<ast::UnaryOperation>(obj);
 					if(!ast::Lexer::isTypeAllowed(unOp->getOperation(), unOp->getValue()->getEffectiveType()))
 						throw yy::ScratchCodeParser::syntax_error(@$, "cannot apply '" + ast::Lexer::getString(unOp->getOperation()) + "' to instance of '" + ast::Lexer::getString(unOp->getValue()->getEffectiveType()) + "'");
+				}
+			},
+			{
+				//check that the while loop condition evaluates to bool
+				ast::WhileLoop::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto whileLoop = std::static_pointer_cast<ast::WhileLoop>(obj);
+					ast::Lexer::ParsedVariableType whileLoopCondType = whileLoop->getCondition()->getEffectiveType();
+					if(whileLoopCondType != ast::Lexer::ParsedVariableType::Bool)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(whileLoop), "while loop condition needs to be of type '" + ast::Lexer::getString(ast::Lexer::ParsedVariableType::Bool) + "', not '" + ast::Lexer::getString(whileLoopCondType) + "'");
 				}
 			}
 		};
@@ -402,21 +433,31 @@ conditional:																										//returns ast::Conditional
 conditionalIf:																										//returns ast::Conditional
 	"if" "(" value ")" statementsBlock
 	{
-		auto newCond = std::make_shared<ast::Conditional>(nullptr);
+		auto newCond = std::make_shared<ast::Conditional>(nullptr, $3, $5, nullptr);
 		$3->setParent(newCond);
 		$5->setParent(newCond);
-		newCond->addCondition($3);
-		newCond->addConsequenceBody($5);
 		$$ = newCond;
 	};
+forLoopHeader:																										//returns ast::ValueList
+	value ";" value ";" value	{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ $1, $3, $5 })); }
+  | value ";" value ";"			{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ $1, $3, nullptr })); }
+  | ";" value ";" value			{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ nullptr, $2, $4 })); }
+  | value ";" ";" value			{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ $1, nullptr, $4 })); }
+  | value ";" ";"				{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ $1, nullptr, nullptr })); }
+  | ";" value ";"				{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ nullptr, $2, nullptr })); }
+  | ";" ";" value				{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ nullptr, nullptr, $3 })); }
+  | ";" ";"						{ $$ = std::make_shared<ast::ValueList>(nullptr, std::vector<std::shared_ptr<ast::Value>>({ nullptr, nullptr, nullptr })); };
 forLoop:																											//returns ast::ForLoop
-	"for" "(" value ";" value ";" value ")" statementsBlock
+	"for" "(" forLoopHeader ")" statementsBlock
 	{
-		auto newForLoop = std::make_shared<ast::ForLoop>(nullptr, $3, $5, $7, $9);
-		$3->setParent(newForLoop);
+		if($3->getValues().size() != 3)
+			throw yy::ScratchCodeParser::syntax_error(@$, "fatal inconsistency error");
+		auto& header = $3->getValues();
+		auto newForLoop = std::make_shared<ast::ForLoop>(nullptr, header[0], header[1], header[2], $5);
+		for(auto v : header)
+			if(v != nullptr)
+				v->setParent(newForLoop);
 		$5->setParent(newForLoop);
-		$7->setParent(newForLoop);
-		$9->setParent(newForLoop);
 		driver.nodeLocations[newForLoop] = @$;
 		$$ = newForLoop;
 	};
@@ -511,7 +552,8 @@ returnStatement:																									//returns ast::ReturnStatement
 valueStandalone:																									//returns ast::Value
 	value ";"
 	{
-		driver.nodeLocations[$1] = @$;
+		if($1 != nullptr)
+			driver.nodeLocations[$1] = @$;
 		$$ = $1;
 	};
 value:																												//returns ast::Value

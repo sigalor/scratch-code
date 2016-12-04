@@ -10,6 +10,7 @@ PROJECT_GEN_DIR=gen
 PROJECT_INCLUDE_DIR=include
 PROJECT_OBJ_DIR=obj
 PROJECT_SRC_DIR=src
+PROJECT_BINARY_RPATH=\$${ORIGIN}/../lib
 
 # lists of own files (not the *.l and *.ypp ones for flex and bison!)
 CPP_FILES=$(wildcard $(PROJECT_SRC_DIR)/*.cpp)
@@ -18,15 +19,16 @@ DEP_FILES=$(addprefix $(PROJECT_DEP_DIR)/,$(notdir $(CPP_FILES:.cpp=.d)))
 EXECUTABLE=$(PROJECT_BIN_DIR)/$(PROJECT_NAME)
 
 # include and library paths and needed libraries
-INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include -I$(PROJECT_EXT_DIR)/boost -I$(PROJECT_EXT_DIR)/rapidjson/include
-LIBRARY_PATHS=-L$(PROJECT_EXT_DIR)/scratch-code-ast/lib
-LIBRARIES=-lfl -lscratch-code-ast
+# -isystem flag to disable warnings from specific include location, from http://stackoverflow.com/a/6321926
+INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include -isystem $(PROJECT_EXT_DIR)/boost/include -isystem $(PROJECT_EXT_DIR)/rapidjson/include -isystem $(PROJECT_EXT_DIR)/ziplib/include
+LIBRARY_PATHS=-L$(PROJECT_EXT_DIR)/scratch-code-ast/lib -L$(PROJECT_EXT_DIR)/ziplib/lib -L$(PROJECT_EXT_DIR)/boost/lib
+LIBRARIES=-lboost_filesystem -lboost_system -lzip -lfl -lscratch-code-ast
 
 # names and options for used programs
 CXX=g++
 CXXFLAGS=-g -std=c++14 -Wall $(INCLUDE_PATHS)
 CXXFLAGS_FLEXBISON=-g -std=c++14 -Wall -Wno-unused-function -Wno-sign-compare $(INCLUDE_PATHS)
-LDFLAGS=-Wall $(LIBRARY_PATHS) $(LIBRARIES)
+LDFLAGS=-Wall $(LIBRARY_PATHS) $(LIBRARIES) -Wl,-rpath,$(PROJECT_BINARY_RPATH)
 FLEX=flex
 FLEXFLAGS=
 BISON=bison
