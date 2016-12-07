@@ -24,9 +24,9 @@ obj/Main.o: src/Main.cpp include/Main.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/ScratchCodeDriver.hpp scratch-code.tab.hpp \
- include/ProjectManager.hpp include/ScratchCodeTranslator.hpp \
- include/ScratchCodeException.hpp
+ include/ScratchCodeDriver.hpp gen/scratch-code.tab.hpp gen/stack.hh \
+ gen/location.hh gen/position.hh include/ProjectManager.hpp \
+ include/ScratchCodeTranslator.hpp include/ScratchCodeException.hpp
 
 include/Main.hpp:
 
@@ -82,7 +82,13 @@ ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
 include/ScratchCodeDriver.hpp:
 
-scratch-code.tab.hpp:
+gen/scratch-code.tab.hpp:
+
+gen/stack.hh:
+
+gen/location.hh:
+
+gen/position.hh:
 
 include/ProjectManager.hpp:
 

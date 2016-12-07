@@ -43,7 +43,7 @@ void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
 		{
 			if(argc == 2)
 			{
-				std::cout << "usage: " << argv[1] << " init <project_name>" << std::endl;
+				std::cout << "usage: " << argv[0] << " init <project_name>" << std::endl;
 				std::exit(EXIT_SUCCESS);
 			}
 			projMgr.setPathPrefix(boost::filesystem::current_path().string());

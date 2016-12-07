@@ -52,8 +52,27 @@ const std::string ProjectManager::fileTypeToString(fs::file_type fileType)
 	{
 		case fs::file_type::regular_file	: return "regular file";
 		case fs::file_type::directory_file	: return "directory";
-		default								: return "unknown file type";
+		case fs::file_type::symlink_file	: return "symlink";
+		case fs::file_type::block_file		: return "block file";
+		case fs::file_type::character_file	: return "character file";
+		case fs::file_type::fifo_file		: return "fifo file";
+		case fs::file_type::socket_file		: return "socket file";
+		default								: return "(unknown file type)";
 	}
+}
+
+const std::string ProjectManager::fileTypeToString(const boost::filesystem::path& filepath)
+{
+	return fileTypeToString(fs::status(filepath).type());
+}
+
+void ProjectManager::createFile(const fs::path& filepath, const std::string& contents)
+{
+	std::ofstream f(filepath.string().c_str());
+	if(!f)
+		throw ScratchCodeException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
+	f << contents;
+	f.close();
 }
 
 void ProjectManager::validateIdentifier(const std::string& name, const std::string& identifier)
@@ -67,17 +86,18 @@ void ProjectManager::validateIdentifier(const std::string& name, const std::stri
 		throw ScratchCodeException(name + " may only contain letters, numbers or underscores, thus '" + identifier + "' is invalid");
 }
 
-void ProjectManager::validateRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const std::string& dirPrefix)
+void ProjectManager::validateRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const fs::path& dirPrefix)
 {
 	bool		hasCorrectFileType;
-	std::string	fileTypeString, currPath;
+	std::string	fileTypeString;
+	fs::path	currPath;
 
 	for(auto& f : reqFiles)
 	{
 		fileTypeString = fileTypeToString(f.first);
-		currPath = (dirPrefix=="" ? "" : (dirPrefix + "/")) + f.second;
+		currPath = dirPrefix / f.second;
 		if(!fs::exists(currPath))
-			throw ScratchCodeException(fileTypeString + " '" + currPath + "' is missing");
+			throw ScratchCodeException(fileTypeString + " '" + currPath.string() + "' is missing");
 		
 		switch(f.first)
 		{
@@ -86,11 +106,11 @@ void ProjectManager::validateRequiredFiles(const ProjectManager::RequiredFilesLi
 			default								: hasCorrectFileType = false;
 		}
 		if(!hasCorrectFileType)
-			throw ScratchCodeException("'" + currPath + "' needs to be a " + fileTypeString);
+			throw ScratchCodeException("'" + currPath.string() + "' needs to be a " + fileTypeString);
 	}
 }
 
-void ProjectManager::validateAllowedFileExtensions(const ProjectManager::AllowedFileExtensionsList& allFileExt, const std::string& dir)
+void ProjectManager::validateAllowedFileExtensions(const ProjectManager::AllowedFileExtensionsList& allFileExt, const fs::path& dir)
 {
 	for(fs::directory_entry& e : fs::directory_iterator(dir))
 	{
@@ -106,22 +126,67 @@ void ProjectManager::validateAllowedFileExtensions(const ProjectManager::Allowed
 	}
 }
 
+void ProjectManager::createRequiredFiles(const RequiredFilesList& reqFiles, const fs::path& dirPrefix)
+{
+	fs::path currPath;
+
+	for(auto& f : reqFiles)
+	{
+		currPath = dirPrefix / f.second;
+	
+		switch(f.first)
+		{
+			case fs::file_type::regular_file	: fs::create_directories(currPath.parent_path()); createFile(currPath); break;
+			case fs::file_type::directory_file	: fs::create_directories(currPath); break;							//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
+			default								: break;
+		}
+	}
+}
+
 ProjectManager::ProjectManager()
 {
 
 }
 
-ProjectManager::ProjectManager(const std::string& newPathPrefix, const std::string& newProjectName) : pathPrefix(newPathPrefix), projectName(newProjectName)
+ProjectManager::ProjectManager(const fs::path& newPathPrefix, const std::string& newProjectName) : pathPrefix(newPathPrefix), projectName(newProjectName)
 {
 
 }
 
 void ProjectManager::initialize()
 {
-
+	if(fs::exists(projectName))
+		throw ScratchCodeException("'" + projectName + "' already exists as a " + fileTypeToString(projectName));
+	
+	try
+	{
+		fs::path projectDir(projectName);
+		fs::create_directory(projectDir);
+		createRequiredFiles(requiredFirstLevelFiles, projectDir);
+		createRequiredFiles(requiredObjectFiles, projectDir / fs::path("objects/stage"));
+		fs::current_path(projectDir);
+	}
+	catch(const fs::filesystem_error& e)
+		{ throw ScratchCodeException(std::string("file system error: ") + e.what()); }
+	
+	validate();
+	std::cout << "successfully created project tree for '" + projectName + "'" << std::endl;
 }
 
-void ProjectManager::validate()
+void ProjectManager::addObject(const std::string& objName)
+{
+	fs::path objBasePath("objects/" + objName);
+	if(fs::exists(objBasePath))
+		throw ScratchCodeException("'" + objBasePath.string() + "' already exists as a" + fileTypeToString(objBasePath));
+	try
+		{ createRequiredFiles(requiredObjectFiles, objBasePath); }
+	catch(const fs::filesystem_error& e)
+		{ throw ScratchCodeException(std::string("file system error: ") + e.what()); }
+	validate();
+	std::cout << "successfully added object '" + objName + "' to project '" + projectName + "'" << std::endl;
+}
+
+void ProjectManager::validate()																						//for this function, fs::current_path needs to be the project tree's first level, i.e. 'bin/' and 'objects/' need to be directly accessible
 {
 	//check that project name is valid
 	validateIdentifier("project name", projectName);
@@ -146,11 +211,14 @@ void ProjectManager::validate()
 	}
 	catch(const ScratchCodeException& e)
 		{ throw ScratchCodeException(std::string("invalid project tree: ") + e.what()); }
+	std::cout << "project tree for '" + projectName + "' is valid" << std::endl;
 }
 
 void ProjectManager::build()
 {
 	validate();
+	std::cout << "Path prefix:  " << pathPrefix << std::endl;
+	std::cout << "Project name: " << projectName << std::endl;
 }
 
 void ProjectManager::clean()
@@ -158,7 +226,7 @@ void ProjectManager::clean()
 	validate();
 }
 
-const std::string& ProjectManager::getPathPrefix()
+const fs::path& ProjectManager::getPathPrefix()
 {
 	return pathPrefix;
 }
@@ -171,11 +239,11 @@ const std::string& ProjectManager::getProjectName()
 void ProjectManager::setProjectPath(const std::string& newProjectPath)
 {
 	fs::path projPath(newProjectPath);
-	pathPrefix = projPath.parent_path().string();
+	pathPrefix = projPath.parent_path();
 	projectName = projPath.filename().string();
 }
 
-void ProjectManager::setPathPrefix(const std::string& newPathPrefix)
+void ProjectManager::setPathPrefix(const fs::path& newPathPrefix)
 {
 	pathPrefix = newPathPrefix;
 }
