@@ -30,8 +30,8 @@ void printBasicUsage(const std::string& appName)
 
 void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
 {
-	std::string		appName = argv[0], action, projectName;
-	ProjectManager	projMgr;
+	std::string			appName = argv[0], action, projectName;
+	sc::ProjectManager	projMgr;
 	
 	if(argc == 1)
 		printBasicUsage(appName);

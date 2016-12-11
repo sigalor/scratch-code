@@ -1,6 +1,5 @@
 obj/ProjectManager.o: src/ProjectManager.cpp include/ProjectManager.hpp \
- include/ScratchCodeTranslator.hpp \
- ext/scratch-code-ast/include/ast/AST.hpp \
+ include/Translator.hpp ext/scratch-code-ast/include/ast/AST.hpp \
  ext/scratch-code-ast/include/ast/Node.hpp \
  ext/scratch-code-ast/include/ast/Statement.hpp \
  ext/scratch-code-ast/include/ast/VariableDefinition.hpp \
@@ -25,11 +24,11 @@ obj/ProjectManager.o: src/ProjectManager.cpp include/ProjectManager.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/ScratchCodeException.hpp
+ include/Utilities.hpp include/ScratchCodeException.hpp
 
 include/ProjectManager.hpp:
 
-include/ScratchCodeTranslator.hpp:
+include/Translator.hpp:
 
 ext/scratch-code-ast/include/ast/AST.hpp:
 
@@ -80,5 +79,7 @@ ext/scratch-code-ast/include/ast/WhileLoop.hpp:
 ext/scratch-code-ast/include/ast/LoopControlStatement.hpp:
 
 ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
+
+include/Utilities.hpp:
 
 include/ScratchCodeException.hpp:

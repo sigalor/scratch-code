@@ -26,52 +26,61 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <functional>
 
 #include <boost/filesystem.hpp>
 
-#include "ScratchCodeTranslator.hpp"
+#include "Translator.hpp"
 #include "ScratchCodeException.hpp"
 
 
 
-class ProjectManager
+namespace sc
 {
-	public:
-		using RequiredFilesList = std::vector<std::pair<boost::filesystem::file_type, boost::filesystem::path>>;
-		using AllowedFileExtensionsList = std::vector<std::string>;
+	class ProjectManager
+	{
+		public:
+			using RequiredDirectoriesList = std::vector<boost::filesystem::path>;
+			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<std::string(const boost::filesystem::path&, ProjectManager*)>>>;
+			using AllowedFileExtensionsList = std::vector<std::string>;
 
-	private:
-		static const std::string								allowedIdentifierCharacters;
-		static const RequiredFilesList							requiredFirstLevelFiles;
-		static const RequiredFilesList							requiredObjectFiles;
-		static const AllowedFileExtensionsList					allowedCostumeFileExtensions;
-		static const AllowedFileExtensionsList					allowedSoundFileExtensions;
+		private:
+			static const std::string								allowedIdentifierCharacters;
+			static const RequiredDirectoriesList					requiredFirstLevelDirectories, requiredObjectDirectories;
+			static const RequiredFilesList							requiredFirstLevelFiles;
+			static const AllowedFileExtensionsList					allowedCostumeFileExtensions, allowedScriptFileExtensions, allowedSoundFileExtensions;
 		
-		boost::filesystem::path									pathPrefix;
-		std::string												projectName;
-		std::vector<std::string>								objectNames;
+			boost::filesystem::path									pathPrefix;
+			std::string												projectName;
+			std::vector<std::string>								objectNames;
 	
-		const std::string										fileTypeToString(boost::filesystem::file_type fileType);
-		const std::string										fileTypeToString(const boost::filesystem::path& filepath);
-		void													createFile(const boost::filesystem::path& filepath, const std::string& contents="");
+			const std::string										fileTypeToString(boost::filesystem::file_type fileType);
+			const std::string										fileTypeToString(const boost::filesystem::path& filepath);
 		
-		void													validateIdentifier(const std::string& name, const std::string& identifier);
-		void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
-		void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExt, const boost::filesystem::path& dir=".");
-		void													createRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
+			void													createFile(const boost::filesystem::path& filepath, const std::string& contents="");
+			void													createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
+			void													createRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
+		
+			void													validateIdentifier(const std::string& name, const std::string& identifier);
+			void													validateFile(const boost::filesystem::path& filepath, boost::filesystem::file_type type);
+			void													validateRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
+			void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
+			void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExt, const boost::filesystem::path& dir=".");
+			void													validateObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
 	
-	public:
-		ProjectManager();
-		ProjectManager(const boost::filesystem::path& newPathPrefix, const std::string& newProjectName);
+		public:
+			ProjectManager();
+			ProjectManager(const boost::filesystem::path& newPathPrefix, const std::string& newProjectName);
 		
-		void													initialize();
-		void													addObject(const std::string& objName);
-		void													validate();
-		void													build();
-		void													clean();
-		const boost::filesystem::path&							getPathPrefix();
-		const std::string&										getProjectName();
-		void													setProjectPath(const std::string& newProjectPath);
-		void													setPathPrefix(const boost::filesystem::path& newPathPrefix);
-		void													setProjectName(const std::string& newProjectName);
-};
+			void													initialize();
+			void													addObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
+			void													validate(const boost::filesystem::path& dirPrefix="");
+			void													build();
+			void													clean();
+			const boost::filesystem::path&							getPathPrefix();
+			const std::string&										getProjectName();
+			void													setProjectPath(const std::string& newProjectPath);
+			void													setPathPrefix(const boost::filesystem::path& newPathPrefix);
+			void													setProjectName(const std::string& newProjectName);
+	};
+}
