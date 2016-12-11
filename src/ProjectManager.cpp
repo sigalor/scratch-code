@@ -35,7 +35,7 @@ namespace sc
 	{
 		{
 			"manifest.json",
-			[](const fs::path& filepath, ProjectManager* projMgr) -> std::string
+			[](const fs::path& filepath, ProjectManager* projMgr)
 			{
 				using namespace rapidjson;
 	
@@ -45,56 +45,43 @@ namespace sc
 				doc.SetObject();
 				doc.AddMember("user", "your_username", alloc);
 				doc.AddMember("title", Value(projMgr->getProjectName().c_str(), alloc), alloc);						//cannot use .c_str() directly, because the resulting char* would not have safe life cycle, from https://github.com/miloyip/rapidjson/issues/738#issuecomment-247340768
-		
-				return Utilities::getDocumentString(doc);
+				
+				Utilities::writeDocumentToFile(filepath, doc);
+			}
+		},
+		{
+			"objects/stage/penLayer/penLayer.png",
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 0, 0, 0, 0); }
+		},
+		{
+			"objects/stage/costumes/backdrop1.png",
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 255, 255, 255, 255); }
+		}
+	};
+	
+	const ProjectManager::RequiredFilesList ProjectManager::requiredObjectFiles =
+	{
+		{
+			"scripts/main.sc",
+			[](const fs::path& filepath, ProjectManager* projMgr)
+			{
+				Utilities::createFile(filepath);
 			}
 		}
 	};
 
-	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedCostumeFileExtensions	= { ".png", ".svg" };
+	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedCostumeFileExtensions	= { ".png" };
 	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedScriptFileExtensions		= { ".sc" };
 	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedSoundFileExtensions		= { ".wav" };
 
 
 
-	const std::string ProjectManager::fileTypeToString(fs::file_type fileType)
-	{
-		switch(fileType)
-		{
-			case fs::file_type::regular_file	: return "regular file";
-			case fs::file_type::directory_file	: return "directory";
-			case fs::file_type::symlink_file	: return "symlink";
-			case fs::file_type::block_file		: return "block file";
-			case fs::file_type::character_file	: return "character file";
-			case fs::file_type::fifo_file		: return "fifo file";
-			case fs::file_type::socket_file		: return "socket file";
-			default								: return "(unknown file type)";
-		}
-	}
 
-	const std::string ProjectManager::fileTypeToString(const boost::filesystem::path& filepath)
-	{
-		return fileTypeToString(fs::status(filepath).type());
-	}
-
-
-
-
-
-	void ProjectManager::createFile(const fs::path& filepath, const std::string& contents)
-	{
-		std::ofstream f(filepath.string().c_str());
-		if(!f)
-			throw ScratchCodeException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
-		if(!contents.empty())
-			f << contents;
-		f.close();
-	}
 
 	void ProjectManager::createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
 	{
 		for(auto& f : reqDirs)
-			fs::create_directories(dirPrefix / f);																		//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
+			fs::create_directories(dirPrefix / f);																	//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
 	}
 
 	void ProjectManager::createRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const fs::path& dirPrefix)
@@ -103,7 +90,7 @@ namespace sc
 		{
 			fs::path currPath(dirPrefix / f.first);
 			fs::create_directories(currPath.parent_path());
-			createFile(currPath, f.second(currPath, this));															//the pair's second element is a function containing the building instructions for the specified file and returns the string that will be written to that file
+			f.second(currPath, this);																				//the pair's second element is a function containing the building instructions for the specified file and creates that file
 		}
 	}
 
@@ -124,7 +111,7 @@ namespace sc
 
 	void ProjectManager::validateFile(const fs::path& filepath, fs::file_type type)
 	{
-		const std::string typeString(fileTypeToString(type));
+		const std::string typeString(Utilities::fileTypeToString(type));
 		bool hasCorrectType = false;
 	
 		if(!fs::exists(filepath))
@@ -151,16 +138,16 @@ namespace sc
 			validateFile(dirPrefix / f.first, fs::file_type::regular_file);
 	}
 
-	void ProjectManager::validateAllowedFileExtensions(const ProjectManager::AllowedFileExtensionsList& allFileExt, const fs::path& dir)
+	void ProjectManager::validateAllowedFileExtensions(const ProjectManager::AllowedFileExtensionsList& allFileExts, const fs::path& dir)
 	{
 		for(fs::directory_entry& e : fs::directory_iterator(dir))
 		{
 			if(!fs::is_regular_file(e.path()))
-				throw ScratchCodeException("'" + e.path().string() + "' needs to be a " + fileTypeToString(fs::file_type::regular_file));
-			if(std::find(allFileExt.begin(), allFileExt.end(), e.path().extension()) == allFileExt.end())
+				throw ScratchCodeException("'" + e.path().string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::regular_file));
+			if(std::find(allFileExts.begin(), allFileExts.end(), e.path().extension()) == allFileExts.end())
 			{
 				std::string allowedConcat;																			//is there an easy standard library function for concatenating all strings in a vector? std::accumulate does not allow a separator...
-				for(auto& s : allFileExt)
+				for(auto& s : allFileExts)
 					allowedConcat += s + " ";
 				throw ScratchCodeException("illegal file extension '" + e.path().extension().string() + "' in '" + e.path().string() + "', only the following are allowed: " + allowedConcat);
 			}
@@ -169,19 +156,20 @@ namespace sc
 
 	void ProjectManager::validateObject(const std::string& objName, const fs::path& dirPrefix)
 	{
-		fs::path objDir(dirPrefix / "objects" / objName);
+		fs::path objBasePath(dirPrefix / "objects" / objName);
 
-		if(!fs::exists(objDir))
-			throw ScratchCodeException("object '" + objName + "' does not exist in '" + objDir.string() + "'");
-		if(!fs::is_directory(objDir))
-			throw ScratchCodeException("'" + objDir.string() + "' needs to be a " + fileTypeToString(fs::file_type::directory_file));
+		if(!fs::exists(objBasePath))
+			throw ScratchCodeException("object '" + objName + "' does not exist in '" + objBasePath.string() + "'");
+		if(!fs::is_directory(objBasePath))
+			throw ScratchCodeException("'" + objBasePath.string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::directory_file));
 	
 		validateIdentifier("object name", objName);
-		validateRequiredDirectories(requiredObjectDirectories, objDir);
+		validateRequiredDirectories(requiredObjectDirectories, objBasePath);
+		validateRequiredFiles(requiredObjectFiles, objBasePath);
 	
-		validateAllowedFileExtensions(allowedCostumeFileExtensions, objDir / "costumes");
-		validateAllowedFileExtensions(allowedScriptFileExtensions,  objDir / "scripts");
-		validateAllowedFileExtensions(allowedSoundFileExtensions,   objDir / "sounds");
+		validateAllowedFileExtensions(allowedCostumeFileExtensions, objBasePath / "costumes");
+		validateAllowedFileExtensions(allowedScriptFileExtensions,  objBasePath / "scripts");
+		validateAllowedFileExtensions(allowedSoundFileExtensions,   objBasePath / "sounds");
 	}
 
 
@@ -202,13 +190,13 @@ namespace sc
 	{
 		fs::path projectDir(projectName);
 		if(fs::exists(projectName))
-			throw ScratchCodeException("'" + projectName + "' already exists as a " + fileTypeToString(projectName));
+			throw ScratchCodeException("'" + projectName + "' already exists as a " + Utilities::fileTypeToString(projectName));
 	
 		try
 		{
 			fs::create_directory(projectDir);
 			createRequiredDirectories(requiredFirstLevelDirectories, projectDir);
-			addObject("stage", projectDir);
+			addObject("stage", projectDir, false);
 			createRequiredFiles(requiredFirstLevelFiles, projectDir);
 		}
 		catch(const fs::filesystem_error& e)
@@ -218,18 +206,24 @@ namespace sc
 		std::cout << "successfully created project tree for '" + projectName + "'" << std::endl;
 	}
 
-	void ProjectManager::addObject(const std::string& objName, const fs::path& dirPrefix)							//current path needs to be project's first level
+	void ProjectManager::addObject(const std::string& objName, const fs::path& dirPrefix, bool validateAll)			//current path needs to be project's first level
 	{
 		fs::path objBasePath(dirPrefix / "objects" / objName);
 		if(fs::exists(objBasePath))
-			throw ScratchCodeException("'" + objBasePath.string() + "' already exists as a" + fileTypeToString(objBasePath));
+			throw ScratchCodeException("'" + objBasePath.string() + "' already exists as a " + Utilities::fileTypeToString(objBasePath));
 	
 		try
-			{ createRequiredDirectories(requiredObjectDirectories, objBasePath); }
+		{
+			createRequiredDirectories(requiredObjectDirectories, objBasePath);
+			createRequiredFiles(requiredObjectFiles, objBasePath);
+		}
 		catch(const fs::filesystem_error& e)
 			{ throw ScratchCodeException(std::string("file system error: ") + e.what()); }
 	
-		validate(dirPrefix);
+		if(validateAll)
+			validate(dirPrefix);
+		else
+			validateObject(objName, dirPrefix);
 		std::cout << "successfully added object '" + objName + "' to project '" + projectName + "'" << std::endl;
 	}
 
@@ -238,24 +232,23 @@ namespace sc
 		//check that project name is valid
 		validateIdentifier("project name", projectName);
 
-		//check that required first level files exist
+		//check that required directories and files exist
 		std::string objectName;
 		try
 		{
 			validateRequiredDirectories(requiredFirstLevelDirectories, dirPrefix);
 			for(fs::directory_entry& e : fs::directory_iterator(dirPrefix / "objects"))
 				validateObject(e.path().filename().string(), dirPrefix);
+			validateObject("stage", dirPrefix);																		//the "stage" object HAS TO exist
+			validateRequiredFiles(requiredFirstLevelFiles, dirPrefix);
 		}
 		catch(const ScratchCodeException& e)
 			{ throw ScratchCodeException(std::string("invalid project tree: ") + e.what()); }
-		std::cout << "project tree for '" + projectName + "' is valid" << std::endl;
 	}
 
 	void ProjectManager::build()
 	{
 		validate();
-		std::cout << "Path prefix:  " << pathPrefix << std::endl;
-		std::cout << "Project name: " << projectName << std::endl;
 	}
 
 	void ProjectManager::clean()

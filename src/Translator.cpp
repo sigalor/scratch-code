@@ -26,21 +26,20 @@ namespace sc
 {
 	namespace Translator
 	{
-		void translate(std::shared_ptr<ast::StatementList> input, const std::string& filename)
+		std::string translate(std::shared_ptr<ast::StatementList> input, const std::string& filename)
 		{
-			using namespace rapidjson;
-	
+			/*using namespace rapidjson;
+			
 			Document doc;
 			Document::AllocatorType& alloc = doc.GetAllocator();
+			
+			doc.SetArray();
+			
+			return Utilities::getDocumentString(doc, false);*/
 		
-			doc.SetObject();
-			doc.AddMember("hello", 42, alloc);
+			return "[[14, 14, [[\"whenGreenFlag\"], [\"wait:elapsed:from:\", 1]]]]";
 		
-			Utilities::writeDocumentToFile(doc, filename);
-		
-		
-		
-			ZipFile::AddFile("archive.zip", "testsource.sc");
+			//ZipFile::AddFile("archive.zip", "testsource.sc");
 		}
 	}
 }

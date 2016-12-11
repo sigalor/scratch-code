@@ -20,9 +20,9 @@ EXECUTABLE=$(PROJECT_BIN_DIR)/$(PROJECT_NAME)
 
 # include and library paths and needed libraries
 # -isystem flag to disable warnings from specific include locations, from http://stackoverflow.com/a/6321926
-INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include -isystem $(PROJECT_EXT_DIR)/boost/include -isystem $(PROJECT_EXT_DIR)/rapidjson/include -isystem $(PROJECT_EXT_DIR)/ziplib/include -isystem $(PROJECT_EXT_DIR)/zlib/include -isystem $(PROJECT_EXT_DIR)/libpng/include
-LIBRARY_PATHS=-L$(PROJECT_EXT_DIR)/scratch-code-ast/lib -L$(PROJECT_EXT_DIR)/ziplib/lib -L$(PROJECT_EXT_DIR)/boost/lib -L$(PROJECT_EXT_DIR)/zlib/lib -L$(PROJECT_EXT_DIR)/libpng/lib
-LIBRARIES=-lboost_filesystem -lboost_system -lpng -lz -lzip -lfl -lscratch-code-ast
+INCLUDE_PATHS=-I$(PROJECT_INCLUDE_DIR) -I$(PROJECT_GEN_DIR) -I$(PROJECT_EXT_DIR)/scratch-code-ast/include -isystem $(PROJECT_EXT_DIR)/boost/include -isystem $(PROJECT_EXT_DIR)/rapidjson/include -isystem $(PROJECT_EXT_DIR)/ziplib/include -isystem $(PROJECT_EXT_DIR)/libpng/include -isystem $(PROJECT_EXT_DIR)/openssl/include
+LIBRARY_PATHS=-L$(PROJECT_EXT_DIR)/scratch-code-ast/lib -L$(PROJECT_EXT_DIR)/ziplib/lib -L$(PROJECT_EXT_DIR)/boost/lib -L$(PROJECT_EXT_DIR)/libpng/lib -L$(PROJECT_EXT_DIR)/openssl/lib
+LIBRARIES=-lcrypto -lboost_filesystem -lboost_system -lpng -lzip -lfl -lscratch-code-ast
 
 # names and options for used programs
 CXX=g++

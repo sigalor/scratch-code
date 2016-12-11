@@ -50,10 +50,19 @@ void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
 			projMgr.setProjectName(argv[2]);
 			projMgr.initialize();
 		}
-		else if(action == "build"  ||  action == "clean")
+		else if(action == "addobject"  ||  action == "build"  ||  action == "clean")
 		{
 			projMgr.setProjectPath(boost::filesystem::current_path().string());
-			if(action == "build")
+			if(action == "addobject")
+			{
+				if(argc == 2)
+				{
+					std::cout << "usage: " << argv[0] << " addobject <object_name>" << std::endl;
+					std::exit(EXIT_SUCCESS);
+				}
+				projMgr.addObject(argv[2]);
+			}
+			else if(action == "build")
 				projMgr.build();
 			else if(action == "clean")
 				projMgr.clean();

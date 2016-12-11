@@ -28,7 +28,6 @@
 #include <memory>
 
 #include <rapidjson/document.h>
-#include <ZipLib/ZipFile.h>
 #include <ast/AST.hpp>
 
 #include "Utilities.hpp"
@@ -39,6 +38,6 @@ namespace sc
 {
 	namespace Translator
 	{
-		void													translate(std::shared_ptr<ast::StatementList> input, const std::string& filename);
+		std::string												translate(std::shared_ptr<ast::StatementList> input, const std::string& filename);
 	}
 }

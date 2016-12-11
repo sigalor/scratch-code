@@ -41,23 +41,19 @@ namespace sc
 	{
 		public:
 			using RequiredDirectoriesList = std::vector<boost::filesystem::path>;
-			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<std::string(const boost::filesystem::path&, ProjectManager*)>>>;
+			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<void(const boost::filesystem::path&, ProjectManager*)>>>;
 			using AllowedFileExtensionsList = std::vector<std::string>;
 
 		private:
 			static const std::string								allowedIdentifierCharacters;
 			static const RequiredDirectoriesList					requiredFirstLevelDirectories, requiredObjectDirectories;
-			static const RequiredFilesList							requiredFirstLevelFiles;
+			static const RequiredFilesList							requiredFirstLevelFiles, requiredObjectFiles;
 			static const AllowedFileExtensionsList					allowedCostumeFileExtensions, allowedScriptFileExtensions, allowedSoundFileExtensions;
 		
 			boost::filesystem::path									pathPrefix;
 			std::string												projectName;
 			std::vector<std::string>								objectNames;
-	
-			const std::string										fileTypeToString(boost::filesystem::file_type fileType);
-			const std::string										fileTypeToString(const boost::filesystem::path& filepath);
 		
-			void													createFile(const boost::filesystem::path& filepath, const std::string& contents="");
 			void													createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
 			void													createRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
 		
@@ -65,7 +61,7 @@ namespace sc
 			void													validateFile(const boost::filesystem::path& filepath, boost::filesystem::file_type type);
 			void													validateRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
 			void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
-			void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExt, const boost::filesystem::path& dir=".");
+			void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExts, const boost::filesystem::path& dir=".");
 			void													validateObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
 	
 		public:
@@ -73,7 +69,7 @@ namespace sc
 			ProjectManager(const boost::filesystem::path& newPathPrefix, const std::string& newProjectName);
 		
 			void													initialize();
-			void													addObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
+			void													addObject(const std::string& objName, const boost::filesystem::path& dirPrefix="", bool validateAll=true);
 			void													validate(const boost::filesystem::path& dirPrefix="");
 			void													build();
 			void													clean();
