@@ -32,13 +32,14 @@
 	#include <memory>
 	#include <typeinfo>
 	#include <ast/AST.hpp>
-	class ScratchCodeDriver;
+	
+	namespace sc { class Driver; }																					//one cannot simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
 }
 
 
 
 //the parsing context
-%param { ScratchCodeDriver& driver }																				//a reference to a "ScratchCodeDriver" will become a parameter for the "ScratchCodeParser" class constructor
+%param { sc::Driver& driver }																						//a reference to a "sc::Driver" will become a parameter for the "ScratchCodeParser" class constructor
 %locations
 %initial-action
 {
@@ -54,7 +55,7 @@
 
 %code
 {
-	#include "ScratchCodeDriver.hpp"
+	#include "Driver.hpp"
 }
 
 %define api.token.prefix {TOK_}

@@ -31,7 +31,10 @@
 #include <boost/filesystem.hpp>
 
 #include "Translator.hpp"
-#include "ScratchCodeException.hpp"
+#include "GeneralException.hpp"
+#include "Object.hpp"
+#include "Costume.hpp"
+#include "Sound.hpp"
 
 
 
@@ -63,7 +66,9 @@ namespace sc
 			void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
 			void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExts, const boost::filesystem::path& dir=".");
 			void													validateObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
-	
+			
+			std::shared_ptr<Object>									loadObject(const std::string& name, const boost::filesystem::path& dirPrefix);
+			
 		public:
 			ProjectManager();
 			ProjectManager(const boost::filesystem::path& newPathPrefix, const std::string& newProjectName);
@@ -71,8 +76,8 @@ namespace sc
 			void													initialize();
 			void													addObject(const std::string& objName, const boost::filesystem::path& dirPrefix="", bool validateAll=true);
 			void													validate(const boost::filesystem::path& dirPrefix="");
-			void													build();
-			void													clean();
+			void													build(const boost::filesystem::path& dirPrefix="");
+			void													clean(const boost::filesystem::path& dirPrefix="");
 			const boost::filesystem::path&							getPathPrefix();
 			const std::string&										getProjectName();
 			void													setProjectPath(const std::string& newProjectPath);

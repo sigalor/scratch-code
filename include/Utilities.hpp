@@ -36,7 +36,7 @@
 #include <png.h>
 #include <openssl/md5.h>
 
-#include "ScratchCodeException.hpp"
+#include "GeneralException.hpp"
 
 
 

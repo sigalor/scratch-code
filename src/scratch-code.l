@@ -29,7 +29,7 @@
 #include <ast/RValueValue.hpp>
 
 #include "scratch-code.tab.hpp"					//to get ScratchCodeParser class declaration
-#include "ScratchCodeDriver.hpp"
+#include "Driver.hpp"
 
 static yy::location loc;
 %}

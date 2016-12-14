@@ -54,7 +54,7 @@ namespace sc
 			fs::create_directories(filepath.parent_path());
 			f.open(filepath.string().c_str());
 			if(!f)
-				throw ScratchCodeException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
+				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
 			if(!contents.empty())
 				f << contents;
 			f.close();
@@ -105,25 +105,25 @@ namespace sc
 				//create png write struct
 				pngPtr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 				if(pngPtr == nullptr)
-					throw ScratchCodeException("unable to create PNG write struct");
+					throw GeneralException("unable to create PNG write struct");
 	
 				//create png info struct
 				infoPtr = png_create_info_struct(pngPtr);
 				if(infoPtr == nullptr)
 				{
-					png_destroy_write_struct(&pngPtr, &infoPtr);
-					throw ScratchCodeException("unable to create PNG info struct");
+					png_destroy_write_struct(&pngPtr, nullptr);
+					throw GeneralException("unable to create PNG info struct");
 				}
 	
 				//set up error handling
 				if(setjmp(png_jmpbuf(pngPtr)))
 				{
 					png_destroy_write_struct(&pngPtr, &infoPtr);
-					throw ScratchCodeException("setjmp failed");
+					throw GeneralException("unknown error");
 				}
 			}
-			catch(const ScratchCodeException& e)
-				{ throw ScratchCodeException("while creating plain PNG file '" + filepath.string() + "': " + e.what()); }
+			catch(const GeneralException& e)
+				{ throw GeneralException("while creating plain PNG file '" + filepath.string() + "': " + e.what()); }
 	
 			//set image attributes
 			png_set_IHDR(pngPtr, infoPtr, width, height, depth, PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -146,7 +146,7 @@ namespace sc
 			//open output file
 			outFile = fopen(filepath.string().c_str(), "wb");
 			if(!outFile)
-				throw ScratchCodeException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
+				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
 	
 			//write image data to output file
 			png_init_io(pngPtr, outFile);
@@ -183,7 +183,7 @@ namespace sc
 		{
 			std::ifstream f(filepath.string().c_str());
 			if(!f)
-				throw ScratchCodeException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for reading");
+				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for reading");
 			return getMD5Sum(std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>()));
 		}
 	}

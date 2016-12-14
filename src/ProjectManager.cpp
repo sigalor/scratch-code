@@ -102,11 +102,11 @@ namespace sc
 	{
 		//trying to match a regex like [_A-Za-z][_A-Za-z0-9]* would be possible, but the std::regex library is way too big for such a simple task
 		if(identifier.empty())
-			throw ScratchCodeException(name + " may not be empty");
+			throw GeneralException(name + " may not be empty");
 		if(std::string(allowedIdentifierCharacters.begin(), allowedIdentifierCharacters.end()-10).find(identifier[0]) == std::string::npos)
-			throw ScratchCodeException(name + " may only begin with a letter or an underscore, not like '" + identifier + "' with '" + std::string(1, identifier[0]) + "'");
+			throw GeneralException(name + " may only begin with a letter or an underscore, not like '" + identifier + "' with '" + std::string(1, identifier[0]) + "'");
 		if(identifier.find_first_not_of(allowedIdentifierCharacters) != std::string::npos)
-			throw ScratchCodeException(name + " may only contain letters, numbers or underscores, thus '" + identifier + "' is invalid");
+			throw GeneralException(name + " may only contain letters, numbers or underscores, thus '" + identifier + "' is invalid");
 	}
 
 	void ProjectManager::validateFile(const fs::path& filepath, fs::file_type type)
@@ -115,7 +115,7 @@ namespace sc
 		bool hasCorrectType = false;
 	
 		if(!fs::exists(filepath))
-			throw ScratchCodeException(typeString + " '" + filepath.string() + "' is missing");
+			throw GeneralException(typeString + " '" + filepath.string() + "' is missing");
 		switch(type)
 		{
 			case fs::file_type::regular_file	: hasCorrectType = fs::is_regular_file(filepath); break;
@@ -123,7 +123,7 @@ namespace sc
 			default								: break;
 		}
 		if(!hasCorrectType)
-			throw ScratchCodeException("'" + filepath.string() + "' needs to be a " + typeString);
+			throw GeneralException("'" + filepath.string() + "' needs to be a " + typeString);
 	}
 
 	void ProjectManager::validateRequiredDirectories(const ProjectManager::RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
@@ -143,13 +143,13 @@ namespace sc
 		for(fs::directory_entry& e : fs::directory_iterator(dir))
 		{
 			if(!fs::is_regular_file(e.path()))
-				throw ScratchCodeException("'" + e.path().string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::regular_file));
+				throw GeneralException("'" + e.path().string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::regular_file));
 			if(std::find(allFileExts.begin(), allFileExts.end(), e.path().extension()) == allFileExts.end())
 			{
 				std::string allowedConcat;																			//is there an easy standard library function for concatenating all strings in a vector? std::accumulate does not allow a separator...
 				for(auto& s : allFileExts)
 					allowedConcat += s + " ";
-				throw ScratchCodeException("illegal file extension '" + e.path().extension().string() + "' in '" + e.path().string() + "', only the following are allowed: " + allowedConcat);
+				throw GeneralException("illegal file extension '" + e.path().extension().string() + "' in '" + e.path().string() + "', only the following are allowed: " + allowedConcat);
 			}
 		}
 	}
@@ -159,9 +159,9 @@ namespace sc
 		fs::path objBasePath(dirPrefix / "objects" / objName);
 
 		if(!fs::exists(objBasePath))
-			throw ScratchCodeException("object '" + objName + "' does not exist in '" + objBasePath.string() + "'");
+			throw GeneralException("object '" + objName + "' does not exist in '" + objBasePath.string() + "'");
 		if(!fs::is_directory(objBasePath))
-			throw ScratchCodeException("'" + objBasePath.string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::directory_file));
+			throw GeneralException("'" + objBasePath.string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::directory_file));
 	
 		validateIdentifier("object name", objName);
 		validateRequiredDirectories(requiredObjectDirectories, objBasePath);
@@ -170,6 +170,23 @@ namespace sc
 		validateAllowedFileExtensions(allowedCostumeFileExtensions, objBasePath / "costumes");
 		validateAllowedFileExtensions(allowedScriptFileExtensions,  objBasePath / "scripts");
 		validateAllowedFileExtensions(allowedSoundFileExtensions,   objBasePath / "sounds");
+	}
+	
+	
+	
+	
+	
+	std::shared_ptr<Object> ProjectManager::loadObject(const std::string& objName, const fs::path& dirPrefix)		//object's existance is guaranteed because of previous call to "validate"
+	{
+		fs::path				objBasePath(dirPrefix / "objects" / objName);
+		std::shared_ptr<Object>	ret = std::make_shared<Object>(objName);
+		
+		for(fs::directory_entry& e : fs::directory_iterator(objBasePath / "costumes"))
+			ret->addCostume(std::make_shared<Costume>(e.path()));
+		for(fs::directory_entry& e : fs::directory_iterator(objBasePath / "sounds"))
+			ret->addSound(std::make_shared<Sound>(e.path()));
+		
+		return ret;
 	}
 
 
@@ -190,7 +207,7 @@ namespace sc
 	{
 		fs::path projectDir(projectName);
 		if(fs::exists(projectName))
-			throw ScratchCodeException("'" + projectName + "' already exists as a " + Utilities::fileTypeToString(projectName));
+			throw GeneralException("'" + projectName + "' already exists as a " + Utilities::fileTypeToString(projectName));
 	
 		try
 		{
@@ -200,7 +217,7 @@ namespace sc
 			createRequiredFiles(requiredFirstLevelFiles, projectDir);
 		}
 		catch(const fs::filesystem_error& e)
-			{ throw ScratchCodeException(std::string("file system error: ") + e.what()); }
+			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 	
 		validate(projectDir);
 		std::cout << "successfully created project tree for '" + projectName + "'" << std::endl;
@@ -210,7 +227,7 @@ namespace sc
 	{
 		fs::path objBasePath(dirPrefix / "objects" / objName);
 		if(fs::exists(objBasePath))
-			throw ScratchCodeException("'" + objBasePath.string() + "' already exists as a " + Utilities::fileTypeToString(objBasePath));
+			throw GeneralException("'" + objBasePath.string() + "' already exists as a " + Utilities::fileTypeToString(objBasePath));
 	
 		try
 		{
@@ -218,7 +235,7 @@ namespace sc
 			createRequiredFiles(requiredObjectFiles, objBasePath);
 		}
 		catch(const fs::filesystem_error& e)
-			{ throw ScratchCodeException(std::string("file system error: ") + e.what()); }
+			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 	
 		if(validateAll)
 			validate(dirPrefix);
@@ -242,16 +259,30 @@ namespace sc
 			validateObject("stage", dirPrefix);																		//the "stage" object HAS TO exist
 			validateRequiredFiles(requiredFirstLevelFiles, dirPrefix);
 		}
-		catch(const ScratchCodeException& e)
-			{ throw ScratchCodeException(std::string("invalid project tree: ") + e.what()); }
+		catch(const GeneralException& e)
+			{ throw GeneralException(std::string("invalid project tree: ") + e.what()); }
 	}
 
-	void ProjectManager::build()
+	void ProjectManager::build(const fs::path& dirPrefix)
 	{
+		std::vector<std::shared_ptr<Object>> objects;
+	
 		validate();
+		for(fs::directory_entry& e : fs::directory_iterator(dirPrefix / "objects"))
+		{
+			objects.push_back(loadObject(e.path().filename().string(), dirPrefix));									//TODO: do not allow double names (currently not possible anyway, because costumes and sounds both have just one available file extension)
+			std::cout << "Object '" << objects.back()->getName() << "':\n";
+			std::cout << "    " << objects.back()->getCostumes().size() << " costume(s):\n";
+			for(auto& c : objects.back()->getCostumes())
+				std::cout << "        '" << c->getName() << "' at " << c->getResourcePath() << ", size: " << c->getWidth() << " x " << c->getHeight() << "\n";
+			std::cout << "    " << objects.back()->getSounds().size() << " sound(s):\n";
+			for(auto& s : objects.back()->getSounds())
+				std::cout << "        '" << s->getName() << "' at " << s->getResourcePath() << ", sampleCount: " << s->getSampleCount() << ", rate: " << s->getRate() << "\n";
+			std::cout << std::endl;
+		}
 	}
 
-	void ProjectManager::clean()
+	void ProjectManager::clean(const fs::path& dirPrefix)
 	{
 		validate();
 	}

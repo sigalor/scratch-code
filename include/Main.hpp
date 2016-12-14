@@ -28,11 +28,11 @@
 
 #include <ast/AST.hpp>
 
-#include "ScratchCodeDriver.hpp"
+#include "Driver.hpp"
 #include "ProjectManager.hpp"
 
 
 
 void															printBasicUsage(const std::string& appName);
-void															processParameters(int argc, char** argv, ScratchCodeDriver& driver);
+void															processParameters(int argc, char** argv, sc::Driver& driver);
 int																main(int argc, char** argv);

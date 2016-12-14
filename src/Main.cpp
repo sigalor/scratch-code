@@ -28,7 +28,7 @@ void printBasicUsage(const std::string& appName)
 	std::exit(EXIT_SUCCESS);
 }
 
-void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
+void processParameters(int argc, char** argv, sc::Driver& driver)
 {
 	std::string			appName = argv[0], action, projectName;
 	sc::ProjectManager	projMgr;
@@ -70,7 +70,7 @@ void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
 		else
 			printBasicUsage(appName);
 	}
-	catch(const ScratchCodeException& e)
+	catch(const sc::GeneralException& e)
 	{
 		std::cerr << "error: " << e.what() << std::endl;
 	}
@@ -78,7 +78,7 @@ void processParameters(int argc, char** argv, ScratchCodeDriver& driver)
 
 int main(int argc, char** argv)
 {
-	ScratchCodeDriver driver;
+	sc::Driver driver;
 
 	processParameters(argc, argv, driver);
 	
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 
 	if(result == 0)
 		std::cout << "\n" << ast::stringify(syntaxTree) << "\n";													//output the parsed abstract syntax tree
-	ScratchCodeTranslator::translate(syntaxTree, outputFile);*/
+	sc::Translator::translate(syntaxTree, outputFile);*/
 	
 	return 0;
 }

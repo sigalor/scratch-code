@@ -47,9 +47,10 @@
 	#include <memory>
 	#include <typeinfo>
 	#include <ast/AST.hpp>
-	class ScratchCodeDriver;
+	
+	namespace sc { class Driver; }																					//one cannot simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
 
-#line 53 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 54 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -126,7 +127,7 @@
 
 
 namespace yy {
-#line 130 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 131 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 
@@ -825,7 +826,7 @@ namespace yy {
 
 
     /// Build a parser object.
-    ScratchCodeParser (ScratchCodeDriver& driver_yyarg);
+    ScratchCodeParser (sc::Driver& driver_yyarg);
     virtual ~ScratchCodeParser ();
 
     /// Parse.
@@ -1038,7 +1039,7 @@ namespace yy {
 
 
     // User arguments.
-    ScratchCodeDriver& driver;
+    sc::Driver& driver;
   };
 
   // Symbol number corresponding to token number t.
@@ -2120,7 +2121,7 @@ namespace yy {
 
 
 } // yy
-#line 2124 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 2125 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 

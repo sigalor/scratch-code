@@ -24,7 +24,8 @@ obj/ProjectManager.o: src/ProjectManager.cpp include/ProjectManager.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/Utilities.hpp include/ScratchCodeException.hpp
+ include/Utilities.hpp include/GeneralException.hpp include/Object.hpp \
+ include/Costume.hpp include/Resource.hpp include/Sound.hpp
 
 include/ProjectManager.hpp:
 
@@ -82,4 +83,12 @@ ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
 include/Utilities.hpp:
 
-include/ScratchCodeException.hpp:
+include/GeneralException.hpp:
+
+include/Object.hpp:
+
+include/Costume.hpp:
+
+include/Resource.hpp:
+
+include/Sound.hpp:

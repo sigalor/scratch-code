@@ -24,7 +24,7 @@ obj/Translator.o: src/Translator.cpp include/Translator.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/Utilities.hpp include/ScratchCodeException.hpp
+ include/Utilities.hpp ScratchCodeException.hpp
 
 include/Translator.hpp:
 
@@ -80,4 +80,4 @@ ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
 include/Utilities.hpp:
 
-include/ScratchCodeException.hpp:
+ScratchCodeException.hpp:
