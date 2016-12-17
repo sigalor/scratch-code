@@ -26,12 +26,12 @@ namespace fs = boost::filesystem;
 
 namespace sc
 {
-	Costume::Costume()
+	Costume::Costume() : Resource(), width(0), height(0), rotationCenterX(0), rotationCenterY(0)
 	{
-	
+		
 	}
 	
-	Costume::Costume(const fs::path& newResourcePath)
+	Costume::Costume(const fs::path& newResourcePath) : Resource(), width(0), height(0), rotationCenterX(0), rotationCenterY(0)
 	{
 		loadFromPath(newResourcePath);
 	}
@@ -85,7 +85,9 @@ namespace sc
 				png_read_info(pngPtr, infoPtr);
 				
 				//get width and height from IHDR chunk
-				png_get_IHDR(pngPtr, infoPtr, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
+				png_get_IHDR(pngPtr, infoPtr, &width, &height, nullptr, nullptr, nullptr, nullptr, nullptr);
+				rotationCenterX = width / 2;
+				rotationCenterY = height / 2;
 				
 				fclose(inpFile);
 			}
@@ -94,6 +96,19 @@ namespace sc
 		{
 			throw GeneralException("invalid '" + fileExt + "' file: " + e.what());
 		}
+	}
+	
+	void Costume::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		/*using namespace rapidjson;
+		
+		valDest.SetObject();
+		valDest.AddMember("costumeName", Value(costume->getName().c_str(), alloc), alloc);
+		valDest.AddMember("baseLayerID", costume->getResourceID(), alloc);
+		valDest.AddMember("baseLayerMD5", Value((costume->getMD5Sum() + costume->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("bitmapResolution", 1, alloc);
+		valDest.AddMember("rotationCenterX", costume->getWidth()/2, alloc);
+		valDest.AddMember("rotationCenterY", costume->getHeight()/2, alloc);*/
 	}
 	
 	uint32_t Costume::getWidth()
@@ -106,13 +121,23 @@ namespace sc
 		return height;
 	}
 	
-	int Costume::getBitDepth()
+	uint32_t Costume::getRotationCenterX()
 	{
-		return bitDepth;
+		return rotationCenterX;
 	}
 	
-	int Costume::getColorType()
+	uint32_t Costume::getRotationCenterY()
 	{
-		return colorType;
+		return rotationCenterY;
+	}
+	
+	void Costume::setRotationCenterX(uint32_t newRotationCenterX)
+	{
+		rotationCenterX = newRotationCenterX;
+	}
+	
+	void Costume::setRotationCenterY(uint32_t newRotationCenterY)
+	{
+		rotationCenterY = newRotationCenterY;
 	}
 }

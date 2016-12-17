@@ -1,4 +1,9 @@
 {
-    "user": "your_username",
-    "title": "proj1"
+	"user": "your_username",
+	"title": "proj1",
+	"stageObject": "stage",
+	"info": {
+		"videoOn": false,
+		"hasCloudData": false
+	}
 }

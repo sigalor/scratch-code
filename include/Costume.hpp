@@ -37,8 +37,7 @@ namespace sc
 	class Costume : public Resource
 	{
 		private:
-			uint32_t											width, height;
-			int													bitDepth, colorType;
+			uint32_t											width, height, rotationCenterX, rotationCenterY;
 			
 	
 		public:
@@ -46,9 +45,12 @@ namespace sc
 			Costume(const boost::filesystem::path& newResourcePath);
 			
 			void												loadFromPath(const boost::filesystem::path& newResourcePath);
+			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
 			uint32_t											getWidth();
 			uint32_t											getHeight();
-			int													getBitDepth();
-			int													getColorType();
+			uint32_t											getRotationCenterX();
+			uint32_t											getRotationCenterY();
+			void												setRotationCenterX(uint32_t newRotationCenterX);
+			void												setRotationCenterY(uint32_t newRotationCenterY);
 	};
 }

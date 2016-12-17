@@ -33,6 +33,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/error/en.h>
 #include <png.h>
 #include <openssl/md5.h>
 
@@ -44,10 +45,16 @@ namespace sc
 {
 	namespace Utilities
 	{
+		void													validateIdentifier(const std::string& description, const std::string& identifier);
+		void													validateAllowedFileExtensions(const std::vector<std::string>& allowedFileExts, const boost::filesystem::path& filepath);
+		void													validateFile(const boost::filesystem::path& filepath, boost::filesystem::file_type type);
+		
 		const std::string										fileTypeToString(boost::filesystem::file_type fileType);
 		const std::string										fileTypeToString(const boost::filesystem::path& filepath);
 		void													createFile(const boost::filesystem::path& filepath, const std::string& contents="");
+		std::string												readFile(const boost::filesystem::path& filepath);
 		
+		void													readDocumentFromFile(const boost::filesystem::path& filepath, rapidjson::Document& doc);
 		std::string												getDocumentString(rapidjson::Document& doc, bool pretty);
 		void													writeDocumentToFile(const boost::filesystem::path& filepath, rapidjson::Document& doc);
 		

@@ -1,0 +1,2 @@
+- add 'stageObject' member to 'manifest.json'
+- add 'scriptPath' member to 'objectManifest.json'

@@ -23,10 +23,10 @@ obj/Main.o: src/Main.cpp include/Main.hpp \
  ext/scratch-code-ast/include/ast/ForLoop.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
- ext/scratch-code-ast/include/ast/ReturnStatement.hpp include/Driver.hpp \
- gen/scratch-code.tab.hpp gen/stack.hh gen/location.hh gen/position.hh \
+ ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
  include/ProjectManager.hpp include/Translator.hpp include/Utilities.hpp \
- include/GeneralException.hpp
+ include/GeneralException.hpp include/Object.hpp include/Costume.hpp \
+ include/Resource.hpp include/Sound.hpp
 
 include/Main.hpp:
 
@@ -80,16 +80,6 @@ ext/scratch-code-ast/include/ast/LoopControlStatement.hpp:
 
 ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
-include/Driver.hpp:
-
-gen/scratch-code.tab.hpp:
-
-gen/stack.hh:
-
-gen/location.hh:
-
-gen/position.hh:
-
 include/ProjectManager.hpp:
 
 include/Translator.hpp:
@@ -97,3 +87,11 @@ include/Translator.hpp:
 include/Utilities.hpp:
 
 include/GeneralException.hpp:
+
+include/Object.hpp:
+
+include/Costume.hpp:
+
+include/Resource.hpp:
+
+include/Sound.hpp:

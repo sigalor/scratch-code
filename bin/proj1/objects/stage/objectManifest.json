@@ -1,0 +1,12 @@
+{
+	"objectName": "stage",
+	"costumes": [
+		{
+			"path": "backdrop1.png",
+			"name": "backdrop1",
+			"rotationCenterX": 0,
+			"rotationCenterY": 0
+		}
+	],
+	"type": "stage"
+}

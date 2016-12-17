@@ -26,21 +26,38 @@ namespace fs = boost::filesystem;
 
 namespace sc
 {
-	Resource::Resource()
+	Resource::Resource() : resourceID(-1)
 	{
 	
 	}
 	
 	void Resource::loadFromPath(const fs::path& newResourcePath)
 	{
+		resourceID = -1;
 		resourcePath = newResourcePath;
+		Utilities::validateFile(resourcePath, fs::file_type::regular_file);
 		name = resourcePath.stem().string();
 		md5Sum = Utilities::getFileMD5Sum(resourcePath);
+	}
+	
+	void Resource::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+	
 	}
 	
 	const std::string& Resource::getName()
 	{
 		return name;
+	}
+	
+	int Resource::getResourceID()
+	{
+		return resourceID;
+	}
+	
+	int Resource::getResourceIndex()
+	{
+		return resourceIndex;
 	}
 	
 	const fs::path& Resource::getResourcePath()
@@ -51,5 +68,20 @@ namespace sc
 	const std::string& Resource::getMD5Sum()
 	{
 		return md5Sum;
+	}
+	
+	void Resource::setName(const std::string& newName)
+	{
+		name = newName;
+	}
+	
+	void Resource::setResourceID(int newResourceID)
+	{
+		resourceID = newResourceID;
+	}
+	
+	void Resource::setResourceIndex(int newResourceIndex)
+	{
+		resourceIndex = newResourceIndex;
 	}
 }

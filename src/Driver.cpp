@@ -22,6 +22,8 @@
 
 
 
+namespace fs = boost::filesystem;
+
 namespace sc
 {
 	Driver::Driver() : result(0), traceLexing(false), traceParsing(false) { }
@@ -33,12 +35,13 @@ namespace sc
 	void Driver::beginLexing()
 	{
 		yy_flex_debug = traceLexing;
-		if(filename.empty()  ||  filename == "-")
+		if(filepath.empty()  ||  filepath == "-")
 			yyin = stdin;
-		else if(!(yyin = fopen(filename.c_str(), "r")))
+		else
 		{
-			handleError("cannot open " + filename + ": " + strerror(errno));
-			exit(EXIT_FAILURE);
+			Utilities::validateFile(filepath, fs::file_type::regular_file);
+			if(!(yyin = fopen(filepath.c_str(), "r")))
+				throw GeneralException("cannot open " + filepath.string() + " for reading: " + strerror(errno));
 		}
 	}
 
@@ -47,11 +50,11 @@ namespace sc
 		fclose(yyin);
 	}
 
-	int Driver::parse(const std::string& newFilename)
+	int Driver::parse(const fs::path& newFilepath)
 	{
 		yy::ScratchCodeParser parser(*this);
 
-		filename = newFilename;
+		filepath = newFilepath;
 		beginLexing();
 		parser.set_debug_level(traceParsing);
 		result = parser.parse();
@@ -62,7 +65,7 @@ namespace sc
 
 	std::string Driver::locationToString(const yy::location& loc)
 	{
-		return filename + ":" + std::to_string(loc.begin.line) + ":" + std::to_string(loc.begin.column);
+		return filepath.string() + ":" + std::to_string(loc.begin.line) + ":" + std::to_string(loc.begin.column);
 	}
 
 	void Driver::handleError(const yy::location& loc, const std::string& message)
@@ -75,14 +78,9 @@ namespace sc
 		std::cerr << message << std::endl;
 	}
 
-	const std::string& Driver::getFilename()
+	const fs::path& Driver::getFilepath()
 	{
-		return filename;
-	}
-
-	std::string* Driver::getFilenamePointer()
-	{
-		return &filename;
+		return filepath;
 	}
 
 	int Driver::getResult()

@@ -27,12 +27,14 @@
 #include <algorithm>
 #include <utility>
 #include <functional>
+#include <type_traits>
 
 #include <boost/filesystem.hpp>
 
 #include "Translator.hpp"
 #include "GeneralException.hpp"
 #include "Object.hpp"
+#include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
 
@@ -45,13 +47,10 @@ namespace sc
 		public:
 			using RequiredDirectoriesList = std::vector<boost::filesystem::path>;
 			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<void(const boost::filesystem::path&, ProjectManager*)>>>;
-			using AllowedFileExtensionsList = std::vector<std::string>;
 
 		private:
-			static const std::string								allowedIdentifierCharacters;
 			static const RequiredDirectoriesList					requiredFirstLevelDirectories, requiredObjectDirectories;
 			static const RequiredFilesList							requiredFirstLevelFiles, requiredObjectFiles;
-			static const AllowedFileExtensionsList					allowedCostumeFileExtensions, allowedScriptFileExtensions, allowedSoundFileExtensions;
 		
 			boost::filesystem::path									pathPrefix;
 			std::string												projectName;
@@ -60,14 +59,27 @@ namespace sc
 			void													createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
 			void													createRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
 		
-			void													validateIdentifier(const std::string& name, const std::string& identifier);
-			void													validateFile(const boost::filesystem::path& filepath, boost::filesystem::file_type type);
 			void													validateRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
 			void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
-			void													validateAllowedFileExtensions(const AllowedFileExtensionsList& allFileExts, const boost::filesystem::path& dir=".");
 			void													validateObject(const std::string& objName, const boost::filesystem::path& dirPrefix="");
 			
 			std::shared_ptr<Object>									loadObject(const std::string& name, const boost::filesystem::path& dirPrefix);
+			
+			template<typename T>
+			typename std::enable_if_t<std::is_base_of<Resource, T>::value, void>
+			buildObjectResourceList(const std::vector<std::shared_ptr<T>>& resourceList, const boost::filesystem::path& dirPrefix="")
+			{
+				for(auto it = resourceList.begin(); it != resourceList.end(); ++it)
+				{
+					auto i = std::distance(resourceList.begin(), it);
+					auto p = (*it)->getResourcePath();
+					boost::filesystem::copy(p, boost::filesystem::path("gen") / (std::to_string(i) + p.extension().string()));
+				}
+			}
+			void													buildCostumeJSON(std::shared_ptr<Costume> costume, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+			void													buildSoundJSON(std::shared_ptr<Sound> sound, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+			void													buildObjectJSON(std::shared_ptr<Object> obj, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+			void													buildProjectJSON(std::vector<std::shared_ptr<Object>> objects, std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest);
 			
 		public:
 			ProjectManager();

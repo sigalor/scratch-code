@@ -22,13 +22,15 @@
 
 
 
+namespace fs = boost::filesystem;
+
 void printBasicUsage(const std::string& appName)
 {
 	std::cout << "usage: " << appName << " init|build|clean <parameters>" << std::endl;
 	std::exit(EXIT_SUCCESS);
 }
 
-void processParameters(int argc, char** argv, sc::Driver& driver)
+void processParameters(int argc, char** argv)
 {
 	std::string			appName = argv[0], action, projectName;
 	sc::ProjectManager	projMgr;
@@ -46,13 +48,13 @@ void processParameters(int argc, char** argv, sc::Driver& driver)
 				std::cout << "usage: " << argv[0] << " init <project_name>" << std::endl;
 				std::exit(EXIT_SUCCESS);
 			}
-			projMgr.setPathPrefix(boost::filesystem::current_path().string());
+			projMgr.setPathPrefix(fs::current_path().string());
 			projMgr.setProjectName(argv[2]);
 			projMgr.initialize();
 		}
 		else if(action == "addobject"  ||  action == "build"  ||  action == "clean")
 		{
-			projMgr.setProjectPath(boost::filesystem::current_path().string());
+			projMgr.setProjectPath(fs::current_path().string());
 			if(action == "addobject")
 			{
 				if(argc == 2)
@@ -72,15 +74,13 @@ void processParameters(int argc, char** argv, sc::Driver& driver)
 	}
 	catch(const sc::GeneralException& e)
 	{
-		std::cerr << "error: " << e.what() << std::endl;
+		std::cerr << action << " error: " << e.what() << std::endl;
 	}
 }
 
 int main(int argc, char** argv)
 {
-	sc::Driver driver;
-
-	processParameters(argc, argv, driver);
+	processParameters(argc, argv);
 	
 
 

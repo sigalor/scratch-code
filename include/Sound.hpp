@@ -73,6 +73,7 @@ namespace sc
 			Sound(const boost::filesystem::path& newResourcePath);
 			
 			void												loadFromPath(const boost::filesystem::path& newResourcePath);
+			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
 			std::size_t											getSampleCount();
 			std::size_t											getRate();
 	};

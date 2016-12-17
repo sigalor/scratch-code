@@ -28,6 +28,51 @@ namespace sc
 {
 	namespace Utilities
 	{
+		void validateIdentifier(const std::string& description, const std::string& identifier)
+		{
+			//trying to match a regex like [_A-Za-z][_A-Za-z0-9]* would be possible, but the std::regex library is way too big for such a simple task
+			static const std::string allowedIdentifierCharacters = "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+			if(identifier.empty())
+				throw GeneralException(description + " may not be empty");
+			if(std::string(allowedIdentifierCharacters.begin(), allowedIdentifierCharacters.end()-10).find(identifier[0]) == std::string::npos)
+				throw GeneralException(description + " may only begin with a letter or an underscore, not like '" + identifier + "' with '" + std::string(1, identifier[0]) + "'");
+			if(identifier.find_first_not_of(allowedIdentifierCharacters) != std::string::npos)
+				throw GeneralException(description + " may only contain letters, numbers or underscores, thus '" + identifier + "' is invalid");
+		}
+		
+		void validateAllowedFileExtensions(const std::vector<std::string>& allowedFileExts, const fs::path& filepath)
+		{
+			validateFile(filepath, fs::file_type::regular_file);
+			if(std::find(allowedFileExts.begin(), allowedFileExts.end(), filepath.extension()) == allowedFileExts.end())
+			{
+				std::string afeConcat;																				//is there an easy standard library function for concatenating all strings in a vector? std::accumulate does not allow a separator...
+				for(auto& s : allowedFileExts)
+					afeConcat += s + " ";
+				throw GeneralException("illegal file extension '" + filepath.extension().string() + "' in '" + filepath.string() + "', only the following are allowed: " + afeConcat);
+			}
+		}
+		
+		void validateFile(const fs::path& filepath, fs::file_type type)
+		{
+			const std::string typeString(fileTypeToString(type));
+			bool hasCorrectType = false;
+	
+			if(!fs::exists(filepath))
+				throw GeneralException(typeString + " '" + filepath.string() + "' is missing");
+			switch(type)
+			{
+				case fs::file_type::regular_file	: hasCorrectType = fs::is_regular_file(filepath); break;
+				case fs::file_type::directory_file	: hasCorrectType = fs::is_directory(filepath); break;
+				default								: break;
+			}
+			if(!hasCorrectType)
+				throw GeneralException("'" + filepath.string() + "' needs to be a " + typeString);
+		}
+		
+		
+		
+		
+		
 		const std::string fileTypeToString(fs::file_type fileType)
 		{
 			switch(fileType)
@@ -54,15 +99,35 @@ namespace sc
 			fs::create_directories(filepath.parent_path());
 			f.open(filepath.string().c_str());
 			if(!f)
-				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
+				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + filepath.string() + "' for writing");
 			if(!contents.empty())
 				f << contents;
 			f.close();
 		}
 		
+		std::string readFile(const fs::path& filepath)
+		{
+			std::ifstream f;
+			validateFile(filepath, fs::file_type::regular_file);
+			f.open(filepath.string().c_str());
+			if(!f)
+				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + filepath.string() + "' for reading");
+			return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+		}
+
+	
 		
 		
 		
+		
+		void readDocumentFromFile(const fs::path& filepath, rapidjson::Document& doc)
+		{
+			using namespace rapidjson;
+		
+			ParseResult res = doc.Parse<0>(readFile(filepath).c_str());
+			if(!res)
+				throw GeneralException("JSON in '" + filepath.string() + "' is invalid, offset " + std::to_string(res.Offset()) + ": " + GetParseError_En(res.Code()));
+		}
 		
 		std::string getDocumentString(rapidjson::Document& doc, bool pretty)
 		{
@@ -181,10 +246,7 @@ namespace sc
 		
 		std::string getFileMD5Sum(const fs::path& filepath)
 		{
-			std::ifstream f(filepath.string().c_str());
-			if(!f)
-				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for reading");
-			return getMD5Sum(std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>()));
+			return getMD5Sum(readFile(filepath));
 		}
 	}
 }

@@ -26,9 +26,7 @@ namespace fs = boost::filesystem;
 
 namespace sc
 {
-	const std::string ProjectManager::allowedIdentifierCharacters = "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	const ProjectManager::RequiredDirectoriesList ProjectManager::requiredFirstLevelDirectories		= { "bin", "objects" };
+	const ProjectManager::RequiredDirectoriesList ProjectManager::requiredFirstLevelDirectories		= { "bin", "gen", "objects" };
 	const ProjectManager::RequiredDirectoriesList ProjectManager::requiredObjectDirectories			= { "costumes", "scripts", "sounds" };
 
 	const ProjectManager::RequiredFilesList ProjectManager::requiredFirstLevelFiles =
@@ -52,27 +50,44 @@ namespace sc
 		{
 			"objects/stage/penLayer/penLayer.png",
 			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 0, 0, 0, 0); }
-		},
+		}/*,
 		{
-			"objects/stage/costumes/backdrop1.png",
+			"objects/stage/costumes/backdrop.png",
 			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 255, 255, 255, 255); }
-		}
+		}*/
 	};
 	
 	const ProjectManager::RequiredFilesList ProjectManager::requiredObjectFiles =
 	{
 		{
-			"scripts/main.sc",
-			[](const fs::path& filepath, ProjectManager* projMgr)
-			{
-				Utilities::createFile(filepath);
-			}
+			"objectManifest.json",
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
+			/*{
+				using namespace rapidjson;
+				
+				Document doc;
+				Document::AllocatorType& alloc = doc.GetAllocator();
+				
+				Value costumesArray(kArrayType);
+				Value costumeObject(kObjectType);
+				costumeObject.AddMember("path", "backdrop.png", alloc);
+				costumesArray.PushBack(costumeObject, alloc);
+				
+				doc.SetObject();
+				doc.AddMember("costumes", costumesArray, alloc);
+			
+				Utilities::writeDocumentToFile(filepath, doc);
+			}*/
+		}/*,
+		{
+			"costumes/costume1.png",
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 100, 100, 255, 0, 0, 255); }
 		}
+		{
+			"scripts/main.sc",
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath); }
+		}*/
 	};
-
-	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedCostumeFileExtensions	= { ".png" };
-	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedScriptFileExtensions		= { ".sc" };
-	const ProjectManager::AllowedFileExtensionsList ProjectManager::allowedSoundFileExtensions		= { ".wav" };
 
 
 
@@ -98,78 +113,21 @@ namespace sc
 
 
 
-	void ProjectManager::validateIdentifier(const std::string& name, const std::string& identifier)
-	{
-		//trying to match a regex like [_A-Za-z][_A-Za-z0-9]* would be possible, but the std::regex library is way too big for such a simple task
-		if(identifier.empty())
-			throw GeneralException(name + " may not be empty");
-		if(std::string(allowedIdentifierCharacters.begin(), allowedIdentifierCharacters.end()-10).find(identifier[0]) == std::string::npos)
-			throw GeneralException(name + " may only begin with a letter or an underscore, not like '" + identifier + "' with '" + std::string(1, identifier[0]) + "'");
-		if(identifier.find_first_not_of(allowedIdentifierCharacters) != std::string::npos)
-			throw GeneralException(name + " may only contain letters, numbers or underscores, thus '" + identifier + "' is invalid");
-	}
-
-	void ProjectManager::validateFile(const fs::path& filepath, fs::file_type type)
-	{
-		const std::string typeString(Utilities::fileTypeToString(type));
-		bool hasCorrectType = false;
-	
-		if(!fs::exists(filepath))
-			throw GeneralException(typeString + " '" + filepath.string() + "' is missing");
-		switch(type)
-		{
-			case fs::file_type::regular_file	: hasCorrectType = fs::is_regular_file(filepath); break;
-			case fs::file_type::directory_file	: hasCorrectType = fs::is_directory(filepath); break;
-			default								: break;
-		}
-		if(!hasCorrectType)
-			throw GeneralException("'" + filepath.string() + "' needs to be a " + typeString);
-	}
-
 	void ProjectManager::validateRequiredDirectories(const ProjectManager::RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
 	{
 		for(auto& f : reqDirs)
-			validateFile(dirPrefix / f, fs::file_type::directory_file);
+			Utilities::validateFile(dirPrefix / f, fs::file_type::directory_file);
 	}
 
 	void ProjectManager::validateRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const fs::path& dirPrefix)
 	{
 		for(auto& f : reqFiles)
-			validateFile(dirPrefix / f.first, fs::file_type::regular_file);
-	}
-
-	void ProjectManager::validateAllowedFileExtensions(const ProjectManager::AllowedFileExtensionsList& allFileExts, const fs::path& dir)
-	{
-		for(fs::directory_entry& e : fs::directory_iterator(dir))
-		{
-			if(!fs::is_regular_file(e.path()))
-				throw GeneralException("'" + e.path().string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::regular_file));
-			if(std::find(allFileExts.begin(), allFileExts.end(), e.path().extension()) == allFileExts.end())
-			{
-				std::string allowedConcat;																			//is there an easy standard library function for concatenating all strings in a vector? std::accumulate does not allow a separator...
-				for(auto& s : allFileExts)
-					allowedConcat += s + " ";
-				throw GeneralException("illegal file extension '" + e.path().extension().string() + "' in '" + e.path().string() + "', only the following are allowed: " + allowedConcat);
-			}
-		}
+			Utilities::validateFile(dirPrefix / f.first, fs::file_type::regular_file);
 	}
 
 	void ProjectManager::validateObject(const std::string& objName, const fs::path& dirPrefix)
 	{
-		fs::path objBasePath(dirPrefix / "objects" / objName);
-
-		if(!fs::exists(objBasePath))
-			throw GeneralException("object '" + objName + "' does not exist in '" + objBasePath.string() + "'");
-		if(!fs::is_directory(objBasePath))
-			throw GeneralException("'" + objBasePath.string() + "' needs to be a " + Utilities::fileTypeToString(fs::file_type::directory_file));
-	
-		validateIdentifier("object name", objName);
-		validateRequiredDirectories(requiredObjectDirectories, objBasePath);
-		validateRequiredFiles(requiredObjectFiles, objBasePath);
-	
-		validateAllowedFileExtensions(allowedCostumeFileExtensions, objBasePath / "costumes");
-		validateAllowedFileExtensions(allowedScriptFileExtensions,  objBasePath / "scripts");
-		validateAllowedFileExtensions(allowedSoundFileExtensions,   objBasePath / "sounds");
+		loadObject(objName, dirPrefix);
 	}
 	
 	
@@ -178,15 +136,84 @@ namespace sc
 	
 	std::shared_ptr<Object> ProjectManager::loadObject(const std::string& objName, const fs::path& dirPrefix)		//object's existance is guaranteed because of previous call to "validate"
 	{
-		fs::path				objBasePath(dirPrefix / "objects" / objName);
-		std::shared_ptr<Object>	ret = std::make_shared<Object>(objName);
+		return std::make_shared<Object>(dirPrefix / "objects" / objName);
+	}
+	
+	void ProjectManager::buildCostumeJSON(std::shared_ptr<Costume> costume, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		using namespace rapidjson;
 		
-		for(fs::directory_entry& e : fs::directory_iterator(objBasePath / "costumes"))
-			ret->addCostume(std::make_shared<Costume>(e.path()));
-		for(fs::directory_entry& e : fs::directory_iterator(objBasePath / "sounds"))
-			ret->addSound(std::make_shared<Sound>(e.path()));
+		valDest.SetObject();
+		valDest.AddMember("costumeName", Value(costume->getName().c_str(), alloc), alloc);
+		valDest.AddMember("baseLayerID", costume->getResourceID(), alloc);
+		valDest.AddMember("baseLayerMD5", Value((costume->getMD5Sum() + costume->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("bitmapResolution", 1, alloc);
+		valDest.AddMember("rotationCenterX", costume->getWidth()/2, alloc);
+		valDest.AddMember("rotationCenterY", costume->getHeight()/2, alloc);
+	}
+	
+	void ProjectManager::buildSoundJSON(std::shared_ptr<Sound> sound, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		using namespace rapidjson;
 		
-		return ret;
+		valDest.SetObject();
+		valDest.AddMember("soundName", Value(sound->getName().c_str(), alloc), alloc);
+		valDest.AddMember("soundID", sound->getResourceID(), alloc);
+		valDest.AddMember("md5", Value((sound->getMD5Sum() + sound->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("sampleCount", sound->getSampleCount(), alloc);
+		valDest.AddMember("rate", sound->getRate(), alloc);
+		valDest.AddMember("format", Value("", alloc), alloc);
+	}
+	
+	void ProjectManager::buildObjectJSON(std::shared_ptr<Object> obj, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		using namespace rapidjson;
+		
+		valDest.SetObject();
+		valDest.AddMember("objName", Value(obj->getName().c_str(), alloc), alloc);
+		
+		Value tempValue;
+		Value costumesArray(kArrayType), soundsArray(kArrayType);
+		
+		valDest.AddMember("sounds", soundsArray, alloc);
+		for(auto s : obj->getSounds())
+		{
+			buildSoundJSON(s, tempValue, alloc);
+			valDest["sounds"].PushBack(tempValue, alloc);
+		}
+		
+		valDest.AddMember("costumes", costumesArray, alloc);
+		for(auto c : obj->getCostumes())
+		{
+			buildCostumeJSON(c, tempValue, alloc);
+			valDest["costumes"].PushBack(tempValue, alloc);
+		}
+		
+		valDest.AddMember("currentCostumeIndex", 0, alloc);
+	}
+	
+	void ProjectManager::buildProjectJSON(std::vector<std::shared_ptr<Object>> objects, std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest)
+	{
+		using namespace rapidjson;
+		
+		Document::AllocatorType& alloc = docDest.GetAllocator();
+		Value tempObject, childrenArray(kArrayType);
+		
+		buildObjectJSON(*std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == Object::Type::Stage); }), docDest, alloc);
+		docDest.AddMember("penLayerMD5", Value((penLayer->getMD5Sum() + penLayer->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		docDest.AddMember("penLayerID", penLayer->getResourceID(), alloc);
+		docDest.AddMember("tempoBPM", 60, alloc);
+		docDest.AddMember("videoAlpha", 0.5, alloc);
+		
+		docDest.AddMember("children", childrenArray, alloc);
+		for(auto o : objects)
+		{
+			if(o->getName() != "stage")
+			{
+				buildObjectJSON(o, tempObject, alloc);
+				docDest["children"].PushBack(tempObject, alloc);
+			}
+		}
 	}
 
 
@@ -233,6 +260,9 @@ namespace sc
 		{
 			createRequiredDirectories(requiredObjectDirectories, objBasePath);
 			createRequiredFiles(requiredObjectFiles, objBasePath);
+			
+			Object currObj(objBasePath, false);
+			Utilities::writeDocumentToFile(objBasePath / "objectManifest.json", currObj.getManifest());				//the object's manifest is repaired after loading it
 		}
 		catch(const fs::filesystem_error& e)
 			{ throw GeneralException(std::string("file system error: ") + e.what()); }
@@ -244,10 +274,10 @@ namespace sc
 		std::cout << "successfully added object '" + objName + "' to project '" + projectName + "'" << std::endl;
 	}
 
-	void ProjectManager::validate(const fs::path& dirPrefix)														//for this function, dirPrefix / fs::current_path needs to be the project tree's first level, i.e. 'bin/' and 'objects/' need to be directly accessible
+	void ProjectManager::validate(const fs::path& dirPrefix)														//for this function, dirPrefix / fs::current_path needs to be the project tree's first level, i.e. 'bin/', 'gen/' and 'objects/' need to be directly accessible
 	{
 		//check that project name is valid
-		validateIdentifier("project name", projectName);
+		Utilities::validateIdentifier("project name", projectName);
 
 		//check that required directories and files exist
 		std::string objectName;
@@ -270,7 +300,7 @@ namespace sc
 		validate();
 		for(fs::directory_entry& e : fs::directory_iterator(dirPrefix / "objects"))
 		{
-			objects.push_back(loadObject(e.path().filename().string(), dirPrefix));									//TODO: do not allow double names (currently not possible anyway, because costumes and sounds both have just one available file extension)
+			objects.push_back(loadObject(e.path().filename().string(), dirPrefix));
 			std::cout << "Object '" << objects.back()->getName() << "':\n";
 			std::cout << "    " << objects.back()->getCostumes().size() << " costume(s):\n";
 			for(auto& c : objects.back()->getCostumes())
@@ -280,6 +310,30 @@ namespace sc
 				std::cout << "        '" << s->getName() << "' at " << s->getResourcePath() << ", sampleCount: " << s->getSampleCount() << ", rate: " << s->getRate() << "\n";
 			std::cout << std::endl;
 		}
+		
+		std::vector<std::shared_ptr<Costume>> costumes;
+		std::vector<std::shared_ptr<Sound>> sounds;
+		costumes.push_back(std::make_shared<Costume>(dirPrefix / "objects/stage/penLayer/penLayer.png"));			//"penLayer" is the very first "costume" and ID 0 is reserved for it
+		costumes.back()->setResourceID(0);
+		for(auto& o : objects)
+		{
+			for(auto c : o->getCostumes())
+			{
+				c->setResourceID(costumes.size());
+				costumes.push_back(c);
+			}
+			for(auto s : o->getSounds())
+			{
+				s->setResourceID(sounds.size());
+				sounds.push_back(s);
+			}
+		}
+		buildObjectResourceList(costumes, dirPrefix);
+		buildObjectResourceList(sounds, dirPrefix);
+		
+		rapidjson::Document doc;
+		buildProjectJSON(objects, costumes[0], doc);
+		Utilities::writeDocumentToFile("gen/project.json", doc);
 	}
 
 	void ProjectManager::clean(const fs::path& dirPrefix)

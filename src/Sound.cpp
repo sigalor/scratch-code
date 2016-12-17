@@ -26,12 +26,12 @@ namespace fs = boost::filesystem;
 
 namespace sc
 {
-	Sound::Sound()
+	Sound::Sound() : Resource()
 	{
 	
 	}
 	
-	Sound::Sound(const fs::path& newResourcePath)
+	Sound::Sound(const fs::path& newResourcePath) : Resource()
 	{
 		loadFromPath(newResourcePath);
 	}
@@ -82,6 +82,19 @@ namespace sc
 		{
 			throw GeneralException("invalid '" + fileExt + "' file: " + e.what());
 		}
+	}
+	
+	void Sound::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		/*using namespace rapidjson;
+		
+		valDest.SetObject();
+		valDest.AddMember("soundName", Value(sound->getName().c_str(), alloc), alloc);
+		valDest.AddMember("soundID", sound->getResourceID(), alloc);
+		valDest.AddMember("md5", Value((sound->getMD5Sum() + sound->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("sampleCount", sound->getSampleCount(), alloc);
+		valDest.AddMember("rate", sound->getRate(), alloc);
+		valDest.AddMember("format", "", alloc);*/
 	}
 	
 	std::size_t Sound::getSampleCount()

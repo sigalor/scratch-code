@@ -28,11 +28,10 @@
 
 #include <ast/AST.hpp>
 
-#include "Driver.hpp"
 #include "ProjectManager.hpp"
 
 
 
 void															printBasicUsage(const std::string& appName);
-void															processParameters(int argc, char** argv, sc::Driver& driver);
+void															processParameters(int argc, char** argv);
 int																main(int argc, char** argv);

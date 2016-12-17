@@ -31,9 +31,12 @@
 #include <unordered_map>
 #include <memory>
 
+#include <boost/filesystem.hpp>
 #include <ast/LexerTokenDefinitions.hpp>
 #include <ast/StatementList.hpp>
 
+#include "Utilities.hpp"
+#include "GeneralException.hpp"
 #include "scratch-code.tab.hpp"
 #define YY_DECL yy::ScratchCodeParser::symbol_type yylex(sc::Driver& driver)
 
@@ -49,7 +52,7 @@ namespace sc
 	{
 		private:
 			int													result;
-			std::string											filename;
+			boost::filesystem::path								filepath;
 			bool												traceLexing, traceParsing;
 
 		public:
@@ -66,12 +69,11 @@ namespace sc
 		
 			void												beginLexing();
 			void												endLexing();
-			int													parse(const std::string& newFilename);
+			int													parse(const boost::filesystem::path& newFilepath);
 			std::string											locationToString(const yy::location& loc);
 			void												handleError(const yy::location& loc, const std::string& message);
 			void												handleError(const std::string& message);
-			const std::string&									getFilename();
-			std::string*										getFilenamePointer();
+			const boost::filesystem::path&						getFilepath();
 			int													getResult();
 			std::shared_ptr<ast::StatementList>					getSyntaxTree();
 			void												setTraceLexing(bool newTraceLexing);

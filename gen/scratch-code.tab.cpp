@@ -809,7 +809,7 @@ namespace yy {
 	//"basic_symbol" class contains member "location" of type "location_type"=instance of "location" class
 	//"location" class is in gen/location.hh, has "begin" and "end" members of type "position"
 	//"position" class is in gen/position.hh, has "filename" member of type std::string*
-	yyla.location.begin.filename = yyla.location.end.filename = driver.getFilenamePointer();
+	//@$.begin.filename = @$.end.filename = driver.getFilenamePointer();
 }
 
 #line 816 "gen/scratch-code.tab.cpp" // lalr1.cc:741

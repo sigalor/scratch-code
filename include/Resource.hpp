@@ -27,6 +27,7 @@
 #include <memory>
 
 #include <boost/filesystem.hpp>
+#include <rapidjson/document.h>
 
 #include "Utilities.hpp"
 
@@ -41,14 +42,21 @@ namespace sc
 		
 		protected:
 			std::string											name;
+			int													resourceID, resourceIndex;
 			boost::filesystem::path								resourcePath;
 	
 		public:
 			Resource();
 			
 			virtual void										loadFromPath(const boost::filesystem::path& newResourcePath);
+			virtual void										buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
 			const std::string&									getName();
+			int													getResourceID();									//ID is global (e.g. all costumes have an unique ID)
+			int													getResourceIndex();									//index is object-local (e.g. the costume number within an object)
 			const boost::filesystem::path&						getResourcePath();
 			const std::string&									getMD5Sum();
+			void												setName(const std::string& newName);
+			void												setResourceID(int newResourceID);
+			void												setResourceIndex(int newResourceIndex);
 	};
 }

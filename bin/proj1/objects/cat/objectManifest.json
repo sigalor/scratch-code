@@ -1,0 +1,12 @@
+{
+	"objectName": "Sprite1",
+	"costumes": [
+		{
+			"path": "costume1.png",
+			"name": "costume1",
+			"rotationCenterX": 0,
+			"rotationCenterY": 0
+		}
+	],
+	"type": "generic"
+}
