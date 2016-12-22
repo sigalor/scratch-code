@@ -8,5 +8,6 @@
 			"rotationCenterY": 0
 		}
 	],
+	"currentCostumeIndex": 0,
 	"type": "generic"
 }

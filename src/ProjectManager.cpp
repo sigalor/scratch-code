@@ -46,15 +46,7 @@ namespace sc
 				
 				Utilities::writeDocumentToFile(filepath, doc);
 			}
-		},
-		{
-			"objects/stage/penLayer/penLayer.png",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 0, 0, 0, 0); }
-		}/*,
-		{
-			"objects/stage/costumes/backdrop.png",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 480, 360, 255, 255, 255, 255); }
-		}*/
+		}
 	};
 	
 	const ProjectManager::RequiredFilesList ProjectManager::requiredObjectFiles =
@@ -62,31 +54,7 @@ namespace sc
 		{
 			"objectManifest.json",
 			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
-			/*{
-				using namespace rapidjson;
-				
-				Document doc;
-				Document::AllocatorType& alloc = doc.GetAllocator();
-				
-				Value costumesArray(kArrayType);
-				Value costumeObject(kObjectType);
-				costumeObject.AddMember("path", "backdrop.png", alloc);
-				costumesArray.PushBack(costumeObject, alloc);
-				
-				doc.SetObject();
-				doc.AddMember("costumes", costumesArray, alloc);
-			
-				Utilities::writeDocumentToFile(filepath, doc);
-			}*/
-		}/*,
-		{
-			"costumes/costume1.png",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::writePlainPNGToFile(filepath, 100, 100, 255, 0, 0, 255); }
 		}
-		{
-			"scripts/main.sc",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath); }
-		}*/
 	};
 
 
@@ -109,10 +77,6 @@ namespace sc
 		}
 	}
 
-
-
-
-
 	void ProjectManager::validateRequiredDirectories(const ProjectManager::RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
 	{
 		for(auto& f : reqDirs)
@@ -124,82 +88,56 @@ namespace sc
 		for(auto& f : reqFiles)
 			Utilities::validateFile(dirPrefix / f.first, fs::file_type::regular_file);
 	}
-
-	void ProjectManager::validateObject(const std::string& objName, const fs::path& dirPrefix)
+	
+	
+	
+	
+	
+	void ProjectManager::loadAllObjects()
 	{
-		loadObject(objName, dirPrefix);
-	}
-	
-	
-	
-	
-	
-	std::shared_ptr<Object> ProjectManager::loadObject(const std::string& objName, const fs::path& dirPrefix)		//object's existance is guaranteed because of previous call to "validate"
-	{
-		return std::make_shared<Object>(dirPrefix / "objects" / objName);
-	}
-	
-	void ProjectManager::buildCostumeJSON(std::shared_ptr<Costume> costume, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
-	{
-		using namespace rapidjson;
-		
-		valDest.SetObject();
-		valDest.AddMember("costumeName", Value(costume->getName().c_str(), alloc), alloc);
-		valDest.AddMember("baseLayerID", costume->getResourceID(), alloc);
-		valDest.AddMember("baseLayerMD5", Value((costume->getMD5Sum() + costume->getResourcePath().extension().string()).c_str(), alloc), alloc);
-		valDest.AddMember("bitmapResolution", 1, alloc);
-		valDest.AddMember("rotationCenterX", costume->getWidth()/2, alloc);
-		valDest.AddMember("rotationCenterY", costume->getHeight()/2, alloc);
-	}
-	
-	void ProjectManager::buildSoundJSON(std::shared_ptr<Sound> sound, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
-	{
-		using namespace rapidjson;
-		
-		valDest.SetObject();
-		valDest.AddMember("soundName", Value(sound->getName().c_str(), alloc), alloc);
-		valDest.AddMember("soundID", sound->getResourceID(), alloc);
-		valDest.AddMember("md5", Value((sound->getMD5Sum() + sound->getResourcePath().extension().string()).c_str(), alloc), alloc);
-		valDest.AddMember("sampleCount", sound->getSampleCount(), alloc);
-		valDest.AddMember("rate", sound->getRate(), alloc);
-		valDest.AddMember("format", Value("", alloc), alloc);
-	}
-	
-	void ProjectManager::buildObjectJSON(std::shared_ptr<Object> obj, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
-	{
-		using namespace rapidjson;
-		
-		valDest.SetObject();
-		valDest.AddMember("objName", Value(obj->getName().c_str(), alloc), alloc);
-		
-		Value tempValue;
-		Value costumesArray(kArrayType), soundsArray(kArrayType);
-		
-		valDest.AddMember("sounds", soundsArray, alloc);
-		for(auto s : obj->getSounds())
+		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "objects"))
 		{
-			buildSoundJSON(s, tempValue, alloc);
-			valDest["sounds"].PushBack(tempValue, alloc);
+			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
+			
+			auto otherStageObject = std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == Object::Type::Stage); });
+			if(newObject->getType() == Object::Type::Stage)
+			{
+				if(otherStageObject != objects.end())
+					throw GeneralException("project may not contain more than one stage object: candidates are at '" + fs::relative(newObject->getObjectPath()).string() + "' and '" + fs::relative((*otherStageObject)->getObjectPath()).string() + "'");
+				stageObject = newObject;
+			}
+			
+			auto objectWithSameName = std::find_if(objects.begin(), objects.end(), [&](std::shared_ptr<Object> obj) { return (obj->getName() == newObject->getName()); });
+			if(objectWithSameName != objects.end())
+				throw GeneralException("project may not contain two objects with the same name: candidates are at '" + fs::relative(newObject->getObjectPath()).string() + "' and '" + fs::relative((*objectWithSameName)->getObjectPath()).string() + "'");
+			
+			objects.push_back(newObject);
 		}
 		
-		valDest.AddMember("costumes", costumesArray, alloc);
-		for(auto c : obj->getCostumes())
-		{
-			buildCostumeJSON(c, tempValue, alloc);
-			valDest["costumes"].PushBack(tempValue, alloc);
-		}
-		
-		valDest.AddMember("currentCostumeIndex", 0, alloc);
+		if(stageObject == nullptr)
+			throw GeneralException("project needs to contain at least one stage object");
 	}
 	
-	void ProjectManager::buildProjectJSON(std::vector<std::shared_ptr<Object>> objects, std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest)
+	std::shared_ptr<Object> ProjectManager::getObject(const std::string& objName)
+	{
+		auto retObject = std::find_if(objects.begin(), objects.end(), [&](std::shared_ptr<Object> obj) { return (obj->getName() == objName); });
+		if(retObject == objects.end())
+			return nullptr;
+			//throw GeneralException("object with name '" + objName + "' not found");
+		return *retObject;
+	}
+	
+	
+	
+	
+	void ProjectManager::buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest)
 	{
 		using namespace rapidjson;
 		
 		Document::AllocatorType& alloc = docDest.GetAllocator();
-		Value tempObject, childrenArray(kArrayType);
+		Value tempValue, childrenArray(kArrayType);
 		
-		buildObjectJSON(*std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == Object::Type::Stage); }), docDest, alloc);
+		stageObject->buildJSON(docDest, alloc);
 		docDest.AddMember("penLayerMD5", Value((penLayer->getMD5Sum() + penLayer->getResourcePath().extension().string()).c_str(), alloc), alloc);
 		docDest.AddMember("penLayerID", penLayer->getResourceID(), alloc);
 		docDest.AddMember("tempoBPM", 60, alloc);
@@ -208,10 +146,10 @@ namespace sc
 		docDest.AddMember("children", childrenArray, alloc);
 		for(auto o : objects)
 		{
-			if(o->getName() != "stage")
+			if(o->getType() != Object::Type::Stage)
 			{
-				buildObjectJSON(o, tempObject, alloc);
-				docDest["children"].PushBack(tempObject, alloc);
+				o->buildJSON(tempValue, alloc);
+				docDest["children"].PushBack(tempValue, alloc);
 			}
 		}
 	}
@@ -225,95 +163,98 @@ namespace sc
 
 	}
 
-	ProjectManager::ProjectManager(const fs::path& newPathPrefix, const std::string& newProjectName) : pathPrefix(newPathPrefix), projectName(newProjectName)
+	ProjectManager::ProjectManager(const fs::path& newPathPrefix, const std::string& newProjectName) : pathPrefix(newPathPrefix), projectPath(newPathPrefix / newProjectName), projectName(newProjectName)
 	{
 
 	}
 
 	void ProjectManager::initialize()
 	{
-		fs::path projectDir(projectName);
-		if(fs::exists(projectName))
+		if(fs::exists(projectPath))
 			throw GeneralException("'" + projectName + "' already exists as a " + Utilities::fileTypeToString(projectName));
 	
 		try
 		{
-			fs::create_directory(projectDir);
-			createRequiredDirectories(requiredFirstLevelDirectories, projectDir);
-			addObject("stage", projectDir, false);
-			createRequiredFiles(requiredFirstLevelFiles, projectDir);
+			fs::create_directory(projectPath);
+			createRequiredDirectories(requiredFirstLevelDirectories, projectPath);
+			createRequiredFiles(requiredFirstLevelFiles, projectPath);
 		}
 		catch(const fs::filesystem_error& e)
 			{ throw GeneralException(std::string("file system error: ") + e.what()); }
-	
-		validate(projectDir);
+		
+		//stage object has to exist
+		addObject("Stage", projectPath / "objects/stage", Object::Type::Stage);
+		
+		//output final input message indicating success
 		std::cout << "successfully created project tree for '" + projectName + "'" << std::endl;
 	}
 
-	void ProjectManager::addObject(const std::string& objName, const fs::path& dirPrefix, bool validateAll)			//current path needs to be project's first level
+	void ProjectManager::addObject(const std::string& objName, const fs::path& objPath, Object::Type objType)
 	{
-		fs::path objBasePath(dirPrefix / "objects" / objName);
-		if(fs::exists(objBasePath))
-			throw GeneralException("'" + objBasePath.string() + "' already exists as a " + Utilities::fileTypeToString(objBasePath));
-	
+		if(fs::exists(objPath))
+			throw GeneralException("'" + fs::relative(objPath).string() + "' already exists as a " + Utilities::fileTypeToString(objPath));
+		std::shared_ptr<Object> objectWithSameName(getObject(objName));
+		if(objectWithSameName != nullptr)
+			throw GeneralException("object called '" + objName + "' already exists at '" + fs::relative(objectWithSameName->getObjectPath()).string() + "'");
+		
 		try
 		{
-			createRequiredDirectories(requiredObjectDirectories, objBasePath);
-			createRequiredFiles(requiredObjectFiles, objBasePath);
+			createRequiredDirectories(requiredObjectDirectories, objPath);
+			createRequiredFiles(requiredObjectFiles, objPath);
 			
-			Object currObj(objBasePath, false);
-			Utilities::writeDocumentToFile(objBasePath / "objectManifest.json", currObj.getManifest());				//the object's manifest is repaired after loading it
+			objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
+			objects.back()->setName(objName);
+			objects.back()->saveAndReload();
 		}
 		catch(const fs::filesystem_error& e)
 			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 	
-		if(validateAll)
-			validate(dirPrefix);
-		else
-			validateObject(objName, dirPrefix);
-		std::cout << "successfully added object '" + objName + "' to project '" + projectName + "'" << std::endl;
+		std::cout << "successfully added object '" << objName << "' to project '" << projectName + "'" << std::endl;
+	}
+	
+	void ProjectManager::addObject(const std::string& objName, Object::Type objType)
+	{
+		addObject(objName, projectPath / "objects" / objName, objType);
 	}
 
-	void ProjectManager::validate(const fs::path& dirPrefix)														//for this function, dirPrefix / fs::current_path needs to be the project tree's first level, i.e. 'bin/', 'gen/' and 'objects/' need to be directly accessible
+	void ProjectManager::validate()
 	{
 		//check that project name is valid
 		Utilities::validateIdentifier("project name", projectName);
-
+		
 		//check that required directories and files exist
 		std::string objectName;
 		try
 		{
-			validateRequiredDirectories(requiredFirstLevelDirectories, dirPrefix);
-			for(fs::directory_entry& e : fs::directory_iterator(dirPrefix / "objects"))
-				validateObject(e.path().filename().string(), dirPrefix);
-			validateObject("stage", dirPrefix);																		//the "stage" object HAS TO exist
-			validateRequiredFiles(requiredFirstLevelFiles, dirPrefix);
+			validateRequiredDirectories(requiredFirstLevelDirectories, projectPath);
+			if(objects.size() == 0)
+				loadAllObjects();
+			validateRequiredFiles(requiredFirstLevelFiles, projectPath);
 		}
 		catch(const GeneralException& e)
 			{ throw GeneralException(std::string("invalid project tree: ") + e.what()); }
+		
+		std::cout << "successfully validated project '" << projectName << "'" << std::endl;
 	}
 
-	void ProjectManager::build(const fs::path& dirPrefix)
+	void ProjectManager::build()
 	{
-		std::vector<std::shared_ptr<Object>> objects;
-	
 		validate();
-		for(fs::directory_entry& e : fs::directory_iterator(dirPrefix / "objects"))
+		/*for(auto o : objects)
 		{
-			objects.push_back(loadObject(e.path().filename().string(), dirPrefix));
-			std::cout << "Object '" << objects.back()->getName() << "':\n";
-			std::cout << "    " << objects.back()->getCostumes().size() << " costume(s):\n";
-			for(auto& c : objects.back()->getCostumes())
+			std::cout << "Object '" << o->getName() << "':\n";
+			std::cout << "    " << o->getCostumes().size() << " costume(s):\n";
+			for(auto& c : o->getCostumes())
 				std::cout << "        '" << c->getName() << "' at " << c->getResourcePath() << ", size: " << c->getWidth() << " x " << c->getHeight() << "\n";
-			std::cout << "    " << objects.back()->getSounds().size() << " sound(s):\n";
-			for(auto& s : objects.back()->getSounds())
+			std::cout << "    " << o->getSounds().size() << " sound(s):\n";
+			for(auto& s : o->getSounds())
 				std::cout << "        '" << s->getName() << "' at " << s->getResourcePath() << ", sampleCount: " << s->getSampleCount() << ", rate: " << s->getRate() << "\n";
 			std::cout << std::endl;
-		}
+		}*/
 		
 		std::vector<std::shared_ptr<Costume>> costumes;
 		std::vector<std::shared_ptr<Sound>> sounds;
-		costumes.push_back(std::make_shared<Costume>(dirPrefix / "objects/stage/penLayer/penLayer.png"));			//"penLayer" is the very first "costume" and ID 0 is reserved for it
+		costumes.push_back(stageObject->getPenLayer());																//"penLayer" is the very first "costume" and ID 0 is reserved for it		costumes.push_back(std::make_shared<Costume>("objects/stage/penLayer/penLayer.png"));						
 		costumes.back()->setResourceID(0);
 		for(auto& o : objects)
 		{
@@ -328,15 +269,30 @@ namespace sc
 				sounds.push_back(s);
 			}
 		}
-		buildObjectResourceList(costumes, dirPrefix);
-		buildObjectResourceList(sounds, dirPrefix);
+		
+		try
+		{
+			fs::remove_all(projectPath / "gen");
+			fs::create_directory(projectPath / "gen");
+			buildObjectResourceList(costumes);
+			buildObjectResourceList(sounds);
+		}
+		catch(const fs::filesystem_error& e)
+			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 		
 		rapidjson::Document doc;
-		buildProjectJSON(objects, costumes[0], doc);
-		Utilities::writeDocumentToFile("gen/project.json", doc);
+		buildProjectJSON(costumes[0], doc);
+		Utilities::writeDocumentToFile(projectPath / "gen/project.json", doc);
+		
+		fs::path binaryPath(projectPath / "bin" / (projectName + ".sb2"));
+		fs::remove(binaryPath);
+		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "gen"))
+			ZipFile::AddFile(binaryPath.string(), e.path().string());
+		
+		std::cout << "successfully built project '" << projectName << "'" << std::endl;
 	}
 
-	void ProjectManager::clean(const fs::path& dirPrefix)
+	void ProjectManager::clean()
 	{
 		validate();
 	}
@@ -351,20 +307,22 @@ namespace sc
 		return projectName;
 	}
 
-	void ProjectManager::setProjectPath(const std::string& newProjectPath)
+	void ProjectManager::setProjectPath(const fs::path& newProjectPath)
 	{
-		fs::path projPath(newProjectPath);
-		pathPrefix = projPath.parent_path();
-		projectName = projPath.filename().string();
+		projectPath = newProjectPath;
+		pathPrefix = projectPath.parent_path();
+		projectName = projectPath.filename().string();
 	}
 
 	void ProjectManager::setPathPrefix(const fs::path& newPathPrefix)
 	{
 		pathPrefix = newPathPrefix;
+		projectPath = pathPrefix / projectName;
 	}
 
 	void ProjectManager::setProjectName(const std::string& newProjectName)
 	{
 		projectName = newProjectName;
+		projectPath = pathPrefix / projectName;
 	}
 }

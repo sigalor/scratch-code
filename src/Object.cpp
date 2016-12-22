@@ -23,6 +23,7 @@
 
 
 namespace fs = boost::filesystem;
+namespace mep = sc::ManifestEntryParams;
 
 namespace sc
 {
@@ -33,227 +34,267 @@ namespace sc
 	const ManifestStructure<Object> Object::manifestStructure(
 	{
 		ManifestEntry<Object>
-		{
+		(
 			"objectName",
-			ManifestEntryParams::Type::String,
-			ManifestEntryParams::Importance::OptionalWithWarning,
-			[](Object* obj) -> ManifestEntryParams::TypeVariant
-			{
-				return obj->getObjectPath().filename().string();
-			},
-			[](Object* obj, const ManifestEntryParams::TypeVariant& val)
-			{
-				obj->setName(boost::get<std::string>(val));
-			}
-		},
+			mep::Type::String,
+			mep::Importance::OptionalWithWarning,
+			std::make_tuple
+			(
+				/* condition */			nullptr,
+				/* alternative */		[](Object* obj) { return obj->getObjectPath().filename().string(); },
+				/* processor */			[](Object* obj, const mep::TypeVariant& val) { obj->setName(boost::get<std::string>(val)); }
+			)
+		),
 		ManifestEntry<Object>
-		{
+		(
 			"type",
-			ManifestEntryParams::Type::String,
-			ManifestEntryParams::Importance::OptionalWithWarning,
-			[](Object* obj)
-			{
-				return "generic";
-			},
-			[](Object* obj, const ManifestEntryParams::TypeVariant& val)
-			{
-				std::string typeStr(boost::get<std::string>(val));
-				if(typeStr == "stage")
-					obj->setType(Object::Type::Stage);
-				else if(typeStr == "generic")
-					obj->setType(Object::Type::Generic);
-				else
-					throw GeneralException("'" + typeStr + "'");		//object manifest at '" + manifestPath.string() + "' contains invalid 'type' member: 
-			}
-		},
+			mep::Type::String,
+			mep::Importance::OptionalWithWarning,
+			std::make_tuple
+			(
+				/* condition */			nullptr,
+				/* alternative */		[](Object* obj)
+										{
+											if(obj->getIsInitialization())
+											{
+												switch(obj->getTypeForInitialization())
+												{
+													case Object::Type::Stage	: return "stage";					//these are the values the JSON file shall have
+													case Object::Type::Generic	: return "generic";
+													default						: return "(unknown)";
+												}
+											}
+											return "generic";
+										},
+				/* processor */			[](Object* obj, const mep::TypeVariant& val)
+										{
+											std::string typeStr(boost::get<std::string>(val));
+											if(typeStr == "stage")
+												obj->setType(Object::Type::Stage);
+											else if(typeStr == "generic")
+												obj->setType(Object::Type::Generic);
+											else
+												throw GeneralException("value '" + typeStr + "' is invalid");
+										}
+			)
+		),
 		ManifestEntry<Object>
-		{
+		(
 			"costumes",
-			ManifestEntryParams::Type::Array,
-			ManifestEntryParams::Importance::OptionalWithWarning,
+			mep::Type::Array,
+			mep::Importance::OptionalWithWarning,
+			std::make_tuple
+			(
+				/* condition */				nullptr,
+				/* preProcessor */			nullptr,
+				/* elementPreProcessor */	[](Object* obj)
+											{
+												obj->addCostume(std::make_shared<Costume>());
+												obj->setCurrentlyProcessedCostume(obj->getCostumes().back());
+												obj->getCurrentlyProcessedCostume()->setResourceIndex(obj->getCostumes().size() - 1);
+											},
+				/* elementPostProcessor */	nullptr,
+				/* postProcessor */			[](Object* obj)
+											{
+												if(obj->getIsInitialization())
+												{
+													using namespace rapidjson;
+												
+													//if initialization is currently working, the object should not have any costumes yet
+													if(obj->getCostumes().size() != 0)
+														throw GeneralException("number of costumes before initialization needs to be 0");
+												
+													Object::Type				objectType = obj->getType();
+													std::string					newCostumeFilename = (objectType==Object::Type::Stage ? "backdrop1.png" : (objectType==Object::Type::Generic ? "costume1.png" : "error.png"));
+													fs::path					newCostumePath(obj->getObjectPath() / "costumes" / newCostumeFilename);
+													Value						newCostumeEntry(kObjectType);
+													Document::AllocatorType&	alloc = obj->getManifest().GetAllocator();
+													
+													//create generic costumes (white fullscreen for stage, red square for generic)
+													if(objectType == Object::Type::Stage)
+														Utilities::writePlainPNGToFile(newCostumePath, 480, 360, 255, 255, 255, 255);
+													else if(objectType == Object::Type::Generic)
+														Utilities::writePlainPNGToFile(newCostumePath, 100, 100, 255, 0, 0, 255);
+													
+													//add an entry for the new costume to the manifest
+													newCostumeEntry.AddMember("path", Value(newCostumeFilename.c_str(), alloc), alloc);
+													obj->getManifest()["costumes"].PushBack(newCostumeEntry, alloc);
+													
+													//load the new costume as if it would have been a regular one that also needs to be pre-processed
+													Object::manifestStructure.entries[2].elementPreProcessor(obj);
+													obj->getCostumes().back()->loadFromPath(newCostumePath);
+													Object::manifestStructure.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, Object::manifestStructure.entries[2].children, obj->getObjectPath() / "objectManifest.json", false);
+													
+													//output final info message
+													std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object '" << obj->getName() << "'" << std::endl;
+												}
+											}
+			),
 			ManifestStructure<Object>(
 			{
 				ManifestEntry<Object>
 				(
 					"path",
-					ManifestEntryParams::Type::String,
-					[](Object* obj, const ManifestEntryParams::TypeVariant& val)
-					{
-						obj->getCurrentCostume()->loadFromPath(obj->getObjectPath() / "costumes" / boost::get<std::string>(val));
-					}
+					mep::Type::String,
+					mep::Importance::Required,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		nullptr,
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->loadFromPath(obj->getObjectPath() / "costumes" / boost::get<std::string>(val)); }
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"name",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getResourcePath().stem().string(); },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setName(boost::get<std::string>(val)); }
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"rotationCenterX",
+					mep::Type::Integer,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getWidth() / 2; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterX(boost::get<int>(val)); }
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"rotationCenterY",
+					mep::Type::Integer,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getHeight() / 2; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterY(boost::get<int>(val)); }
+					)
 				)
 			})
-		}
+		),
+		ManifestEntry<Object>
+		(
+			"currentCostumeIndex",
+			mep::Type::Integer,
+			mep::Importance::OptionalWithWarning,
+			std::make_tuple
+			(
+				/* condition */			nullptr,
+				/* alternative */		[](Object* obj)									{ return 0; },
+				/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setCurrentCostumeIndex(boost::get<int>(val)); }		//all costumes are available at this point
+			)
+		)
 	});
+	
+	const std::string Object::typeToString(Object::Type type)
+	{
+		switch(type)
+		{
+			case Type::Stage	: return "stage";																	//these are the string representations the user shall see in program outputs, NOT the ones that are for the JSON file!
+			case Type::Generic	: return "generic";
+			default				: return "(unknown)";
+		}
+	}
 	
 	
 	
 	
 
-	Object::Object() : type(Type::Invalid)
+	Object::Object()
 	{
 	
 	}
 	
-	Object::Object(const fs::path& newObjectPath, bool verboseOutput) : type(Type::Invalid)
+	Object::Object(const fs::path& newObjectPath, bool verboseOutput, bool newIsInitialization, Type newTypeForInitialization)
 	{
-		loadFromPath(newObjectPath, verboseOutput);
+		loadFromPath(newObjectPath, verboseOutput, newIsInitialization, newTypeForInitialization);
 	}
 	
-	void Object::loadFromPath(const fs::path& newObjectPath, bool verboseOutput)
+	void Object::loadFromPath(const fs::path& newObjectPath, bool verboseOutput, bool newIsInitialization, Type newTypeForInitialization)
 	{
 		using namespace rapidjson;
 	
 		objectPath = newObjectPath;
+		isInitialization = newIsInitialization;
+		typeForInitialization = newTypeForInitialization;
 		Utilities::validateFile(objectPath, fs::file_type::directory_file);
+		manifestStructure.validateJSON(this, objectPath / "objectManifest.json", manifest, verboseOutput);
 		
-		//load manifest
-		Document::AllocatorType& alloc = manifest.GetAllocator();
-		fs::path manifestPath(objectPath / "objectManifest.json");
-		Utilities::readDocumentFromFile(manifestPath, manifest);
-		
-		//check and get object name
-		if(!manifest.HasMember("objectName")  ||  !manifest["objectName"].IsString())
+		if(getType() == Type::Stage)
 		{
-			std::string altName(objectPath.filename().string());
-			if(verboseOutput)
-				std::cerr << "warning: object manifest at '" << manifestPath << "' is missing string member 'objectName', defaulting to '" << altName << "'" << std::endl;
-			if(manifest.HasMember("objectName"))
-				manifest.RemoveMember("objectName");
-			manifest.AddMember("objectName", Value(altName.c_str(), alloc), alloc);
-		}
-		name = manifest["objectName"].GetString();
-		Utilities::validateIdentifier("object name", name);
-		
-		//check and get type
-		if(!manifest.HasMember("type")  ||  !manifest["type"].IsString())
-		{
-			if(verboseOutput)
-				std::cerr << "warning: object manifest at '" << manifestPath << "' is missing string member 'type', defaulting to 'generic'" << std::endl;
-			if(manifest.HasMember("type"))
-				manifest.RemoveMember("type");
-			manifest.AddMember("type", "generic", alloc);
-		}
-		std::string typeStr(manifest["type"].GetString());
-		if(typeStr == "stage")
-			type = Type::Stage;
-		else if(typeStr == "generic")
-			type = Type::Generic;
-		else
-			throw GeneralException("object manifest at '" + manifestPath.string() + "' contains invalid 'type' member: '" + typeStr + "'");
-		
-		if(manifest.HasMember("costumes")  &&  manifest["costumes"].IsArray())
-		{
-			Value& costumesArray = manifest["costumes"];
-			for(Value::ValueIterator it = costumesArray.Begin(); it != costumesArray.End(); ++it)
+			fs::path penLayerPath(objectPath / "penLayer/penLayer.png");
+			if(isInitialization)
 			{
-				auto i = it - costumesArray.Begin();
-				Value& v = *it;
-				std::string msgBegin("entry " + std::to_string(i) + " in 'costumes' in object manifest at '" + manifestPath.string() + "'");
-				
-				if(!v.IsObject())
-					throw GeneralException(msgBegin + " is not an object");
-				
-				//check and get path
-				std::shared_ptr<Costume> newCostume = std::make_shared<Costume>();
-				if(!v.HasMember("path")  ||  !v["path"].IsString())
-					throw GeneralException(msgBegin + " is missing string member 'path'");
-				fs::path newCostumePath(objectPath / "costumes" / v["path"].GetString());
-				Utilities::validateAllowedFileExtensions(allowedCostumeExts, newCostumePath);
-				newCostume->loadFromPath(newCostumePath);
-				newCostume->setResourceIndex(costumes.size());
-				
-				//check and get name
-				if(!v.HasMember("name")  ||  !v["name"].IsString())
-				{
-					if(verboseOutput)
-						std::cerr << "warning: " << msgBegin << " is missing string member 'name', defaulting to '" << newCostume->getName() << "'" << std::endl;
-					if(v.HasMember("name"))
-						v.RemoveMember("name");
-					v.AddMember("name", Value(newCostume->getName().c_str(), alloc), alloc);
-				}
-				Utilities::validateIdentifier("string member 'name' in " + msgBegin, v["name"].GetString());
-				newCostume->setName(v["name"].GetString());
-				
-				//check that name does not yet exist
-				auto nameRedecl = std::find_if(costumes.begin(), costumes.end(), [&](std::shared_ptr<Costume> c) { return (c->getName() == newCostume->getName()); });
-				if(nameRedecl != costumes.end())
-					throw GeneralException("costume name '" + newCostume->getName() + "' in " + msgBegin + " already exists in entry " + std::to_string((*nameRedecl)->getResourceIndex()));
-				
-				//check and get rotationCenterX
-				if(!v.HasMember("rotationCenterX")  ||  !v["rotationCenterX"].IsInt())
-				{
-					if(verboseOutput)
-						std::cerr << "warning: " << msgBegin << " is missing integer member 'rotationCenterX', defaulting to '" << newCostume->getRotationCenterX() << "'" << std::endl;
-					if(v.HasMember("rotationCenterX"))
-						v.RemoveMember("rotationCenterX");
-					v.AddMember("rotationCenterX", newCostume->getRotationCenterX(), alloc);
-				}
-				newCostume->setRotationCenterX(v["rotationCenterX"].GetInt());
-				
-				//check and get rotationCenterY
-				if(!v.HasMember("rotationCenterY")  ||  !v["rotationCenterY"].IsInt())
-				{
-					if(verboseOutput)
-						std::cerr << "warning: " << msgBegin << " is missing integer member 'rotationCenterY', defaulting to '" << newCostume->getRotationCenterY() << "'" << std::endl;
-					if(v.HasMember("rotationCenterY"))
-						v.RemoveMember("rotationCenterY");
-					v.AddMember("rotationCenterY", newCostume->getRotationCenterY(), alloc);
-				}
-				newCostume->setRotationCenterY(v["rotationCenterY"].GetInt());
-				
-				//finally add costume to object
-				addCostume(newCostume);
+				fs::create_directories(penLayerPath.parent_path());
+				Utilities::writePlainPNGToFile(penLayerPath, 480, 360, 0, 0, 0, 0);
 			}
+			setPenLayer(std::make_shared<Costume>(penLayerPath));
 		}
-		else if(verboseOutput)
-			std::cerr << "warning: object manifest at '" << manifestPath << "' is missing array member 'costumes'" << std::endl;
-		if(costumes.size() == 0)
-			throw GeneralException("object at '" + objectPath.string() + "' needs at least one costume");
-		
-		if(manifest.HasMember("sounds")  &&  manifest["sounds"].IsArray())
-		{
-			Value& soundsArray = manifest["sounds"];
-			for(Value::ValueIterator it = soundsArray.Begin(); it != soundsArray.End(); ++it)
-			{
-				auto i = it - soundsArray.Begin();
-				Value& v = *it;
-				std::string msgBegin("entry " + std::to_string(i) + " in 'sounds' in object manifest at '" + manifestPath.string() + "'");
-				
-				if(!v.IsObject())
-					throw GeneralException(msgBegin + " is not an object");
-				
-				//check and get path
-				std::shared_ptr<Sound> newSound = std::make_shared<Sound>();
-				if(!v.HasMember("path")  ||  !v["path"].IsString())
-					throw GeneralException(msgBegin + " is missing string member 'path'");
-				fs::path newSoundPath(objectPath / "sounds" / v["path"].GetString());
-				Utilities::validateAllowedFileExtensions(allowedSoundExts, newSoundPath);
-				newSound->loadFromPath(objectPath / "sounds" / v["path"].GetString());
-				
-				//check and get name
-				if(!v.HasMember("name")  ||  !v["name"].IsString())
-				{
-					if(verboseOutput)
-						std::cerr << "warning: " << msgBegin << " is missing string member 'name', defaulting to '" << newSound->getName() << "'" << std::endl;
-					if(v.HasMember("name"))
-						v.RemoveMember("name");
-					v.AddMember("name", Value(newSound->getName().c_str(), alloc), alloc);
-				}
-				Utilities::validateIdentifier("string member 'name' in " + msgBegin, v["name"].GetString());
-				newSound->setName(v["name"].GetString());
-				
-				//finally add sound to object
-				addSound(newSound);
-			}
-		}
-		else if(verboseOutput)
-			std::cerr << "warning: object manifest at '" << manifestPath << "' is missing array member 'sounds'" << std::endl;
 	}
+	
+	void Object::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
+	{
+		using namespace rapidjson;
+		
+		Value valueBuffer;
+		Value costumesArray(kArrayType), soundsArray(kArrayType);
+		
+		valDest.SetObject();
+		valDest.AddMember("objName", Value(getName().c_str(), alloc), alloc);
+		
+		//add all sounds
+		valDest.AddMember("sounds", soundsArray, alloc);
+		for(auto s : sounds)
+		{
+			s->buildJSON(valueBuffer, alloc);
+			valDest["sounds"].PushBack(valueBuffer, alloc);
+		}
+		
+		//add all costumes
+		valDest.AddMember("costumes", costumesArray, alloc);
+		for(auto c : costumes)
+		{
+			c->buildJSON(valueBuffer, alloc);
+			valDest["costumes"].PushBack(valueBuffer, alloc);
+		}
+		
+		valDest.AddMember("currentCostumeIndex", getCurrentCostumeIndex(), alloc);
+	}
+	
+	void Object::saveAndReload(bool verboseOutput)
+	{
+		Utilities::writeDocumentToFile(objectPath / "objectManifest.json", manifest);
+		manifest.SetObject();
+		isInitialization = false;
+		costumes.clear();
+		sounds.clear();
+		scripts = nullptr;
+		currentlyProcessedCostume = nullptr;
+		currentlyProcessedSound = nullptr;
+		loadFromPath(objectPath, verboseOutput);
+	}
+	
+	
+	
+	
 	
 	Object::Type Object::getType()
 	{
-		return type;
+		if(std::string(manifest["type"].GetString()) == "stage")
+			return Type::Stage;
+		else if(std::string(manifest["type"].GetString()) == "generic")
+			return Type::Generic;
+		return Type::Invalid;
 	}
 
 	const fs::path& Object::getObjectPath()
@@ -261,14 +302,26 @@ namespace sc
 		return objectPath;
 	}
 	
-	const std::string& Object::getName()
+	std::string Object::getName()
 	{
-		return name;
+		return manifest["objectName"].GetString();
 	}
 	
 	rapidjson::Document& Object::getManifest()
 	{
 		return manifest;
+	}
+	
+	int Object::getCurrentCostumeIndex()
+	{
+		return manifest["currentCostumeIndex"].GetInt();
+	}
+	
+	std::shared_ptr<Costume> Object::getPenLayer()
+	{
+		if(getType() != Type::Stage)
+			throw GeneralException("object '" + getName() + "' is not of type '" + typeToString(getType()) + "', thus it does not have a pen layer");
+		return penLayer;
 	}
 	
 	std::vector<std::shared_ptr<Costume>>& Object::getCostumes()
@@ -281,24 +334,34 @@ namespace sc
 		return sounds;
 	}
 	
-	std::shared_ptr<Costume> Object::getCurrentCostume()
-	{
-		return currentCostume;
-	}
-	
-	std::shared_ptr<Sound> Object::getCurrentSound()
-	{
-		return currentSound;
-	}
-	
 	void Object::setType(Object::Type newType)
 	{
-		type = newType;
+		switch(newType)
+		{
+			case Type::Stage	: manifest["type"].SetString("stage"); break;
+			case Type::Generic	: manifest["type"].SetString("generic"); break;
+			default				: break;
+		}
 	}
 	
 	void Object::setName(const std::string& newName)
 	{
-		name = newName;
+		Utilities::validateIdentifier("object name", newName);
+		manifest["objectName"].SetString(newName.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setCurrentCostumeIndex(int newCurrentCostumeIndex)
+	{
+		if(newCurrentCostumeIndex < 0  ||  newCurrentCostumeIndex >= (int)costumes.size())
+			throw GeneralException("costume index '" + std::to_string(newCurrentCostumeIndex) + "' is out of range (" + std::to_string(costumes.size()) + " costumes available)");
+		manifest["currentCostumeIndex"].SetInt(newCurrentCostumeIndex);
+	}
+	
+	void Object::setPenLayer(std::shared_ptr<Costume> newPenLayer)
+	{
+		if(getType() != Type::Stage)
+			throw GeneralException("object '" + getName() + "' is not of type '" + typeToString(getType()) + "', thus no pen layer may be assigned to it");
+		penLayer = newPenLayer;
 	}
 	
 	void Object::addCostume(std::shared_ptr<Costume> newCostume)
@@ -309,5 +372,50 @@ namespace sc
 	void Object::addSound(std::shared_ptr<Sound> newSound)
 	{
 		sounds.push_back(newSound);
+	}
+	
+	
+	
+	
+	
+	bool Object::getIsInitialization()
+	{
+		return isInitialization;
+	}
+	
+	Object::Type Object::getTypeForInitialization()
+	{
+		return typeForInitialization;
+	}
+	
+	std::shared_ptr<Costume> Object::getCurrentlyProcessedCostume()
+	{
+		return currentlyProcessedCostume;
+	}
+	
+	std::shared_ptr<Sound> Object::getCurrentlyProcessedSound()
+	{
+		return currentlyProcessedSound;
+	}
+	
+	void Object::setCurrentlyProcessedCostume(std::shared_ptr<Costume> newCurrentlyProcessedCostume)
+	{
+		if(currentlyProcessedCostume != nullptr)
+		{
+			auto otherCostume = std::find_if(costumes.begin(), costumes.end(), [&](std::shared_ptr<Costume> costume)
+			{
+				if(costume == currentlyProcessedCostume)
+					return false;
+				return (costume->getName() == currentlyProcessedCostume->getName());
+			});
+			if(otherCostume != costumes.end())
+				throw GeneralException("object '" + getName() + "' may not contain two costumes with the same name: candidates are at '" + fs::relative((*otherCostume)->getResourcePath()).string() + "' and '" + fs::relative(currentlyProcessedCostume->getResourcePath()).string() + "'");
+		}
+		currentlyProcessedCostume = newCurrentlyProcessedCostume;
+	}
+	
+	void Object::setCurrentlyProcessedSound(std::shared_ptr<Sound> newCurrentlyProcessedSound)
+	{
+		currentlyProcessedSound = newCurrentlyProcessedSound;
 	}
 }

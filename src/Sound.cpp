@@ -86,15 +86,15 @@ namespace sc
 	
 	void Sound::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
 	{
-		/*using namespace rapidjson;
+		using namespace rapidjson;
 		
 		valDest.SetObject();
-		valDest.AddMember("soundName", Value(sound->getName().c_str(), alloc), alloc);
-		valDest.AddMember("soundID", sound->getResourceID(), alloc);
-		valDest.AddMember("md5", Value((sound->getMD5Sum() + sound->getResourcePath().extension().string()).c_str(), alloc), alloc);
-		valDest.AddMember("sampleCount", sound->getSampleCount(), alloc);
-		valDest.AddMember("rate", sound->getRate(), alloc);
-		valDest.AddMember("format", "", alloc);*/
+		valDest.AddMember("soundName", Value(name.c_str(), alloc), alloc);
+		valDest.AddMember("soundID", resourceID, alloc);
+		valDest.AddMember("md5", Value((getMD5Sum() + resourcePath.extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("sampleCount", sampleCount, alloc);
+		valDest.AddMember("rate", rate, alloc);
+		valDest.AddMember("format", "", alloc);
 	}
 	
 	std::size_t Sound::getSampleCount()

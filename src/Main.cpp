@@ -48,13 +48,13 @@ void processParameters(int argc, char** argv)
 				std::cout << "usage: " << argv[0] << " init <project_name>" << std::endl;
 				std::exit(EXIT_SUCCESS);
 			}
-			projMgr.setPathPrefix(fs::current_path().string());
+			projMgr.setPathPrefix(fs::current_path());
 			projMgr.setProjectName(argv[2]);
 			projMgr.initialize();
 		}
 		else if(action == "addobject"  ||  action == "build"  ||  action == "clean")
 		{
-			projMgr.setProjectPath(fs::current_path().string());
+			projMgr.setProjectPath(fs::current_path());
 			if(action == "addobject")
 			{
 				if(argc == 2)

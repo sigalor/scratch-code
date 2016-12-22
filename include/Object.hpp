@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <tuple>
 
 #include <boost/filesystem.hpp>
 #include <boost/variant.hpp>
@@ -34,6 +35,7 @@
 #include "Costume.hpp"
 #include "Sound.hpp"
 #include "ManifestStructure.hpp"
+#include "Utilities.hpp"
 
 
 
@@ -48,36 +50,53 @@ namespace sc
 				Stage,
 				Generic
 			};
+			
+			static const std::string							typeToString(Type type);
 	
-		private:
 			static const std::vector<std::string>				allowedCostumeExts, allowedScriptExts, allowedSoundExts;
 			static const ManifestStructure<Object>				manifestStructure;
-			Type												type;
+		
+		private:			
 			boost::filesystem::path								objectPath;
-			std::string											name;
 			rapidjson::Document									manifest;
+			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;
 			std::vector<std::shared_ptr<Sound>>					sounds;
-			//std::shared_ptr<ast::StatementList>					scripts;
-			std::shared_ptr<Costume>							currentCostume;
-			std::shared_ptr<Sound>								currentSound;
+			std::shared_ptr<ast::StatementList>					scripts;
+			
+			bool												isInitialization;
+			Type												typeForInitialization;
+			std::shared_ptr<Costume>							currentlyProcessedCostume;							//both only needed during manifest loading
+			std::shared_ptr<Sound>								currentlyProcessedSound;
 	
 		public:
 			Object();
-			Object(const boost::filesystem::path& newObjectPath, bool verboseOutput=true);
+			Object(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
 			
-			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true);
+			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
+			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+			void												saveAndReload(bool verboseOutput=true);
+			
 			Type												getType();
 			const boost::filesystem::path&						getObjectPath();
-			const std::string&									getName();
+			std::string											getName();
 			rapidjson::Document&								getManifest();
+			int													getCurrentCostumeIndex();
+			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();
 			std::vector<std::shared_ptr<Sound>>&				getSounds();
-			std::shared_ptr<Costume>							getCurrentCostume();
-			std::shared_ptr<Sound>								getCurrentSound();
 			void												setType(Type newType);
 			void												setName(const std::string& newName);
+			void												setCurrentCostumeIndex(int newCurrentCostumeIndex);
+			void												setPenLayer(std::shared_ptr<Costume> newPenLayer);
 			void												addCostume(std::shared_ptr<Costume> newCostume);
 			void												addSound(std::shared_ptr<Sound> newSound);
+			
+			bool												getIsInitialization();
+			Type												getTypeForInitialization();
+			std::shared_ptr<Costume>							getCurrentlyProcessedCostume();
+			std::shared_ptr<Sound>								getCurrentlyProcessedSound();
+			void												setCurrentlyProcessedCostume(std::shared_ptr<Costume> newCurrentCostume);
+			void												setCurrentlyProcessedSound(std::shared_ptr<Sound> newCurrentSound);
 	};
 }

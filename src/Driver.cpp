@@ -41,7 +41,7 @@ namespace sc
 		{
 			Utilities::validateFile(filepath, fs::file_type::regular_file);
 			if(!(yyin = fopen(filepath.c_str(), "r")))
-				throw GeneralException("cannot open " + filepath.string() + " for reading: " + strerror(errno));
+				throw GeneralException("cannot open " + fs::relative(filepath).string() + " for reading: " + strerror(errno));
 		}
 	}
 
@@ -65,7 +65,7 @@ namespace sc
 
 	std::string Driver::locationToString(const yy::location& loc)
 	{
-		return filepath.string() + ":" + std::to_string(loc.begin.line) + ":" + std::to_string(loc.begin.column);
+		return fs::relative(filepath).string() + ":" + std::to_string(loc.begin.line) + ":" + std::to_string(loc.begin.column);
 	}
 
 	void Driver::handleError(const yy::location& loc, const std::string& message)

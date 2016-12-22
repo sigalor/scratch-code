@@ -26,7 +26,8 @@ obj/Main.o: src/Main.cpp include/Main.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
  include/ProjectManager.hpp include/Translator.hpp include/Utilities.hpp \
  include/GeneralException.hpp include/Object.hpp include/Costume.hpp \
- include/Resource.hpp include/Sound.hpp
+ include/Resource.hpp include/Sound.hpp include/ManifestStructure.hpp \
+ include/ManifestEntryParams.hpp include/ManifestEntry.hpp
 
 include/Main.hpp:
 
@@ -95,3 +96,9 @@ include/Costume.hpp:
 include/Resource.hpp:
 
 include/Sound.hpp:
+
+include/ManifestStructure.hpp:
+
+include/ManifestEntryParams.hpp:
+
+include/ManifestEntry.hpp:

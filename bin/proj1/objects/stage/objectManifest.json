@@ -1,5 +1,5 @@
 {
-	"objectName": "stage",
+	"objectName": "Buehne",
 	"costumes": [
 		{
 			"path": "backdrop1.png",
@@ -8,5 +8,6 @@
 			"rotationCenterY": 0
 		}
 	],
+	"currentCostumeIndex": 0,
 	"type": "stage"
 }

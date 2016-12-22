@@ -1,5 +1,5 @@
 {
-    "objName": "stage",
+    "objName": "Buehne",
     "sounds": [],
     "costumes": [
         {
@@ -7,8 +7,8 @@
             "baseLayerID": 2,
             "baseLayerMD5": "1db4812ba9e5c9b0c3561df1a661b84e.png",
             "bitmapResolution": 1,
-            "rotationCenterX": 240,
-            "rotationCenterY": 180
+            "rotationCenterX": 0,
+            "rotationCenterY": 0
         }
     ],
     "currentCostumeIndex": 0,
@@ -26,8 +26,8 @@
                     "baseLayerID": 1,
                     "baseLayerMD5": "73d5eaf2b5a3ae9036269e2ca6e0a106.png",
                     "bitmapResolution": 1,
-                    "rotationCenterX": 47,
-                    "rotationCenterY": 55
+                    "rotationCenterX": 0,
+                    "rotationCenterY": 0
                 }
             ],
             "currentCostumeIndex": 0

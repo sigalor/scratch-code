@@ -100,15 +100,15 @@ namespace sc
 	
 	void Costume::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
 	{
-		/*using namespace rapidjson;
+		using namespace rapidjson;
 		
 		valDest.SetObject();
-		valDest.AddMember("costumeName", Value(costume->getName().c_str(), alloc), alloc);
-		valDest.AddMember("baseLayerID", costume->getResourceID(), alloc);
-		valDest.AddMember("baseLayerMD5", Value((costume->getMD5Sum() + costume->getResourcePath().extension().string()).c_str(), alloc), alloc);
+		valDest.AddMember("costumeName", Value(name.c_str(), alloc), alloc);
+		valDest.AddMember("baseLayerID", resourceID, alloc);
+		valDest.AddMember("baseLayerMD5", Value((getMD5Sum() + resourcePath.extension().string()).c_str(), alloc), alloc);
 		valDest.AddMember("bitmapResolution", 1, alloc);
-		valDest.AddMember("rotationCenterX", costume->getWidth()/2, alloc);
-		valDest.AddMember("rotationCenterY", costume->getHeight()/2, alloc);*/
+		valDest.AddMember("rotationCenterX", rotationCenterX, alloc);
+		valDest.AddMember("rotationCenterY", rotationCenterY, alloc);
 	}
 	
 	uint32_t Costume::getWidth()

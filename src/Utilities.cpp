@@ -22,6 +22,40 @@
 
 
 
+/*namespace boost::filesystem
+{
+	path relative_path(const path& from, const path& to)															//from http://stackoverflow.com/a/29221546
+	{
+		//Start at the root path and while they are the same then do nothing then when they first
+		//diverge take the remainder of the two path and replace the entire from path with ".."
+		//segments.
+		path::const_iterator fromIter = from.begin();
+		path::const_iterator toIter = to.begin();
+
+		//Loop through both
+		while (fromIter != from.end()  &&  toIter != to.end()  &&  (*toIter) == (*fromIter))
+		{
+			++toIter;
+			++fromIter;
+		}
+
+		path finalPath;
+		while (fromIter != from.end())
+		{
+			finalPath /= "..";
+			++fromIter;
+		}
+
+		while (toIter != to.end())
+		{
+			finalPath /= *toIter;
+			++toIter;
+		}
+
+		return finalPath;
+	}
+}*/
+
 namespace fs = boost::filesystem;
 
 namespace sc
@@ -48,7 +82,7 @@ namespace sc
 				std::string afeConcat;																				//is there an easy standard library function for concatenating all strings in a vector? std::accumulate does not allow a separator...
 				for(auto& s : allowedFileExts)
 					afeConcat += s + " ";
-				throw GeneralException("illegal file extension '" + filepath.extension().string() + "' in '" + filepath.string() + "', only the following are allowed: " + afeConcat);
+				throw GeneralException("illegal file extension '" + filepath.extension().string() + "' in '" + fs::relative(filepath).string() + "', only the following are allowed: " + afeConcat);
 			}
 		}
 		
@@ -58,7 +92,7 @@ namespace sc
 			bool hasCorrectType = false;
 	
 			if(!fs::exists(filepath))
-				throw GeneralException(typeString + " '" + filepath.string() + "' is missing");
+				throw GeneralException(typeString + " '" + fs::relative(filepath).string() + "' is missing");
 			switch(type)
 			{
 				case fs::file_type::regular_file	: hasCorrectType = fs::is_regular_file(filepath); break;
@@ -66,7 +100,7 @@ namespace sc
 				default								: break;
 			}
 			if(!hasCorrectType)
-				throw GeneralException("'" + filepath.string() + "' needs to be a " + typeString);
+				throw GeneralException("'" + fs::relative(filepath).string() + "' needs to be a " + typeString);
 		}
 		
 		
@@ -99,7 +133,7 @@ namespace sc
 			fs::create_directories(filepath.parent_path());
 			f.open(filepath.string().c_str());
 			if(!f)
-				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + filepath.string() + "' for writing");
+				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + fs::relative(filepath).string() + "' for writing");
 			if(!contents.empty())
 				f << contents;
 			f.close();
@@ -111,22 +145,21 @@ namespace sc
 			validateFile(filepath, fs::file_type::regular_file);
 			f.open(filepath.string().c_str());
 			if(!f)
-				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + filepath.string() + "' for reading");
+				throw GeneralException("cannot open " + fileTypeToString(filepath) + " '" + fs::relative(filepath).string() + "' for reading");
 			return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 		}
-
-	
 		
 		
-		
-		
+			
+			
+			
 		void readDocumentFromFile(const fs::path& filepath, rapidjson::Document& doc)
 		{
 			using namespace rapidjson;
 		
 			ParseResult res = doc.Parse<0>(readFile(filepath).c_str());
 			if(!res)
-				throw GeneralException("JSON in '" + filepath.string() + "' is invalid, offset " + std::to_string(res.Offset()) + ": " + GetParseError_En(res.Code()));
+				throw GeneralException("JSON in '" + fs::relative(filepath).string() + "' is invalid, offset " + std::to_string(res.Offset()) + ": " + GetParseError_En(res.Code()));
 		}
 		
 		std::string getDocumentString(rapidjson::Document& doc, bool pretty)
@@ -188,7 +221,7 @@ namespace sc
 				}
 			}
 			catch(const GeneralException& e)
-				{ throw GeneralException("while creating plain PNG file '" + filepath.string() + "': " + e.what()); }
+				{ throw GeneralException("while creating plain PNG file '" + fs::relative(filepath).string() + "': " + e.what()); }
 	
 			//set image attributes
 			png_set_IHDR(pngPtr, infoPtr, width, height, depth, PNG_COLOR_TYPE_RGB_ALPHA, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -211,7 +244,7 @@ namespace sc
 			//open output file
 			outFile = fopen(filepath.string().c_str(), "wb");
 			if(!outFile)
-				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + filepath.string() + "' for writing");
+				throw GeneralException("cannot open " + fileTypeToString(fs::file_type::regular_file) + " '" + fs::relative(filepath).string() + "' for writing");
 	
 			//write image data to output file
 			png_init_io(pngPtr, outFile);

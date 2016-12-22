@@ -27,6 +27,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 #include <rapidjson/document.h>
@@ -41,10 +42,23 @@
 
 
 
+/*namespace boost::filesystem
+{
+	path														relative_path(const path& from, const path& to);
+}*/
+
 namespace sc
 {
 	namespace Utilities
 	{
+		template<typename T>
+		std::string toString(T val)
+		{
+			std::stringstream ss;
+			ss << val;
+			return ss.str();
+		}
+	
 		void													validateIdentifier(const std::string& description, const std::string& identifier);
 		void													validateAllowedFileExtensions(const std::vector<std::string>& allowedFileExts, const boost::filesystem::path& filepath);
 		void													validateFile(const boost::filesystem::path& filepath, boost::filesystem::file_type type);
