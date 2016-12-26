@@ -42,11 +42,6 @@
 
 
 
-/*namespace boost::filesystem
-{
-	path														relative_path(const path& from, const path& to);
-}*/
-
 namespace sc
 {
 	namespace Utilities
@@ -57,6 +52,20 @@ namespace sc
 			std::stringstream ss;
 			ss << val;
 			return ss.str();
+		}
+		
+		//this is why I absolutely love C++, improvement from http://stackoverflow.com/a/26995098
+		template<typename R, typename... Args1, typename... Args2>
+		R safeWorker(const std::string& message, std::function<R(Args1...)> worker, Args2&&... args)
+		{
+			if(worker)
+			{
+				try
+					{ return worker(std::forward<Args2>(args)...); }
+				catch(const GeneralException& e)
+					{ throw GeneralException(message + ": " + e.what()); }
+			}
+			return R();
 		}
 	
 		void													validateIdentifier(const std::string& description, const std::string& identifier);

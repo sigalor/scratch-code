@@ -24,17 +24,17 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <rapidjson/document.h>
 
 #include "ManifestEntryParams.hpp"
 #include "ManifestEntry.hpp"
+#include "ManifestEntryValue.hpp"
 #include "Utilities.hpp"
 #include "GeneralException.hpp"
 
 
-
-namespace fs = boost::filesystem;
 
 namespace sc
 {
@@ -49,128 +49,136 @@ namespace sc
 				//empty
 			}
 			
-			void validateJSON(T* targetInstance, rapidjson::Value& manifestJSON, rapidjson::Document::AllocatorType& alloc, const ManifestStructure& manifestStructure, const boost::filesystem::path& filepath, bool verboseOutput=true, const std::string& parentHierarchy="root") const
+			const ManifestEntry<T>& getEntry(const std::string& name) const
 			{
-				namespace fs = boost::filesystem;
+				auto it = std::find_if(entries.begin(), entries.end(), [&](const ManifestEntry<T>& entry) { return (entry.attrName == name); });
+				if(it == entries.end())
+					throw GeneralException("manifest structure does not contain any entry named '" + name + "'");
+				return *it;
+			}
+			
+			template<typename U>
+			void validateJSON(T* targetInstance, rapidjson::Value& manifestJSON, rapidjson::Document::AllocatorType& alloc, const ManifestStructure& manifestStructure, const boost::filesystem::path& filepath, ManifestEntryValue<U>& currEntryValue, const U& defaultEntryValue, const U& triggeredEntryValue, bool verboseOutput=true, const std::string& parentHierarchy="root") const
+			{
 				using namespace rapidjson;
+				namespace fs = boost::filesystem;
+				namespace mep = ManifestEntryParams;
 				
-				//get rapidjson allocator
-				std::string							warningMissingPrefix, currMemberLocation;
-				ManifestEntryParams::TypeVariant	currVal;
+				std::string			warningMissingPrefix, currMemberLocation;
+				mep::TypeVariant	currVal;
 				
 				//can only process objects
 				if(!manifestJSON.IsObject())
 					throw GeneralException("cannot validate JSON non-object");
+				if(currEntryValue.type != mep::Type::Object)
+					throw GeneralException("cannot fill manifest entry value non-object");
 				
 				//loop through all entries
 				for(auto& e : manifestStructure.entries)
 				{
+					ManifestEntryValue<U>& newCurrEntryValue = currEntryValue.getEntry(e.attrName);
 					currMemberLocation = parentHierarchy=="root" ? e.attrName : (parentHierarchy + "." + e.attrName);
+					newCurrEntryValue.value = triggeredEntryValue;
 					
-					if(e.preProcessor)
+					//if no condition is given, assume it is true. Just when the condition function returns 'false' or throws, ignore the current manifest entry
+					if(e.condition)
 					{
 						try
-							{ e.preProcessor(targetInstance); }
+							{ if(!e.condition(targetInstance)) continue; }
 						catch(const GeneralException& e)
-							{ throw GeneralException("unable to pre-process member '" + currMemberLocation + "': " + e.what()); }
+							{ continue; }
 					}
 					
+					//pre-processing takes place at the very beginning
+					Utilities::safeWorker("unable to pre-process member '" + currMemberLocation + "'", e.preProcessor, targetInstance);
+					
+					//if the current member is not given or has a wrong time, try to find an alternative
 					if(!manifestJSON.HasMember(e.attrName.c_str())  ||  !e.checkType(manifestJSON[e.attrName.c_str()]))
 					{
-						if(e.importance == ManifestEntryParams::Importance::Required)
-							throw GeneralException("missing " + ManifestEntryParams::typeToString(e.type) + " member '" + currMemberLocation + "'");
+						//if the member is required and it does not exist, the manifest is malformed
+						if(e.importance == mep::Importance::Required)
+							throw GeneralException("missing " + mep::typeToString(e.type) + " member '" + currMemberLocation + "'");
 						
-						warningMissingPrefix = "warning: in manifest at '" + fs::relative(filepath).string() + "': missing " + ManifestEntryParams::typeToString(e.type) + " member '" + currMemberLocation + "'";
-						if(e.type == ManifestEntryParams::Type::Array)
+						warningMissingPrefix = "warning: in manifest at '" + fs::relative(filepath).string() + "': missing " + mep::typeToString(e.type) + " member '" + currMemberLocation + "'";
+						if(e.type == mep::Type::Array  ||  e.type == mep::Type::Object)
 						{
-							if(verboseOutput  &&  e.importance == ManifestEntryParams::Importance::OptionalWithWarning)
-								std::cerr << warningMissingPrefix << ", defaulting to empty array" << std::endl;
+							//arrays and objects do not have an alternative value, they just become empty
+							if(verboseOutput  &&  e.importance == mep::Importance::OptionalWithWarning)
+								std::cerr << warningMissingPrefix << ", defaulting to empty " << mep::typeToString(e.type) << std::endl;
 							if(manifestJSON.HasMember(e.attrName.c_str()))
 								manifestJSON.RemoveMember(e.attrName.c_str());
-							Value emptyArrayVal(kArrayType);
-							manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), emptyArrayVal, alloc);
+							Value emptyCompoundVal(e.type==mep::Type::Array ? kArrayType : kObjectType);
+							manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), emptyCompoundVal, alloc);
 						}
 						else
 						{
+							//the alternative function will return a replacement value for the missing member
 							if(!e.alternative)
 								throw GeneralException("alternative function not set for member '" + currMemberLocation + "'");
-							try
-								{ currVal = e.alternative(targetInstance); }
-							catch(const GeneralException& e)
-								{ throw GeneralException("unable to obtain alternative for member '" + currMemberLocation + "': " + e.what()); }
+							currVal = Utilities::safeWorker("unable to obtain alternative for member '" + currMemberLocation + "'", e.alternative, targetInstance);
 							
-							if(verboseOutput  &&  e.importance == ManifestEntryParams::Importance::OptionalWithWarning)
+							//output a warning message if that is desired
+							if(verboseOutput  &&  e.importance == mep::Importance::OptionalWithWarning)
 								std::cerr << warningMissingPrefix << ", defaulting value to '" << currVal << "'" << std::endl;
+							
+							//remove the member if it existed but had the wrong time, then set its value to the generated alternative
 							if(manifestJSON.HasMember(e.attrName.c_str()))
 								manifestJSON.RemoveMember(e.attrName.c_str());
-						
 							switch(e.type)
 							{
-								case ManifestEntryParams::Type::Integer	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<int>(currVal)), alloc); break;
-								case ManifestEntryParams::Type::String	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<std::string>(currVal).c_str(), alloc), alloc); break;
-								default									: throw GeneralException("cannot set JSON value for " + ManifestEntryParams::typeToString(e.type));
+								case mep::Type::Integer	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<int>(currVal)), alloc); break;
+								case mep::Type::String	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<std::string>(currVal).c_str(), alloc), alloc); break;
+								default					: throw GeneralException("cannot set JSON value for " + mep::typeToString(e.type));
 							}
 						}
 					}
 					
-					if(e.type == ManifestEntryParams::Type::Array)
+					if(e.type == mep::Type::Array)
 					{
 						Value& currArr = manifestJSON[e.attrName.c_str()];
 						for(Value::ValueIterator it = currArr.Begin(); it != currArr.End(); ++it)
 						{
-							std::string arrayDesc(e.attrName + "[" + std::to_string(it-currArr.Begin()) + "]");
+							auto i = it - currArr.Begin();
+							if(it != currArr.Begin())
+								newCurrEntryValue.addArrayEntry(defaultEntryValue);
+							std::string arrayDesc(e.attrName + "[" + std::to_string(i) + "]");
 							std::string currArrayElementLocation(parentHierarchy=="root" ? arrayDesc : (parentHierarchy + "." + arrayDesc));
-							if(e.elementPreProcessor)
-							{
-								try
-									{ e.elementPreProcessor(targetInstance); }
-								catch(const GeneralException& e)
-									{ throw GeneralException("unable to pre-process array member '" + currArrayElementLocation + "': " + e.what()); }
-							}
-							validateJSON(targetInstance, *it, alloc, e.children, filepath, verboseOutput, currArrayElementLocation);
-							if(e.elementPostProcessor)
-							{
-								try
-									{ e.elementPostProcessor(targetInstance); }
-								catch(const GeneralException& e)
-									{ throw GeneralException("unable to post-process array member '" + currArrayElementLocation + "': " + e.what()); }
-							}
+							Utilities::safeWorker("unable to pre-process array member '" + currArrayElementLocation + "'", e.elementPreProcessor, targetInstance);
+							validateJSON(targetInstance, *it, alloc, e.children, filepath, newCurrEntryValue.children[i], defaultEntryValue, triggeredEntryValue, verboseOutput, currArrayElementLocation);
+							Utilities::safeWorker("unable to post-process array member '" + currArrayElementLocation + "'", e.elementPostProcessor, targetInstance);
 						}
+					}
+					else if(e.type == mep::Type::Object)
+					{
+						std::string currObjectLocation(parentHierarchy=="root" ? e.attrName : (parentHierarchy + "." + e.attrName));
+						Utilities::safeWorker("unable to pre-process object '" + currObjectLocation + "'", e.elementPreProcessor, targetInstance);
+						validateJSON(targetInstance, manifestJSON[e.attrName.c_str()], alloc, e.children, filepath, newCurrEntryValue, defaultEntryValue, triggeredEntryValue, verboseOutput, currObjectLocation);
+						Utilities::safeWorker("unable to post-process object '" + currObjectLocation + "'", e.elementPostProcessor, targetInstance);
 					}
 					else
 					{
 						switch(e.type)
 						{
-							case ManifestEntryParams::Type::Integer	: currVal = manifestJSON[e.attrName.c_str()].GetInt(); break;
-							case ManifestEntryParams::Type::String	: currVal = manifestJSON[e.attrName.c_str()].GetString(); break;
+							case mep::Type::Integer	: currVal = manifestJSON[e.attrName.c_str()].GetInt(); break;
+							case mep::Type::String	: currVal = manifestJSON[e.attrName.c_str()].GetString(); break;
 							default									: break;
 						}
-						if(e.processor)
-						{
-							try
-								{ e.processor(targetInstance, currVal); }
-							catch(const GeneralException& e)
-								{ throw GeneralException("unable to process member '" + currMemberLocation + "': " + e.what()); }
-						}
+						Utilities::safeWorker("unable to process member '" + currMemberLocation + "'", e.processor, targetInstance, currVal);
 					}
 					
 					if(e.postProcessor)
-					{
-						try
-							{ e.postProcessor(targetInstance); }
-						catch(const GeneralException& e)
-							{ throw GeneralException("unable to post-process member '" + currMemberLocation + "': " + e.what()); }
-					}
+						Utilities::safeWorker("unable to post-process member '" + currMemberLocation + "'", e.postProcessor, targetInstance);
 				}
 			}
 			
-			void validateJSON(T* targetInstance, const boost::filesystem::path& filepath, rapidjson::Document& doc, bool verboseOutput=true) const
+			template<typename U>
+			void validateJSON(T* targetInstance, const boost::filesystem::path& filepath, rapidjson::Document& doc, ManifestEntryValue<U>& currEntryValue, const U& defaultEntryValue, const U& triggeredEntryValue, bool verboseOutput=true) const
 			{
 				Utilities::readDocumentFromFile(filepath, doc);
 				try
-					{ validateJSON(targetInstance, doc, doc.GetAllocator(), *this, filepath, verboseOutput); }
+					{ validateJSON(targetInstance, doc, doc.GetAllocator(), *this, filepath, currEntryValue, defaultEntryValue, triggeredEntryValue, verboseOutput); }
 				catch(const GeneralException& e)
-					{ throw GeneralException("in manifest at '" + fs::relative(filepath).string() + "': " + e.what()); }
+					{ throw GeneralException("in manifest at '" + boost::filesystem::relative(filepath).string() + "': " + e.what()); }
 			}
 	};
 }

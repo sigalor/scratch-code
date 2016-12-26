@@ -33,6 +33,7 @@ namespace sc
 				case Type::Integer	: return "integer";
 				case Type::String	: return "string";
 				case Type::Array	: return "array";
+				case Type::Object	: return "object";
 				default				: return "(unknown)";
 			}
 		}

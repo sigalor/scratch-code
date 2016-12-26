@@ -35,6 +35,7 @@
 #include "Costume.hpp"
 #include "Sound.hpp"
 #include "ManifestStructure.hpp"
+#include "ManifestEntryValue.hpp"
 #include "Utilities.hpp"
 
 
@@ -54,11 +55,13 @@ namespace sc
 			static const std::string							typeToString(Type type);
 	
 			static const std::vector<std::string>				allowedCostumeExts, allowedScriptExts, allowedSoundExts;
-			static const ManifestStructure<Object>				manifestStructure;
+			static const ManifestEntry<Object>					manifestRootEntry;
+			static const ManifestEntryValue<bool>				manifestRootEntryValueBase;
 		
 		private:			
 			boost::filesystem::path								objectPath;
 			rapidjson::Document									manifest;
+			ManifestEntryValue<bool>							predefinedValues;
 			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;
 			std::vector<std::shared_ptr<Sound>>					sounds;
@@ -71,7 +74,7 @@ namespace sc
 	
 		public:
 			Object();
-			Object(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
+			Object(const boost::filesystem::path& newObjectPath, const ManifestEntryValue<bool>& newPredefinedValues, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
 			
 			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
 			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
@@ -81,6 +84,7 @@ namespace sc
 			const boost::filesystem::path&						getObjectPath();
 			std::string											getName();
 			rapidjson::Document&								getManifest();
+			ManifestEntryValue<bool>&							getPredefinedValues();
 			int													getCurrentCostumeIndex();
 			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();

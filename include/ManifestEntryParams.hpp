@@ -33,13 +33,16 @@ namespace sc
 	{
 		enum class Type
 		{
+			Invalid,
 			Integer,
 			String,
-			Array
+			Array,
+			Object
 		};
 		
 		enum class Importance
 		{
+			Invalid,
 			Required,
 			OptionalWithWarning,
 			Optional

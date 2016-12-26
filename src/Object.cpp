@@ -31,7 +31,13 @@ namespace sc
 	const std::vector<std::string> Object::allowedScriptExts	= { ".sc" };
 	const std::vector<std::string> Object::allowedSoundExts		= { ".wav" };
 	
-	const ManifestStructure<Object> Object::manifestStructure(
+	/*const LocalParamsManifestStructure Object::localParamsManifestStructure(
+	{
+		LocalParamsManifestEntry("objectName", false),
+		LocalParamsManifestEntry("type", false),
+	});*/
+	
+	const ManifestEntry<Object> Object::manifestRootEntry(ManifestStructure<Object>(
 	{
 		ManifestEntry<Object>
 		(
@@ -61,7 +67,7 @@ namespace sc
 												{
 													case Object::Type::Stage	: return "stage";					//these are the values the JSON file shall have
 													case Object::Type::Generic	: return "generic";
-													default						: return "(unknown)";
+													default						: return "error";
 												}
 											}
 											return "generic";
@@ -121,9 +127,11 @@ namespace sc
 													obj->getManifest()["costumes"].PushBack(newCostumeEntry, alloc);
 													
 													//load the new costume as if it would have been a regular one that also needs to be pre-processed
-													Object::manifestStructure.entries[2].elementPreProcessor(obj);
+													ManifestEntryValue<bool>& costumesEntryValue = obj->getPredefinedValues().getEntry("costumes");
+													costumesEntryValue.addArrayEntry(false);
+													Object::manifestRootEntry.children.getEntry("costumes").elementPreProcessor(obj);
 													obj->getCostumes().back()->loadFromPath(newCostumePath);
-													Object::manifestStructure.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, Object::manifestStructure.entries[2].children, obj->getObjectPath() / "objectManifest.json", false);
+													Object::manifestRootEntry.children.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, Object::manifestRootEntry.children.getEntry("costumes").children, obj->getObjectPath() / "objectManifest.json", costumesEntryValue.children.back(), false, true, false);
 													
 													//output final info message
 													std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object '" << obj->getName() << "'" << std::endl;
@@ -194,7 +202,9 @@ namespace sc
 				/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setCurrentCostumeIndex(boost::get<int>(val)); }		//all costumes are available at this point
 			)
 		)
-	});
+	}));
+	
+	const ManifestEntryValue<bool> Object::manifestRootEntryValueBase(Object::manifestRootEntry);
 	
 	const std::string Object::typeToString(Object::Type type)
 	{
@@ -215,7 +225,7 @@ namespace sc
 	
 	}
 	
-	Object::Object(const fs::path& newObjectPath, bool verboseOutput, bool newIsInitialization, Type newTypeForInitialization)
+	Object::Object(const fs::path& newObjectPath, const ManifestEntryValue<bool>& newPredefinedValues, bool verboseOutput, bool newIsInitialization, Type newTypeForInitialization) : predefinedValues(newPredefinedValues)
 	{
 		loadFromPath(newObjectPath, verboseOutput, newIsInitialization, newTypeForInitialization);
 	}
@@ -225,10 +235,11 @@ namespace sc
 		using namespace rapidjson;
 	
 		objectPath = newObjectPath;
+		predefinedValues.resetAll(false);
 		isInitialization = newIsInitialization;
 		typeForInitialization = newTypeForInitialization;
 		Utilities::validateFile(objectPath, fs::file_type::directory_file);
-		manifestStructure.validateJSON(this, objectPath / "objectManifest.json", manifest, verboseOutput);
+		manifestRootEntry.children.validateJSON(this, objectPath / "objectManifest.json", manifest, predefinedValues, false, true, verboseOutput);
 		
 		if(getType() == Type::Stage)
 		{
@@ -273,6 +284,7 @@ namespace sc
 	
 	void Object::saveAndReload(bool verboseOutput)
 	{
+		//purge values that needed the "alternative" function here (using the "predefinedValues" instance)
 		Utilities::writeDocumentToFile(objectPath / "objectManifest.json", manifest);
 		manifest.SetObject();
 		isInitialization = false;
@@ -310,6 +322,11 @@ namespace sc
 	rapidjson::Document& Object::getManifest()
 	{
 		return manifest;
+	}
+	
+	ManifestEntryValue<bool>& Object::getPredefinedValues()
+	{
+		return predefinedValues;
 	}
 	
 	int Object::getCurrentCostumeIndex()

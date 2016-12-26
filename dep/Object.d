@@ -26,7 +26,8 @@ obj/Object.o: src/Object.cpp include/Object.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp include/Costume.hpp \
  include/Resource.hpp include/Utilities.hpp include/GeneralException.hpp \
  include/Sound.hpp include/ManifestStructure.hpp \
- include/ManifestEntryParams.hpp include/ManifestEntry.hpp
+ include/ManifestEntryParams.hpp include/ManifestEntry.hpp \
+ include/ManifestEntryValue.hpp
 
 include/Object.hpp:
 
@@ -95,3 +96,5 @@ include/ManifestStructure.hpp:
 include/ManifestEntryParams.hpp:
 
 include/ManifestEntry.hpp:
+
+include/ManifestEntryValue.hpp:

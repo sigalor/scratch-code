@@ -97,7 +97,7 @@ namespace sc
 	{
 		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "objects"))
 		{
-			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
+			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path(), Object::manifestRootEntryValueBase);
 			
 			auto otherStageObject = std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == Object::Type::Stage); });
 			if(newObject->getType() == Object::Type::Stage)
@@ -202,7 +202,7 @@ namespace sc
 			createRequiredDirectories(requiredObjectDirectories, objPath);
 			createRequiredFiles(requiredObjectFiles, objPath);
 			
-			objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
+			objects.push_back(std::make_shared<Object>(objPath, Object::manifestRootEntryValueBase, false, true, objType));
 			objects.back()->setName(objName);
 			objects.back()->saveAndReload();
 		}

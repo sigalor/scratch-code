@@ -27,7 +27,7 @@ obj/ProjectManager.o: src/ProjectManager.cpp include/ProjectManager.hpp \
  include/Utilities.hpp include/GeneralException.hpp include/Object.hpp \
  include/Costume.hpp include/Resource.hpp include/Sound.hpp \
  include/ManifestStructure.hpp include/ManifestEntryParams.hpp \
- include/ManifestEntry.hpp
+ include/ManifestEntry.hpp include/ManifestEntryValue.hpp
 
 include/ProjectManager.hpp:
 
@@ -100,3 +100,5 @@ include/ManifestStructure.hpp:
 include/ManifestEntryParams.hpp:
 
 include/ManifestEntry.hpp:
+
+include/ManifestEntryValue.hpp:
