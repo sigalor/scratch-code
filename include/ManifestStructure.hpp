@@ -76,9 +76,8 @@ namespace sc
 				//loop through all entries
 				for(auto& e : manifestStructure.entries)
 				{
-					ManifestEntryValue<U>& newCurrEntryValue = currEntryValue.getEntry(e.attrName);
+					//set the current member's location as a string for showing it to the user (when that is necessary)
 					currMemberLocation = parentHierarchy=="root" ? e.attrName : (parentHierarchy + "." + e.attrName);
-					newCurrEntryValue.value = triggeredEntryValue;
 					
 					//if no condition is given, assume it is true. Just when the condition function returns 'false' or throws, ignore the current manifest entry
 					if(e.condition)
@@ -88,6 +87,11 @@ namespace sc
 						catch(const GeneralException& e)
 							{ continue; }
 					}
+					
+					//set the current manifest entry value object to the current member and trigger it only if that member actually exists in the manifest before any processing
+					ManifestEntryValue<U>& newCurrEntryValue = currEntryValue.getEntry(e.attrName);
+					if(manifestJSON.HasMember(e.attrName.c_str()))
+						newCurrEntryValue.value = triggeredEntryValue;
 					
 					//pre-processing takes place at the very beginning
 					Utilities::safeWorker("unable to pre-process member '" + currMemberLocation + "'", e.preProcessor, targetInstance);

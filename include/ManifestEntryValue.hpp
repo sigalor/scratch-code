@@ -42,6 +42,7 @@ namespace sc
 			std::string											attrName;
 			bool												isRoot;
 			mep::Type											type;
+			mep::Importance										importance;
 			T													value;
 			std::vector<ManifestEntryValue<T>>					children;
 			
@@ -55,6 +56,7 @@ namespace sc
 				attrName = original.attrName;
 				isRoot = original.isRoot;
 				type = original.type;
+				importance = original.importance;
 				value = T();
 				
 				std::vector<ManifestEntryValue<T>> newChildren;

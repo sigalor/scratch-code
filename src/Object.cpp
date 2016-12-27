@@ -133,8 +133,8 @@ namespace sc
 													obj->getCostumes().back()->loadFromPath(newCostumePath);
 													Object::manifestRootEntry.children.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, Object::manifestRootEntry.children.getEntry("costumes").children, obj->getObjectPath() / "objectManifest.json", costumesEntryValue.children.back(), false, true, false);
 													
-													//output final info message
-													std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object '" << obj->getName() << "'" << std::endl;
+													//output final info message (do not use "obj->getName()" here, as the "ProjectManager::addObject" function sets the desired name later)
+													std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object at '" << fs::relative(obj->getObjectPath()).string() << "'" << std::endl;
 												}
 											}
 			),
@@ -282,9 +282,44 @@ namespace sc
 		valDest.AddMember("currentCostumeIndex", getCurrentCostumeIndex(), alloc);
 	}
 	
+	void Object::purgeNonPredefinedManifestEntries(rapidjson::Value& currValue, ManifestEntryValue<bool>& currPredefinedValues)			//purges all entries from the "manifest" object that were not there when the manifest was loaded
+	{
+		using namespace rapidjson;
+	
+		if(!currValue.IsObject())
+			throw GeneralException("cannot purge manifest entries in JSON non-object");
+		if(currPredefinedValues.type != mep::Type::Object)
+			throw GeneralException("cannot purge manifest entries using manifest entry value non-object");
+		
+		for(ManifestEntryValue<bool>& e : currPredefinedValues.children)
+		{
+			//here are quite some places for inconsistencies to happen...
+			if(!currValue.HasMember(e.attrName.c_str()))
+				throw GeneralException("inconsistency detected while trying to purge manifest entries");
+			
+			//if the "value" member is false, the current manifest entry can definitely be removed. If it's not, arrays and objects need to processed recursively
+			//if currently the initialization is happening, only remove members that have an importance lower than or equal to "Optional"
+			if(e.value  ||  (isInitialization  &&  (e.importance == mep::Importance::Required  ||  e.importance == mep::Importance::OptionalWithWarning)))
+			{
+				if(e.type == mep::Type::Object)
+					purgeNonPredefinedManifestEntries(currValue[e.attrName.c_str()], e);
+				else if(e.type == mep::Type::Array)
+				{
+					Value& currArr = currValue[e.attrName.c_str()];
+					if(!currArr.IsArray())
+						throw GeneralException("inconsistency detected while trying to purge manifest entries");
+					for(Value::ValueIterator it = currArr.Begin(); it != currArr.End(); ++it)
+						purgeNonPredefinedManifestEntries(*it, e.children[it - currArr.Begin()]);
+				}
+			}
+			else
+				currValue.RemoveMember(e.attrName.c_str());
+		}
+	}
+	
 	void Object::saveAndReload(bool verboseOutput)
 	{
-		//purge values that needed the "alternative" function here (using the "predefinedValues" instance)
+		purgeNonPredefinedManifestEntries(manifest, predefinedValues);
 		Utilities::writeDocumentToFile(objectPath / "objectManifest.json", manifest);
 		manifest.SetObject();
 		isInitialization = false;

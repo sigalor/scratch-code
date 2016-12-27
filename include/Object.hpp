@@ -78,6 +78,7 @@ namespace sc
 			
 			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
 			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+			void												purgeNonPredefinedManifestEntries(rapidjson::Value& currValue, ManifestEntryValue<bool>& currPredefinedValues);
 			void												saveAndReload(bool verboseOutput=true);
 			
 			Type												getType();
