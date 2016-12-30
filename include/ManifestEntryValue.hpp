@@ -28,12 +28,16 @@
 #include "ManifestEntry.hpp"
 #include "ManifestEntryParams.hpp"
 #include "ManifestStructure.hpp"
+#include "GeneralException.hpp"
 
 
 
 namespace sc
 {
 	namespace mep = ManifestEntryParams;
+	
+	template<typename T>
+	class ManifestEntry;
 	
 	template<typename T>
 	class ManifestEntryValue

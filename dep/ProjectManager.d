@@ -25,9 +25,11 @@ obj/ProjectManager.o: src/ProjectManager.cpp include/ProjectManager.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
  include/Utilities.hpp include/GeneralException.hpp include/Object.hpp \
- include/Costume.hpp include/Resource.hpp include/Sound.hpp \
- include/ManifestStructure.hpp include/ManifestEntryParams.hpp \
- include/ManifestEntry.hpp include/ManifestEntryValue.hpp
+ include/Resource.hpp include/Costume.hpp include/Sound.hpp \
+ include/ManifestEntry.hpp include/ManifestEntryParams.hpp \
+ include/ManifestStructure.hpp include/ManifestEntryValue.hpp \
+ include/ManifestUser.hpp include/ManifestDefinitions.hpp \
+ include/ObjectParams.hpp
 
 include/ProjectManager.hpp:
 
@@ -89,16 +91,22 @@ include/GeneralException.hpp:
 
 include/Object.hpp:
 
-include/Costume.hpp:
-
 include/Resource.hpp:
+
+include/Costume.hpp:
 
 include/Sound.hpp:
 
-include/ManifestStructure.hpp:
+include/ManifestEntry.hpp:
 
 include/ManifestEntryParams.hpp:
 
-include/ManifestEntry.hpp:
+include/ManifestStructure.hpp:
 
 include/ManifestEntryValue.hpp:
+
+include/ManifestUser.hpp:
+
+include/ManifestDefinitions.hpp:
+
+include/ObjectParams.hpp:

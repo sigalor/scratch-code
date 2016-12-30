@@ -26,79 +26,79 @@
 #include <vector>
 #include <memory>
 #include <tuple>
+#include <type_traits>
 
 #include <boost/filesystem.hpp>
 #include <boost/variant.hpp>
 #include <rapidjson/document.h>
 #include <ast/AST.hpp>
 
+#include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
-#include "ManifestStructure.hpp"
+#include "ManifestEntry.hpp"
 #include "ManifestEntryValue.hpp"
+#include "ManifestEntryParams.hpp"
+#include "ManifestUser.hpp"
+#include "ManifestDefinitions.hpp"
+#include "ObjectParams.hpp"
 #include "Utilities.hpp"
 
 
 
 namespace sc
 {
-	class Object
+	class Object : public ManifestUser<Object>
 	{
-		public:
-			enum class Type
-			{
-				Invalid,
-				Stage,
-				Generic
-			};
-			
-			static const std::string							typeToString(Type type);
-	
-			static const std::vector<std::string>				allowedCostumeExts, allowedScriptExts, allowedSoundExts;
-			static const ManifestEntry<Object>					manifestRootEntry;
-			static const ManifestEntryValue<bool>				manifestRootEntryValueBase;
-		
 		private:			
 			boost::filesystem::path								objectPath;
-			rapidjson::Document									manifest;
-			ManifestEntryValue<bool>							predefinedValues;
 			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;
 			std::vector<std::shared_ptr<Sound>>					sounds;
 			std::shared_ptr<ast::StatementList>					scripts;
 			
-			bool												isInitialization;
-			Type												typeForInitialization;
+			ObjectParams::Type									typeForInitialization;
 			std::shared_ptr<Costume>							currentlyProcessedCostume;							//both only needed during manifest loading
 			std::shared_ptr<Sound>								currentlyProcessedSound;
-	
+			
 		public:
-			Object();
-			Object(const boost::filesystem::path& newObjectPath, const ManifestEntryValue<bool>& newPredefinedValues, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
+			Object(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool newIsInitialization=false, ObjectParams::Type newTypeForInitialization=ObjectParams::Type::Generic);
 			
-			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool isInitialization=false, Type newTypeForInitialization=Type::Generic);
+			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, ObjectParams::Type newTypeForInitialization=ObjectParams::Type::Generic);
 			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-			void												purgeNonPredefinedManifestEntries(rapidjson::Value& currValue, ManifestEntryValue<bool>& currPredefinedValues);
 			void												saveAndReload(bool verboseOutput=true);
+			virtual void										reset();
 			
-			Type												getType();
 			const boost::filesystem::path&						getObjectPath();
+			ObjectParams::Type									getType();
 			std::string											getName();
-			rapidjson::Document&								getManifest();
-			ManifestEntryValue<bool>&							getPredefinedValues();
 			int													getCurrentCostumeIndex();
 			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();
 			std::vector<std::shared_ptr<Sound>>&				getSounds();
-			void												setType(Type newType);
+			void												setType(ObjectParams::Type newType);
 			void												setName(const std::string& newName);
 			void												setCurrentCostumeIndex(int newCurrentCostumeIndex);
 			void												setPenLayer(std::shared_ptr<Costume> newPenLayer);
 			void												addCostume(std::shared_ptr<Costume> newCostume);
 			void												addSound(std::shared_ptr<Sound> newSound);
 			
-			bool												getIsInitialization();
-			Type												getTypeForInitialization();
+			template<typename T>
+			typename std::enable_if_t<std::is_base_of<Resource, T>::value>
+			checkResourceNameUniqueness(const std::string& resourcePluralDesc, const std::vector<std::shared_ptr<T>>& resourceList)
+			{
+				if(resourceList.size() <= 1)
+					return;
+				for(auto it = resourceList.begin(); it != resourceList.end(); ++it)
+				{
+					auto otherResource = std::find_if(it + 1, resourceList.end(), [&](std::shared_ptr<T> resource)
+						{ return (resource->getName() == (*it)->getName()); });
+					if(otherResource != resourceList.end())
+						throw GeneralException("object '" + getName() + "' may not contain two " + resourcePluralDesc + " with the same name: candidates are at '" + boost::filesystem::relative((*it)->getResourcePath()).string() + "' and '" + boost::filesystem::relative((*otherResource)->getResourcePath()).string() + "'");
+				}
+			}
+			
+			ObjectParams::Type									getTypeForInitialization();
 			std::shared_ptr<Costume>							getCurrentlyProcessedCostume();
 			std::shared_ptr<Sound>								getCurrentlyProcessedSound();
 			void												setCurrentlyProcessedCostume(std::shared_ptr<Costume> newCurrentCostume);

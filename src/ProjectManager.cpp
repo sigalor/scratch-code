@@ -23,6 +23,8 @@
 
 
 namespace fs = boost::filesystem;
+namespace mep = sc::ManifestEntryParams;
+namespace op = sc::ObjectParams;
 
 namespace sc
 {
@@ -33,19 +35,7 @@ namespace sc
 	{
 		{
 			"manifest.json",
-			[](const fs::path& filepath, ProjectManager* projMgr)
-			{
-				using namespace rapidjson;
-	
-				Document doc;
-				Document::AllocatorType& alloc = doc.GetAllocator();
-		
-				doc.SetObject();
-				doc.AddMember("user", "your_username", alloc);
-				doc.AddMember("title", Value(projMgr->getProjectName().c_str(), alloc), alloc);						//cannot use .c_str() directly, because the resulting char* would not have safe life cycle, from https://github.com/miloyip/rapidjson/issues/738#issuecomment-247340768
-				
-				Utilities::writeDocumentToFile(filepath, doc);
-			}
+			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
 		}
 	};
 	
@@ -56,11 +46,11 @@ namespace sc
 			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
 		}
 	};
-
-
-
-
-
+	
+	
+	
+	
+	
 	void ProjectManager::createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
 	{
 		for(auto& f : reqDirs)
@@ -97,10 +87,10 @@ namespace sc
 	{
 		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "objects"))
 		{
-			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path(), Object::manifestRootEntryValueBase);
+			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
 			
-			auto otherStageObject = std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == Object::Type::Stage); });
-			if(newObject->getType() == Object::Type::Stage)
+			auto otherStageObject = std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == op::Type::Stage); });
+			if(newObject->getType() == op::Type::Stage)
 			{
 				if(otherStageObject != objects.end())
 					throw GeneralException("project may not contain more than one stage object: candidates are at '" + fs::relative(newObject->getObjectPath()).string() + "' and '" + fs::relative((*otherStageObject)->getObjectPath()).string() + "'");
@@ -146,7 +136,7 @@ namespace sc
 		docDest.AddMember("children", childrenArray, alloc);
 		for(auto o : objects)
 		{
-			if(o->getType() != Object::Type::Stage)
+			if(o->getType() != op::Type::Stage)
 			{
 				o->buildJSON(tempValue, alloc);
 				docDest["children"].PushBack(tempValue, alloc);
@@ -158,21 +148,16 @@ namespace sc
 
 
 
-	ProjectManager::ProjectManager()
+	ProjectManager::ProjectManager(const fs::path& newProjectPath) : ManifestUser(newProjectPath / "manifest.json", ManifestDefinitions::ProjectManagerManifest::rootEntry, ManifestDefinitions::ProjectManagerManifest::rootEntryValueBase, false), projectPath(newProjectPath)
 	{
-
-	}
-
-	ProjectManager::ProjectManager(const fs::path& newPathPrefix, const std::string& newProjectName) : pathPrefix(newPathPrefix), projectPath(newPathPrefix / newProjectName), projectName(newProjectName)
-	{
-
+		//empty
 	}
 
 	void ProjectManager::initialize()
 	{
 		if(fs::exists(projectPath))
-			throw GeneralException("'" + projectName + "' already exists as a " + Utilities::fileTypeToString(projectName));
-	
+			throw GeneralException("'" + getTitle() + "' already exists as a " + Utilities::fileTypeToString(getTitle()));
+		
 		try
 		{
 			fs::create_directory(projectPath);
@@ -182,15 +167,23 @@ namespace sc
 		catch(const fs::filesystem_error& e)
 			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 		
+		//load manifest
+		isInitialization = true;
+		loadManifestInternal(this, false);
+		saveAndReloadInternal(this);
+		isInitialization = true;
+		
 		//stage object has to exist
-		addObject("Stage", projectPath / "objects/stage", Object::Type::Stage);
+		addObject("Stage", projectPath / "objects/stage", op::Type::Stage);
 		
 		//output final input message indicating success
-		std::cout << "successfully created project tree for '" + projectName + "'" << std::endl;
+		std::cout << "successfully created project tree for '" + getTitle() + "'" << std::endl;
 	}
 
-	void ProjectManager::addObject(const std::string& objName, const fs::path& objPath, Object::Type objType)
+	void ProjectManager::addObject(const std::string& objName, const fs::path& objPath, op::Type objType)
 	{
+		if(!isInitialization)
+			validate();
 		if(fs::exists(objPath))
 			throw GeneralException("'" + fs::relative(objPath).string() + "' already exists as a " + Utilities::fileTypeToString(objPath));
 		std::shared_ptr<Object> objectWithSameName(getObject(objName));
@@ -202,28 +195,27 @@ namespace sc
 			createRequiredDirectories(requiredObjectDirectories, objPath);
 			createRequiredFiles(requiredObjectFiles, objPath);
 			
-			objects.push_back(std::make_shared<Object>(objPath, Object::manifestRootEntryValueBase, false, true, objType));
+			objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
 			objects.back()->setName(objName);
 			objects.back()->saveAndReload();
 		}
 		catch(const fs::filesystem_error& e)
 			{ throw GeneralException(std::string("file system error: ") + e.what()); }
 	
-		std::cout << "successfully added object '" << objName << "' to project '" << projectName + "'" << std::endl;
+		std::cout << "successfully added object '" << objName << "' to project '" << getTitle() + "'" << std::endl;
 	}
 	
-	void ProjectManager::addObject(const std::string& objName, Object::Type objType)
+	void ProjectManager::addObject(const std::string& objName, op::Type objType)
 	{
 		addObject(objName, projectPath / "objects" / objName, objType);
 	}
 
 	void ProjectManager::validate()
 	{
-		//check that project name is valid
-		Utilities::validateIdentifier("project name", projectName);
+		//the project's path has to exist and be a directory of course
+		Utilities::validateFile(projectPath, fs::file_type::directory_file);
 		
 		//check that required directories and files exist
-		std::string objectName;
 		try
 		{
 			validateRequiredDirectories(requiredFirstLevelDirectories, projectPath);
@@ -234,7 +226,11 @@ namespace sc
 		catch(const GeneralException& e)
 			{ throw GeneralException(std::string("invalid project tree: ") + e.what()); }
 		
-		std::cout << "successfully validated project '" << projectName << "'" << std::endl;
+		//load the manifest
+		loadManifestInternal(this);
+		
+		//output final success message
+		std::cout << "successfully validated project '" << getTitle() << "'" << std::endl;
 	}
 
 	void ProjectManager::build()
@@ -284,45 +280,47 @@ namespace sc
 		buildProjectJSON(costumes[0], doc);
 		Utilities::writeDocumentToFile(projectPath / "gen/project.json", doc);
 		
-		fs::path binaryPath(projectPath / "bin" / (projectName + ".sb2"));
+		fs::path binaryPath(projectPath / "bin" / (getTitle() + ".sb2"));
 		fs::remove(binaryPath);
 		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "gen"))
 			ZipFile::AddFile(binaryPath.string(), e.path().string());
 		
-		std::cout << "successfully built project '" << projectName << "'" << std::endl;
+		std::cout << "successfully built project '" << getTitle() << "'" << std::endl;
 	}
 
 	void ProjectManager::clean()
 	{
 		validate();
 	}
+	
+	
+	
+	
 
-	const fs::path& ProjectManager::getPathPrefix()
+	const fs::path& ProjectManager::getProjectPath()
 	{
-		return pathPrefix;
+		return projectPath;
+	}
+	
+	std::string ProjectManager::getTitle()
+	{
+		return manifest["title"].GetString();
+	}
+	
+	std::string ProjectManager::getUsername()
+	{
+		return manifest["username"].GetString();
 	}
 
-	const std::string& ProjectManager::getProjectName()
+	void ProjectManager::setTitle(const std::string& newTitle)
 	{
-		return projectName;
+		//Utilities::validateIdentifier("project title", newTitle);
+		manifest["title"].SetString(newTitle.c_str(), manifest.GetAllocator());
 	}
-
-	void ProjectManager::setProjectPath(const fs::path& newProjectPath)
+	
+	void ProjectManager::setUsername(const std::string& newUsername)
 	{
-		projectPath = newProjectPath;
-		pathPrefix = projectPath.parent_path();
-		projectName = projectPath.filename().string();
-	}
-
-	void ProjectManager::setPathPrefix(const fs::path& newPathPrefix)
-	{
-		pathPrefix = newPathPrefix;
-		projectPath = pathPrefix / projectName;
-	}
-
-	void ProjectManager::setProjectName(const std::string& newProjectName)
-	{
-		projectName = newProjectName;
-		projectPath = pathPrefix / projectName;
+		//Utilities::validateIdentifier("username", newUsername);
+		manifest["username"].SetString(newUsername.c_str(), manifest.GetAllocator());
 	}
 }

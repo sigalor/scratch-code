@@ -1,2 +1,1 @@
-- add 'stageObject' member to 'manifest.json'
-- add 'scriptPath' member to 'objectManifest.json'
+- add custom paths for costumes, sounds, penLayer and scripts member to 'objectManifest.json'

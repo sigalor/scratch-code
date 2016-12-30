@@ -30,31 +30,40 @@
 #include <type_traits>
 
 #include <boost/filesystem.hpp>
+#include <rapidjson/document.h>
 #include <ZipLib/ZipFile.h>
 
 #include "Translator.hpp"
 #include "GeneralException.hpp"
 #include "Object.hpp"
+#include "ObjectParams.hpp"
 #include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
+#include "ManifestEntry.hpp"
+#include "ManifestEntryValue.hpp"
+#include "ManifestEntryParams.hpp"
+#include "ManifestUser.hpp"
+#include "ManifestDefinitions.hpp"
+#include "Utilities.hpp"
 
 
 
 namespace sc
 {
-	class ProjectManager
+	class Object;
+	
+	class ProjectManager : public ManifestUser<ProjectManager>
 	{
 		public:
 			using RequiredDirectoriesList = std::vector<boost::filesystem::path>;
 			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<void(const boost::filesystem::path&, ProjectManager*)>>>;
-
-		private:
+			
 			static const RequiredDirectoriesList					requiredFirstLevelDirectories, requiredObjectDirectories;
 			static const RequiredFilesList							requiredFirstLevelFiles, requiredObjectFiles;
-		
-			boost::filesystem::path									pathPrefix, projectPath;
-			std::string												projectName;
+			
+		private:
+			boost::filesystem::path									projectPath;
 			std::shared_ptr<Object>									stageObject;
 			std::vector<std::shared_ptr<Object>>					objects;
 		
@@ -67,8 +76,8 @@ namespace sc
 			std::shared_ptr<Object>									getObject(const std::string& objName);
 			
 			template<typename T>
-			typename std::enable_if_t<std::is_base_of<Resource, T>::value, void>
-			buildObjectResourceList(const std::vector<std::shared_ptr<T>>& resourceList, const boost::filesystem::path& dirPrefix="")
+			typename std::enable_if_t<std::is_base_of<Resource, T>::value>
+			buildObjectResourceList(const std::vector<std::shared_ptr<T>>& resourceList)
 			{
 				for(auto it = resourceList.begin(); it != resourceList.end(); ++it)
 				{
@@ -80,19 +89,19 @@ namespace sc
 			void													buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest);
 			
 		public:
-			ProjectManager();
-			ProjectManager(const boost::filesystem::path& newPathPrefix, const std::string& newProjectName);
+			ProjectManager(const boost::filesystem::path& newProjectPath);
 		
 			void													initialize();
-			void													addObject(const std::string& objName, const boost::filesystem::path& objPath, Object::Type objType=Object::Type::Generic);
-			void													addObject(const std::string& objName, Object::Type objType=Object::Type::Generic);
+			void													addObject(const std::string& objName, const boost::filesystem::path& objPath, ObjectParams::Type objType=ObjectParams::Type::Generic);
+			void													addObject(const std::string& objName, ObjectParams::Type objType=ObjectParams::Type::Generic);
 			void													validate();
 			void													build();
 			void													clean();
-			const boost::filesystem::path&							getPathPrefix();
-			const std::string&										getProjectName();
-			void													setProjectPath(const boost::filesystem::path& newProjectPath);
-			void													setPathPrefix(const boost::filesystem::path& newPathPrefix);
-			void													setProjectName(const std::string& newProjectName);
+			
+			const boost::filesystem::path&							getProjectPath();
+			std::string												getTitle();
+			std::string												getUsername();
+			void													setTitle(const std::string& newTitle);
+			void													setUsername(const std::string& newUsername);
 	};
 }

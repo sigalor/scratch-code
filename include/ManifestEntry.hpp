@@ -38,8 +38,8 @@ namespace sc
 {
 	namespace mep = ManifestEntryParams;
 	
-	template<typename T>
-	class ManifestStructure;
+	//template<typename T>
+	//class ManifestStructure;
 
 	template<typename T>
 	class ManifestEntry

@@ -32,8 +32,8 @@ void printBasicUsage(const std::string& appName)
 
 void processParameters(int argc, char** argv)
 {
-	std::string			appName = argv[0], action, projectName;
-	sc::ProjectManager	projMgr;
+	std::string							appName = argv[0], action, projectName;
+	std::shared_ptr<sc::ProjectManager>	projMgr;
 	
 	if(argc == 1)
 		printBasicUsage(appName);
@@ -48,13 +48,12 @@ void processParameters(int argc, char** argv)
 				std::cout << "usage: " << argv[0] << " init <project_name>" << std::endl;
 				std::exit(EXIT_SUCCESS);
 			}
-			projMgr.setPathPrefix(fs::current_path());
-			projMgr.setProjectName(argv[2]);
-			projMgr.initialize();
+			projMgr = std::make_shared<sc::ProjectManager>(fs::current_path() / argv[2]);
+			projMgr->initialize();
 		}
 		else if(action == "addobject"  ||  action == "build"  ||  action == "clean")
 		{
-			projMgr.setProjectPath(fs::current_path());
+			projMgr = std::make_shared<sc::ProjectManager>(fs::current_path());
 			if(action == "addobject")
 			{
 				if(argc == 2)
@@ -62,12 +61,12 @@ void processParameters(int argc, char** argv)
 					std::cout << "usage: " << argv[0] << " addobject <object_name>" << std::endl;
 					std::exit(EXIT_SUCCESS);
 				}
-				projMgr.addObject(argv[2]);
+				projMgr->addObject(argv[2]);
 			}
 			else if(action == "build")
-				projMgr.build();
+				projMgr->build();
 			else if(action == "clean")
-				projMgr.clean();
+				projMgr->clean();
 		}
 		else
 			printBasicUsage(appName);
