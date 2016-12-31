@@ -1,0 +1,15 @@
+{
+    "objectName": "Bühne",
+    "type": "stage",
+    "currentCostumeIndex": 0,
+    "sounds": [],
+    "costumes": [
+        {
+            "path": "backdrop1.png"
+        }
+    ],
+    "costumesDirectoryPath": "Kostüme",
+    "scriptsDirectoryPath": "Skripte",
+    "soundsDirectoryPath": "Töne",
+    "penLayerPath": "Malebene/Malebene.png"
+}

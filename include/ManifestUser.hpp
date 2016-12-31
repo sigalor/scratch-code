@@ -59,9 +59,16 @@ namespace sc
 				isInitialization = false;
 			}
 			
-			void loadManifestInternal(T* targetInstance, bool verboseOutput=true)									//implies that "loadManifestInternal" can only be called from another class that derived like this: "class OtherClass : public ManifestUser<OtherClass> { ... }"
+			void loadManifestInternal(T* targetInstance, bool verboseOutput=true)									//parameter 1 implies that "loadManifestInternal" can only be called from another class that derived like this: "class OtherClass : public ManifestUser<OtherClass> { ... }"
 			{
-				rootEntryRef.children.validateJSON(targetInstance, manifestPath, manifest, predefinedValues, false, true, verboseOutput);
+				try
+				{
+					if(isInitialization  &&  !boost::filesystem::exists(manifestPath))								//if the initialization is happening, the file at "manifestPath" may need to be created; do this with an empty JSON object
+						Utilities::createFile(manifestPath, "{}");													//this implies that NO ManifestEntries in the definition's first level are allowed to have "mep::Importance::Required"!
+					rootEntryRef.children.validateJSON(targetInstance, manifestPath, manifest, predefinedValues, false, true, verboseOutput);
+				}
+				catch(const boost::filesystem::filesystem_error& e)
+					{ throw GeneralException(std::string("file system error: ") + e.what()); }
 			}
 			
 			void saveAndReloadInternal(T* targetInstance, bool verboseOutput=true)									//same like "loadManifestInternal"
@@ -108,6 +115,11 @@ namespace sc
 			}
 		
 		public:
+			const boost::filesystem::path& getManifestPath()
+			{
+				return manifestPath;
+			}
+			
 			rapidjson::Document& getManifest()
 			{
 				return manifest;

@@ -41,17 +41,6 @@ namespace sc
 		typeForInitialization = newTypeForInitialization;
 		Utilities::validateFile(objectPath, fs::file_type::directory_file);
 		loadManifestInternal(this, verboseOutput);
-		
-		if(getType() == op::Type::Stage)
-		{
-			fs::path penLayerPath(objectPath / "penLayer/penLayer.png");
-			if(isInitialization)
-			{
-				fs::create_directories(penLayerPath.parent_path());
-				Utilities::writePlainPNGToFile(penLayerPath, 480, 360, 0, 0, 0, 0);
-			}
-			setPenLayer(std::make_shared<Costume>(penLayerPath));
-		}
 	}
 	
 	void Object::buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
@@ -107,14 +96,34 @@ namespace sc
 		return objectPath;
 	}
 	
+	std::string Object::getName()
+	{
+		return manifest["objectName"].GetString();
+	}
+	
 	op::Type Object::getType()
 	{
 		return op::jsonStringToType(manifest["type"].GetString());
 	}
 	
-	std::string Object::getName()
+	fs::path Object::getCostumesDirectoryPath()
 	{
-		return manifest["objectName"].GetString();
+		return objectPath / manifest["costumesDirectoryPath"].GetString();
+	}
+	
+	fs::path Object::getScriptsDirectoryPath()
+	{
+		return objectPath / manifest["scriptsDirectoryPath"].GetString();
+	}
+	
+	fs::path Object::getSoundsDirectoryPath()
+	{
+		return objectPath / manifest["soundsDirectoryPath"].GetString();
+	}
+	
+	fs::path Object::getPenLayerPath()
+	{
+		return objectPath / manifest["penLayerPath"].GetString();
 	}
 	
 	int Object::getCurrentCostumeIndex()
@@ -139,15 +148,38 @@ namespace sc
 		return sounds;
 	}
 	
+	void Object::setName(const std::string& newName)
+	{
+		manifest["objectName"].SetString(newName.c_str(), manifest.GetAllocator());
+	}
+	
 	void Object::setType(op::Type newType)
 	{
 		manifest["type"].SetString(op::typeToJSONString(newType).c_str(), manifest.GetAllocator());
 	}
 	
-	void Object::setName(const std::string& newName)
+	void Object::setCostumesDirectoryPath(const std::string& newCostumesDirectoryPath)
 	{
-		//Utilities::validateIdentifier("object name", newName);
-		manifest["objectName"].SetString(newName.c_str(), manifest.GetAllocator());
+		Utilities::validateFile(objectPath / newCostumesDirectoryPath, fs::file_type::directory_file);
+		manifest["costumesDirectoryPath"].SetString(newCostumesDirectoryPath.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setScriptsDirectoryPath(const std::string& newScriptsDirectoryPath)
+	{
+		Utilities::validateFile(objectPath / newScriptsDirectoryPath, fs::file_type::directory_file);
+		manifest["scriptsDirectoryPath"].SetString(newScriptsDirectoryPath.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setSoundsDirectoryPath(const std::string& newSoundsDirectoryPath)
+	{
+		Utilities::validateFile(objectPath / newSoundsDirectoryPath, fs::file_type::directory_file);
+		manifest["soundsDirectoryPath"].SetString(newSoundsDirectoryPath.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setPenLayerPath(const std::string& newPenLayerPath)
+	{
+		Utilities::validateFile(objectPath / newPenLayerPath, fs::file_type::regular_file);
+		manifest["penLayerPath"].SetString(newPenLayerPath.c_str(), manifest.GetAllocator());
 	}
 	
 	void Object::setCurrentCostumeIndex(int newCurrentCostumeIndex)

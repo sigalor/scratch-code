@@ -56,6 +56,60 @@ namespace sc
 						/* alternative */		[](ProjectManager* projMgr) { return projMgr->getProjectPath().filename().string(); },
 						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val) { projMgr->setTitle(boost::get<std::string>(val)); }
 					)
+				),
+				ManifestEntry<ProjectManager>
+				(
+					"binariesDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](ProjectManager* projMgr) { return "bin"; },
+						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+												{
+													std::string binariesPath(boost::get<std::string>(val));
+													if(projMgr->getIsInitialization())
+														fs::create_directories(projMgr->getProjectPath() / binariesPath);
+													projMgr->setBinariesDirectoryPath(binariesPath);
+												}
+					)
+				),
+				ManifestEntry<ProjectManager>
+				(
+					"generatedFilesDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](ProjectManager* projMgr) { return "gen"; },
+						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+												{
+													std::string generatedFilesPath(boost::get<std::string>(val));
+													if(projMgr->getIsInitialization())
+														fs::create_directories(projMgr->getProjectPath() / generatedFilesPath);
+													projMgr->setGeneratedFilesDirectoryPath(generatedFilesPath);
+												}
+					)
+				),
+				ManifestEntry<ProjectManager>
+				(
+					"objectsDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](ProjectManager* projMgr) { return "objects"; },
+						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+												{
+													std::string objectsPath(boost::get<std::string>(val));
+													if(projMgr->getIsInitialization())
+														fs::create_directories(projMgr->getProjectPath() / objectsPath);
+													projMgr->setObjectsDirectoryPath(objectsPath);
+												}
+					)
 				)
 			}));
 			const ManifestEntryValue<bool> rootEntryValueBase(rootEntry);
@@ -99,6 +153,82 @@ namespace sc
 				),
 				ManifestEntry<Object>
 				(
+					"costumesDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj) { return "costumes"; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)
+												{
+													std::string costumesPath(boost::get<std::string>(val));
+													if(obj->getIsInitialization())
+														fs::create_directories(obj->getObjectPath() / costumesPath);		//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
+													obj->setCostumesDirectoryPath(costumesPath);
+												}
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"scriptsDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj) { return "scripts"; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)
+												{
+													std::string scriptsPath(boost::get<std::string>(val));
+													if(obj->getIsInitialization())
+														fs::create_directories(obj->getObjectPath() / scriptsPath);
+													obj->setScriptsDirectoryPath(scriptsPath);
+												}
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"soundsDirectoryPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj) { return "sounds"; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)
+												{
+													std::string soundsPath(boost::get<std::string>(val));
+													if(obj->getIsInitialization())
+														fs::create_directories(obj->getObjectPath() / soundsPath);
+													obj->setSoundsDirectoryPath(soundsPath);
+												}
+					)
+				),
+				ManifestEntry<Object>
+				(
+					"penLayerPath",
+					mep::Type::String,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */			[](Object* obj) { return (obj->getType() == op::Type::Stage); },	//pen layer is only needed when the object is a stage (otherwise it's ignored and "alternative" and "processor" will NOT be executed)
+						/* alternative */		[](Object* obj) { return "penLayer/penLayer.png"; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)
+												{
+													fs::path penLayerPath(obj->getObjectPath() / boost::get<std::string>(val));		//because of the upper "condition", no checking for "obj->getType() == op::Type::Stage" is necessary
+													if(obj->getIsInitialization())
+													{
+														fs::create_directories(penLayerPath.parent_path());
+														Utilities::writePlainPNGToFile(penLayerPath, 480, 360, 0, 0, 0, 0);
+													}
+													obj->setPenLayerPath(boost::get<std::string>(val));
+													obj->setPenLayer(std::make_shared<Costume>(penLayerPath));
+												}
+					)
+				),
+				ManifestEntry<Object>
+				(
 					"costumes",
 					mep::Type::Array,
 					mep::Importance::OptionalWithWarning,
@@ -125,7 +255,7 @@ namespace sc
 												
 															op::Type					objectType = obj->getType();
 															std::string					newCostumeFilename = (objectType==op::Type::Stage ? "backdrop1.png" : (objectType==op::Type::Generic ? "costume1.png" : "error.png"));
-															fs::path					newCostumePath(obj->getObjectPath() / "costumes" / newCostumeFilename);
+															fs::path					newCostumePath(obj->getCostumesDirectoryPath() / newCostumeFilename);
 															Value						newCostumeEntry(kObjectType);
 															Document::AllocatorType&	alloc = obj->getManifest().GetAllocator();
 													
@@ -145,7 +275,7 @@ namespace sc
 															costumesEntryValue.addArrayEntry(false);
 															rootEntry.children.getEntry("costumes").elementPreProcessor(obj);
 															obj->getCostumes().back()->loadFromPath(newCostumePath);
-															rootEntry.children.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, rootEntry.children.getEntry("costumes").children, obj->getObjectPath() / "objectManifest.json", costumesEntryValue.children.back(), false, true, false);
+															rootEntry.children.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, rootEntry.children.getEntry("costumes").children, obj->getManifestPath(), costumesEntryValue.children.back(), false, true, false);
 													
 															//output final info message (do not use "obj->getName()" here, as the "ProjectManager::addObject" function sets the desired name later)
 															std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object at '" << fs::relative(obj->getObjectPath()).string() << "'" << std::endl;
@@ -164,7 +294,7 @@ namespace sc
 							(
 								/* condition */			nullptr,
 								/* alternative */		nullptr,
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->loadFromPath(obj->getObjectPath() / "costumes" / boost::get<std::string>(val)); }
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->loadFromPath(obj->getCostumesDirectoryPath() / boost::get<std::string>(val)); }
 							)
 						),
 						ManifestEntry<Object>
@@ -237,7 +367,7 @@ namespace sc
 							(
 								/* condition */			nullptr,
 								/* alternative */		nullptr,
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedSound()->loadFromPath(obj->getObjectPath() / "sounds" / boost::get<std::string>(val)); }
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedSound()->loadFromPath(obj->getSoundsDirectoryPath() / boost::get<std::string>(val)); }
 							)
 						),
 						ManifestEntry<Object>

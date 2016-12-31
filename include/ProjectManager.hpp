@@ -55,37 +55,13 @@ namespace sc
 	
 	class ProjectManager : public ManifestUser<ProjectManager>
 	{
-		public:
-			using RequiredDirectoriesList = std::vector<boost::filesystem::path>;
-			using RequiredFilesList = std::vector<std::pair<boost::filesystem::path, std::function<void(const boost::filesystem::path&, ProjectManager*)>>>;
-			
-			static const RequiredDirectoriesList					requiredFirstLevelDirectories, requiredObjectDirectories;
-			static const RequiredFilesList							requiredFirstLevelFiles, requiredObjectFiles;
-			
 		private:
 			boost::filesystem::path									projectPath;
 			std::shared_ptr<Object>									stageObject;
 			std::vector<std::shared_ptr<Object>>					objects;
 		
-			void													createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
-			void													createRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
-			void													validateRequiredDirectories(const RequiredDirectoriesList& reqDirs, const boost::filesystem::path& dirPrefix="");
-			void													validateRequiredFiles(const RequiredFilesList& reqFiles, const boost::filesystem::path& dirPrefix="");
-			
 			void													loadAllObjects();
 			std::shared_ptr<Object>									getObject(const std::string& objName);
-			
-			template<typename T>
-			typename std::enable_if_t<std::is_base_of<Resource, T>::value>
-			buildObjectResourceList(const std::vector<std::shared_ptr<T>>& resourceList)
-			{
-				for(auto it = resourceList.begin(); it != resourceList.end(); ++it)
-				{
-					auto i = std::distance(resourceList.begin(), it);
-					auto p = (*it)->getResourcePath();
-					boost::filesystem::copy(p, projectPath / "gen" / (std::to_string(i) + p.extension().string()));
-				}
-			}
 			void													buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest);
 			
 		public:
@@ -101,7 +77,26 @@ namespace sc
 			const boost::filesystem::path&							getProjectPath();
 			std::string												getTitle();
 			std::string												getUsername();
+			boost::filesystem::path									getBinariesDirectoryPath();
+			boost::filesystem::path									getGeneratedFilesDirectoryPath();
+			boost::filesystem::path									getObjectsDirectoryPath();
 			void													setTitle(const std::string& newTitle);
 			void													setUsername(const std::string& newUsername);
+			void													setBinariesDirectoryPath(const std::string& newBinariesDirectoryPath);
+			void													setGeneratedFilesDirectoryPath(const std::string& newGeneratedFilesDirectoryPath);
+			void													setObjectsDirectoryPath(const std::string& newObjectsDirectoryPath);
+		
+		private:
+			template<typename T>
+			typename std::enable_if_t<std::is_base_of<Resource, T>::value>
+			buildObjectResourceList(const std::vector<std::shared_ptr<T>>& resourceList)
+			{
+				for(auto it = resourceList.begin(); it != resourceList.end(); ++it)
+				{
+					auto i = std::distance(resourceList.begin(), it);
+					auto p = (*it)->getResourcePath();
+					boost::filesystem::copy(p, getGeneratedFilesDirectoryPath() / (std::to_string(i) + p.extension().string()));
+				}
+			}
 	};
 }

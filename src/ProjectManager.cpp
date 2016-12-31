@@ -28,64 +28,9 @@ namespace op = sc::ObjectParams;
 
 namespace sc
 {
-	const ProjectManager::RequiredDirectoriesList ProjectManager::requiredFirstLevelDirectories		= { "bin", "gen", "objects" };
-	const ProjectManager::RequiredDirectoriesList ProjectManager::requiredObjectDirectories			= { "costumes", "scripts", "sounds" };
-
-	const ProjectManager::RequiredFilesList ProjectManager::requiredFirstLevelFiles =
-	{
-		{
-			"manifest.json",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
-		}
-	};
-	
-	const ProjectManager::RequiredFilesList ProjectManager::requiredObjectFiles =
-	{
-		{
-			"objectManifest.json",
-			[](const fs::path& filepath, ProjectManager* projMgr) { Utilities::createFile(filepath, "{}"); }
-		}
-	};
-	
-	
-	
-	
-	
-	void ProjectManager::createRequiredDirectories(const RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
-	{
-		for(auto& f : reqDirs)
-			fs::create_directories(dirPrefix / f);																	//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
-	}
-
-	void ProjectManager::createRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const fs::path& dirPrefix)
-	{
-		for(auto& f : reqFiles)
-		{
-			fs::path currPath(dirPrefix / f.first);
-			fs::create_directories(currPath.parent_path());
-			f.second(currPath, this);																				//the pair's second element is a function containing the building instructions for the specified file and creates that file
-		}
-	}
-
-	void ProjectManager::validateRequiredDirectories(const ProjectManager::RequiredDirectoriesList& reqDirs, const fs::path& dirPrefix)
-	{
-		for(auto& f : reqDirs)
-			Utilities::validateFile(dirPrefix / f, fs::file_type::directory_file);
-	}
-
-	void ProjectManager::validateRequiredFiles(const ProjectManager::RequiredFilesList& reqFiles, const fs::path& dirPrefix)
-	{
-		for(auto& f : reqFiles)
-			Utilities::validateFile(dirPrefix / f.first, fs::file_type::regular_file);
-	}
-	
-	
-	
-	
-	
 	void ProjectManager::loadAllObjects()
 	{
-		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "objects"))
+		for(fs::directory_entry& e : fs::directory_iterator(getObjectsDirectoryPath()))
 		{
 			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
 			
@@ -157,15 +102,7 @@ namespace sc
 	{
 		if(fs::exists(projectPath))
 			throw GeneralException("'" + getTitle() + "' already exists as a " + Utilities::fileTypeToString(getTitle()));
-		
-		try
-		{
-			fs::create_directory(projectPath);
-			createRequiredDirectories(requiredFirstLevelDirectories, projectPath);
-			createRequiredFiles(requiredFirstLevelFiles, projectPath);
-		}
-		catch(const fs::filesystem_error& e)
-			{ throw GeneralException(std::string("file system error: ") + e.what()); }
+		fs::create_directory(projectPath);
 		
 		//load manifest
 		isInitialization = true;
@@ -174,7 +111,7 @@ namespace sc
 		isInitialization = true;
 		
 		//stage object has to exist
-		addObject("Stage", projectPath / "objects/stage", op::Type::Stage);
+		addObject("Stage", getObjectsDirectoryPath() / "stage", op::Type::Stage);
 		
 		//output final input message indicating success
 		std::cout << "successfully created project tree for '" + getTitle() + "'" << std::endl;
@@ -182,32 +119,30 @@ namespace sc
 
 	void ProjectManager::addObject(const std::string& objName, const fs::path& objPath, op::Type objType)
 	{
+		//if "isInitialization == true", then this function was DEFINITELY called from "initialize()"
 		if(!isInitialization)
 			validate();
+		
+		//check for new object's uniqueness (in path and name)
 		if(fs::exists(objPath))
 			throw GeneralException("'" + fs::relative(objPath).string() + "' already exists as a " + Utilities::fileTypeToString(objPath));
 		std::shared_ptr<Object> objectWithSameName(getObject(objName));
 		if(objectWithSameName != nullptr)
 			throw GeneralException("object called '" + objName + "' already exists at '" + fs::relative(objectWithSameName->getObjectPath()).string() + "'");
 		
-		try
-		{
-			createRequiredDirectories(requiredObjectDirectories, objPath);
-			createRequiredFiles(requiredObjectFiles, objPath);
-			
-			objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
-			objects.back()->setName(objName);
-			objects.back()->saveAndReload();
-		}
-		catch(const fs::filesystem_error& e)
-			{ throw GeneralException(std::string("file system error: ") + e.what()); }
-	
+		//load the object, then do some changes, then save the modified object's manifest on the disk and reload it
+		objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
+		objects.back()->setName(objName);
+		objects.back()->saveAndReload();
+		
+		//output final success message
 		std::cout << "successfully added object '" << objName << "' to project '" << getTitle() + "'" << std::endl;
 	}
 	
 	void ProjectManager::addObject(const std::string& objName, op::Type objType)
 	{
-		addObject(objName, projectPath / "objects" / objName, objType);
+		//this function is just a shortcut
+		addObject(objName, getObjectsDirectoryPath() / objName, objType);
 	}
 
 	void ProjectManager::validate()
@@ -215,19 +150,15 @@ namespace sc
 		//the project's path has to exist and be a directory of course
 		Utilities::validateFile(projectPath, fs::file_type::directory_file);
 		
-		//check that required directories and files exist
+		//load the own manifest and all objects
 		try
 		{
-			validateRequiredDirectories(requiredFirstLevelDirectories, projectPath);
+			loadManifestInternal(this);
 			if(objects.size() == 0)
 				loadAllObjects();
-			validateRequiredFiles(requiredFirstLevelFiles, projectPath);
 		}
 		catch(const GeneralException& e)
 			{ throw GeneralException(std::string("invalid project tree: ") + e.what()); }
-		
-		//load the manifest
-		loadManifestInternal(this);
 		
 		//output final success message
 		std::cout << "successfully validated project '" << getTitle() << "'" << std::endl;
@@ -268,8 +199,8 @@ namespace sc
 		
 		try
 		{
-			fs::remove_all(projectPath / "gen");
-			fs::create_directory(projectPath / "gen");
+			fs::remove_all(getGeneratedFilesDirectoryPath());
+			fs::create_directory(getGeneratedFilesDirectoryPath());
 			buildObjectResourceList(costumes);
 			buildObjectResourceList(sounds);
 		}
@@ -278,11 +209,11 @@ namespace sc
 		
 		rapidjson::Document doc;
 		buildProjectJSON(costumes[0], doc);
-		Utilities::writeDocumentToFile(projectPath / "gen/project.json", doc);
+		Utilities::writeDocumentToFile(getGeneratedFilesDirectoryPath() / "project.json", doc);
 		
-		fs::path binaryPath(projectPath / "bin" / (getTitle() + ".sb2"));
+		fs::path binaryPath(getBinariesDirectoryPath() / (getTitle() + ".sb2"));
 		fs::remove(binaryPath);
-		for(fs::directory_entry& e : fs::directory_iterator(projectPath / "gen"))
+		for(fs::directory_entry& e : fs::directory_iterator(getGeneratedFilesDirectoryPath()))
 			ZipFile::AddFile(binaryPath.string(), e.path().string());
 		
 		std::cout << "successfully built project '" << getTitle() << "'" << std::endl;
@@ -311,10 +242,24 @@ namespace sc
 	{
 		return manifest["username"].GetString();
 	}
+	
+	boost::filesystem::path ProjectManager::getBinariesDirectoryPath()
+	{
+		return projectPath / manifest["binariesDirectoryPath"].GetString();
+	}
+	
+	boost::filesystem::path ProjectManager::getGeneratedFilesDirectoryPath()
+	{
+		return projectPath / manifest["generatedFilesDirectoryPath"].GetString();
+	}
+	
+	boost::filesystem::path ProjectManager::getObjectsDirectoryPath()
+	{
+		return projectPath / manifest["objectsDirectoryPath"].GetString();
+	}
 
 	void ProjectManager::setTitle(const std::string& newTitle)
 	{
-		//Utilities::validateIdentifier("project title", newTitle);
 		manifest["title"].SetString(newTitle.c_str(), manifest.GetAllocator());
 	}
 	
@@ -322,5 +267,23 @@ namespace sc
 	{
 		//Utilities::validateIdentifier("username", newUsername);
 		manifest["username"].SetString(newUsername.c_str(), manifest.GetAllocator());
+	}
+	
+	void ProjectManager::setBinariesDirectoryPath(const std::string& newBinariesDirectoryPath)
+	{
+		Utilities::validateFile(projectPath / newBinariesDirectoryPath, fs::file_type::directory_file);
+		manifest["binariesDirectoryPath"].SetString(newBinariesDirectoryPath.c_str(), manifest.GetAllocator());
+	}
+	
+	void ProjectManager::setGeneratedFilesDirectoryPath(const std::string& newGeneratedFilesDirectoryPath)
+	{
+		Utilities::validateFile(projectPath / newGeneratedFilesDirectoryPath, fs::file_type::directory_file);
+		manifest["generatedFilesDirectoryPath"].SetString(newGeneratedFilesDirectoryPath.c_str(), manifest.GetAllocator());
+	}
+	
+	void ProjectManager::setObjectsDirectoryPath(const std::string& newObjectsDirectoryPath)
+	{
+		Utilities::validateFile(projectPath / newObjectsDirectoryPath, fs::file_type::directory_file);
+		manifest["objectsDirectoryPath"].SetString(newObjectsDirectoryPath.c_str(), manifest.GetAllocator());
 	}
 }

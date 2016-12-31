@@ -96,7 +96,7 @@ namespace sc
 					//pre-processing takes place at the very beginning
 					Utilities::safeWorker("unable to pre-process member '" + currMemberLocation + "'", e.preProcessor, targetInstance);
 					
-					//if the current member is not given or has a wrong time, try to find an alternative
+					//if the current member is not given or has a wrong type, try to find an alternative
 					if(!manifestJSON.HasMember(e.attrName.c_str())  ||  !e.checkType(manifestJSON[e.attrName.c_str()]))
 					{
 						//if the member is required and it does not exist, the manifest is malformed
@@ -165,7 +165,7 @@ namespace sc
 						{
 							case mep::Type::Integer	: currVal = manifestJSON[e.attrName.c_str()].GetInt(); break;
 							case mep::Type::String	: currVal = manifestJSON[e.attrName.c_str()].GetString(); break;
-							default									: break;
+							default					: break;
 						}
 						Utilities::safeWorker("unable to process member '" + currMemberLocation + "'", e.processor, targetInstance, currVal);
 					}

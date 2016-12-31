@@ -70,14 +70,22 @@ namespace sc
 			virtual void										reset();
 			
 			const boost::filesystem::path&						getObjectPath();
-			ObjectParams::Type									getType();
 			std::string											getName();
+			ObjectParams::Type									getType();
+			boost::filesystem::path								getCostumesDirectoryPath();
+			boost::filesystem::path								getScriptsDirectoryPath();
+			boost::filesystem::path								getSoundsDirectoryPath();
+			boost::filesystem::path								getPenLayerPath();
 			int													getCurrentCostumeIndex();
 			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();
 			std::vector<std::shared_ptr<Sound>>&				getSounds();
-			void												setType(ObjectParams::Type newType);
 			void												setName(const std::string& newName);
+			void												setType(ObjectParams::Type newType);
+			void												setCostumesDirectoryPath(const std::string& newCostumesDirectoryPath);
+			void												setScriptsDirectoryPath(const std::string& newScriptsDirectoryPath);
+			void												setSoundsDirectoryPath(const std::string& newSoundsDirectoryPath);
+			void												setPenLayerPath(const std::string& newPenLayerPath);
 			void												setCurrentCostumeIndex(int newCurrentCostumeIndex);
 			void												setPenLayer(std::shared_ptr<Costume> newPenLayer);
 			void												addCostume(std::shared_ptr<Costume> newCostume);
