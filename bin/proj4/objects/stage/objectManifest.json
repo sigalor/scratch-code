@@ -1,0 +1,13 @@
+{
+    "objectName": "Stage",
+    "type": "stage",
+    "appearance": {
+        "currentCostumeIndex": 0
+    },
+    "costumes": [
+        {
+            "path": "backdrop1.png"
+        }
+    ],
+    "sounds": []
+}

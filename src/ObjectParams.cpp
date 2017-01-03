@@ -36,7 +36,7 @@ namespace sc
 			}
 		}
 		
-		const std::string typeToJSONString(Type type)																//in contrast to "typeToReadableString", these are the type strings for the JSON file which may NOT be translated
+		const std::string typeToJSONString(Type type)																//in contrast to "typeToReadableString", these are the type strings for the JSON file (objectManifest.json) which may NOT be translated
 		{
 			switch(type)
 			{
@@ -52,8 +52,29 @@ namespace sc
 				return Type::Stage;
 			else if(typeStr == "generic")
 				return Type::Generic;
-			else
-				throw GeneralException("value '" + typeStr + "' is invalid for an object type");
+			throw GeneralException("value '" + typeStr + "' is invalid for an object type");
+		}
+		
+		const std::string rotationStyleToJSONString(RotationStyle rotationStyle)
+		{
+			switch(rotationStyle)
+			{
+				case RotationStyle::Normal		: return "normal";
+				case RotationStyle::LeftRight	: return "leftRight";
+				case RotationStyle::None		: return "none";
+				default							: return "error";
+			}
+		}
+		
+		RotationStyle jsonStringToRotationStyle(const std::string& rotationStyleStr)
+		{
+			if(rotationStyleStr == "normal")
+				return RotationStyle::Normal;
+			else if(rotationStyleStr == "leftRight")
+				return RotationStyle::LeftRight;
+			else if(rotationStyleStr == "none")
+				return RotationStyle::None;
+			throw GeneralException("value '" + rotationStyleStr + "' is invalid for an object's rotation style");
 		}
 	}
 }

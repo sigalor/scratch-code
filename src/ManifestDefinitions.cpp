@@ -41,7 +41,7 @@ namespace sc
 					std::make_tuple
 					(
 						/* condition */			nullptr,
-						/* alternative */		[](ProjectManager* projMgr) { return "your_username"; },
+						/* alternative */		[](ProjectManager* projMgr) -> std::string { return "your_username"; },		//need to use std::string for string literals explicitly, as otherwise "const char* --> bool" is preferred over "const char* --> std::string"; alternative would be `return std::string("your_username");`
 						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val) { projMgr->setUsername(boost::get<std::string>(val)); }
 					)
 				),
@@ -53,63 +53,93 @@ namespace sc
 					std::make_tuple
 					(
 						/* condition */			nullptr,
-						/* alternative */		[](ProjectManager* projMgr) { return projMgr->getProjectPath().filename().string(); },
+						/* alternative */		[](ProjectManager* projMgr) -> std::string { return projMgr->getProjectPath().filename().string(); },
 						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val) { projMgr->setTitle(boost::get<std::string>(val)); }
 					)
 				),
 				ManifestEntry<ProjectManager>
 				(
-					"binariesDirectoryPath",
-					mep::Type::String,
+					"paths",
+					mep::Type::Object,
 					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](ProjectManager* projMgr) { return "bin"; },
-						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
-												{
-													std::string binariesPath(boost::get<std::string>(val));
-													if(projMgr->getIsInitialization())
-														fs::create_directories(projMgr->getProjectPath() / binariesPath);
-													projMgr->setBinariesDirectoryPath(binariesPath);
-												}
-					)
+					ManifestStructure<ProjectManager>(
+					{
+						ManifestEntry<ProjectManager>
+						(
+							"binariesDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](ProjectManager* projMgr) -> std::string { return "bin"; },
+								/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+														{
+															std::string binariesPath(boost::get<std::string>(val));
+															if(projMgr->getIsInitialization())
+																fs::create_directories(projMgr->getProjectPath() / binariesPath);
+															projMgr->setPaths_binariesDirectory(binariesPath);
+														}
+							)
+						),
+						ManifestEntry<ProjectManager>
+						(
+							"generatedFilesDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](ProjectManager* projMgr) -> std::string { return "gen"; },
+								/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+														{
+															std::string generatedFilesPath(boost::get<std::string>(val));
+															if(projMgr->getIsInitialization())
+																fs::create_directories(projMgr->getProjectPath() / generatedFilesPath);
+															projMgr->setPaths_generatedFilesDirectory(generatedFilesPath);
+														}
+							)
+						),
+						ManifestEntry<ProjectManager>
+						(
+							"objectsDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](ProjectManager* projMgr) -> std::string { return "objects"; },
+								/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
+														{
+															std::string objectsPath(boost::get<std::string>(val));
+															if(projMgr->getIsInitialization())
+																fs::create_directories(projMgr->getProjectPath() / objectsPath);
+															projMgr->setPaths_objectsDirectory(objectsPath);
+														}
+							)
+						)
+					})	
 				),
 				ManifestEntry<ProjectManager>
 				(
-					"generatedFilesDirectoryPath",
-					mep::Type::String,
+					"info",
+					mep::Type::Object,
 					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](ProjectManager* projMgr) { return "gen"; },
-						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
-												{
-													std::string generatedFilesPath(boost::get<std::string>(val));
-													if(projMgr->getIsInitialization())
-														fs::create_directories(projMgr->getProjectPath() / generatedFilesPath);
-													projMgr->setGeneratedFilesDirectoryPath(generatedFilesPath);
-												}
-					)
-				),
-				ManifestEntry<ProjectManager>
-				(
-					"objectsDirectoryPath",
-					mep::Type::String,
-					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](ProjectManager* projMgr) { return "objects"; },
-						/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)
-												{
-													std::string objectsPath(boost::get<std::string>(val));
-													if(projMgr->getIsInitialization())
-														fs::create_directories(projMgr->getProjectPath() / objectsPath);
-													projMgr->setObjectsDirectoryPath(objectsPath);
-												}
-					)
+					ManifestStructure<ProjectManager>(
+					{
+						ManifestEntry<ProjectManager>
+						(
+							"userAgent",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](ProjectManager* projMgr) -> std::string					{ return "scratch-code"; },
+								/* processor */			[](ProjectManager* projMgr, const mep::TypeVariant& val)	{ projMgr->setInfo_userAgent(boost::get<std::string>(val)); }
+							)
+						)
+					})
 				)
 			}));
 			const ManifestEntryValue<bool> rootEntryValueBase(rootEntry);
@@ -127,7 +157,7 @@ namespace sc
 					std::make_tuple
 					(
 						/* condition */			nullptr,
-						/* alternative */		[](Object* obj) { return obj->getObjectPath().filename().string(); },
+						/* alternative */		[](Object* obj) -> std::string { return obj->getObjectPath().filename().string(); },
 						/* processor */			[](Object* obj, const mep::TypeVariant& val) { obj->setName(boost::get<std::string>(val)); }
 					)
 				),
@@ -139,7 +169,7 @@ namespace sc
 					std::make_tuple
 					(
 						/* condition */			nullptr,
-						/* alternative */		[](Object* obj)
+						/* alternative */		[](Object* obj) -> std::string
 												{
 													if(obj->getIsInitialization())
 														return op::typeToJSONString(obj->getTypeForInitialization());
@@ -153,79 +183,88 @@ namespace sc
 				),
 				ManifestEntry<Object>
 				(
-					"costumesDirectoryPath",
-					mep::Type::String,
+					"paths",
+					mep::Type::Object,
 					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](Object* obj) { return "costumes"; },
-						/* processor */			[](Object* obj, const mep::TypeVariant& val)
-												{
-													std::string costumesPath(boost::get<std::string>(val));
-													if(obj->getIsInitialization())
-														fs::create_directories(obj->getObjectPath() / costumesPath);		//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
-													obj->setCostumesDirectoryPath(costumesPath);
-												}
-					)
-				),
-				ManifestEntry<Object>
-				(
-					"scriptsDirectoryPath",
-					mep::Type::String,
-					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](Object* obj) { return "scripts"; },
-						/* processor */			[](Object* obj, const mep::TypeVariant& val)
-												{
-													std::string scriptsPath(boost::get<std::string>(val));
-													if(obj->getIsInitialization())
-														fs::create_directories(obj->getObjectPath() / scriptsPath);
-													obj->setScriptsDirectoryPath(scriptsPath);
-												}
-					)
-				),
-				ManifestEntry<Object>
-				(
-					"soundsDirectoryPath",
-					mep::Type::String,
-					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			nullptr,
-						/* alternative */		[](Object* obj) { return "sounds"; },
-						/* processor */			[](Object* obj, const mep::TypeVariant& val)
-												{
-													std::string soundsPath(boost::get<std::string>(val));
-													if(obj->getIsInitialization())
-														fs::create_directories(obj->getObjectPath() / soundsPath);
-													obj->setSoundsDirectoryPath(soundsPath);
-												}
-					)
-				),
-				ManifestEntry<Object>
-				(
-					"penLayerPath",
-					mep::Type::String,
-					mep::Importance::Optional,
-					std::make_tuple
-					(
-						/* condition */			[](Object* obj) { return (obj->getType() == op::Type::Stage); },	//pen layer is only needed when the object is a stage (otherwise it's ignored and "alternative" and "processor" will NOT be executed)
-						/* alternative */		[](Object* obj) { return "penLayer/penLayer.png"; },
-						/* processor */			[](Object* obj, const mep::TypeVariant& val)
-												{
-													fs::path penLayerPath(obj->getObjectPath() / boost::get<std::string>(val));		//because of the upper "condition", no checking for "obj->getType() == op::Type::Stage" is necessary
-													if(obj->getIsInitialization())
-													{
-														fs::create_directories(penLayerPath.parent_path());
-														Utilities::writePlainPNGToFile(penLayerPath, 480, 360, 0, 0, 0, 0);
-													}
-													obj->setPenLayerPath(boost::get<std::string>(val));
-													obj->setPenLayer(std::make_shared<Costume>(penLayerPath));
-												}
-					)
+					ManifestStructure<Object>(
+					{
+						ManifestEntry<Object>
+						(
+							"costumesDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](Object* obj) -> std::string { return "costumes"; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)
+														{
+															std::string costumesPath(boost::get<std::string>(val));
+															if(obj->getIsInitialization())
+																fs::create_directories(obj->getObjectPath() / costumesPath);		//fs::create_directories acts like "mkdir -p", i.e. it creates missing parents as well
+															obj->setPaths_costumesDirectory(costumesPath);
+														}
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"scriptsDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](Object* obj) -> std::string { return "scripts"; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)
+														{
+															std::string scriptsPath(boost::get<std::string>(val));
+															if(obj->getIsInitialization())
+																fs::create_directories(obj->getObjectPath() / scriptsPath);
+															obj->setPaths_scriptsDirectory(scriptsPath);
+														}
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"soundsDirectory",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](Object* obj) -> std::string { return "sounds"; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)
+														{
+															std::string soundsPath(boost::get<std::string>(val));
+															if(obj->getIsInitialization())
+																fs::create_directories(obj->getObjectPath() / soundsPath);
+															obj->setPaths_soundsDirectory(soundsPath);
+														}
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"penLayer",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj) { return (obj->getType() == op::Type::Stage); },	//pen layer is only needed when the object is a stage (otherwise it's ignored and "alternative" and "processor" will NOT be executed)
+								/* alternative */		[](Object* obj) -> std::string { return "penLayer/penLayer.png"; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)
+														{
+															fs::path penLayerPath(obj->getObjectPath() / boost::get<std::string>(val));		//because of the upper "condition", no checking for "obj->getType() == op::Type::Stage" is necessary
+															if(obj->getIsInitialization())
+															{
+																fs::create_directories(penLayerPath.parent_path());
+																Utilities::writePlainPNGToFile(penLayerPath, 480, 360, 0, 0, 0, 0);
+															}
+															obj->setPaths_penLayer(boost::get<std::string>(val));
+															obj->setPenLayer(std::make_shared<Costume>(penLayerPath));
+														}
+							)
+						)
+					})
 				),
 				ManifestEntry<Object>
 				(
@@ -254,8 +293,8 @@ namespace sc
 																throw GeneralException("number of costumes before initialization needs to be 0");
 												
 															op::Type					objectType = obj->getType();
-															std::string					newCostumeFilename = (objectType==op::Type::Stage ? "backdrop1.png" : (objectType==op::Type::Generic ? "costume1.png" : "error.png"));
-															fs::path					newCostumePath(obj->getCostumesDirectoryPath() / newCostumeFilename);
+															std::string					newCostumeFilename(objectType==op::Type::Stage ? "backdrop1.png" : (objectType==op::Type::Generic ? "costume1.png" : "error.png"));
+															fs::path					newCostumePath(obj->getPaths_costumesDirectory() / newCostumeFilename);
 															Value						newCostumeEntry(kObjectType);
 															Document::AllocatorType&	alloc = obj->getManifest().GetAllocator();
 													
@@ -294,7 +333,7 @@ namespace sc
 							(
 								/* condition */			nullptr,
 								/* alternative */		nullptr,
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->loadFromPath(obj->getCostumesDirectoryPath() / boost::get<std::string>(val)); }
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->loadFromPath(obj->getPaths_costumesDirectory() / boost::get<std::string>(val)); }
 							)
 						),
 						ManifestEntry<Object>
@@ -305,7 +344,7 @@ namespace sc
 							std::make_tuple
 							(
 								/* condition */			nullptr,
-								/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getResourcePath().stem().string(); },
+								/* alternative */		[](Object* obj) -> std::string					{ return obj->getCurrentlyProcessedCostume()->getResourcePath().stem().string(); },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setName(boost::get<std::string>(val)); }
 							)
 						),
@@ -317,8 +356,8 @@ namespace sc
 							std::make_tuple
 							(
 								/* condition */			nullptr,
-								/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getWidth() / 2; },
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterX(boost::get<int>(val)); }
+								/* alternative */		[](Object* obj) -> int64_t						{ return (obj->getCurrentlyProcessedCostume()->getWidth() / 2); },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterX(boost::get<int64_t>(val)); }
 							)
 						),
 						ManifestEntry<Object>
@@ -329,8 +368,8 @@ namespace sc
 							std::make_tuple
 							(
 								/* condition */			nullptr,
-								/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedCostume()->getHeight() / 2; },
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterY(boost::get<int>(val)); }
+								/* alternative */		[](Object* obj) -> int64_t						{ return (obj->getCurrentlyProcessedCostume()->getHeight() / 2); },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedCostume()->setRotationCenterY(boost::get<int64_t>(val)); }
 							)
 						)
 					})
@@ -367,7 +406,7 @@ namespace sc
 							(
 								/* condition */			nullptr,
 								/* alternative */		nullptr,
-								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedSound()->loadFromPath(obj->getSoundsDirectoryPath() / boost::get<std::string>(val)); }
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedSound()->loadFromPath(obj->getPaths_soundsDirectory() / boost::get<std::string>(val)); }
 							)
 						),
 						ManifestEntry<Object>
@@ -378,7 +417,7 @@ namespace sc
 							std::make_tuple
 							(
 								/* condition */			nullptr,
-								/* alternative */		[](Object* obj)									{ return obj->getCurrentlyProcessedSound()->getResourcePath().stem().string(); },
+								/* alternative */		[](Object* obj) -> std::string					{ return obj->getCurrentlyProcessedSound()->getResourcePath().stem().string(); },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->getCurrentlyProcessedSound()->setName(boost::get<std::string>(val)); }
 							)
 						)
@@ -386,15 +425,142 @@ namespace sc
 				),
 				ManifestEntry<Object>
 				(
-					"currentCostumeIndex",
-					mep::Type::Integer,
+					"transformation",
+					mep::Type::Object,
 					mep::Importance::OptionalWithWarning,
 					std::make_tuple
 					(
-						/* condition */			nullptr,
-						/* alternative */		[](Object* obj)									{ return 0; },
-						/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setCurrentCostumeIndex(boost::get<int>(val)); }		//all costumes are available at this point
-					)
+						/* condition */				[](Object* obj)								{ return (obj->getType() == op::Type::Generic); },
+						/* preProcessor */			nullptr,
+						/* elementPreProcessor */	nullptr,
+						/* elementPostProcessor */	nullptr,
+						/* postProcessor */			nullptr
+					),
+					ManifestStructure<Object>(
+					{
+						ManifestEntry<Object>
+						(
+							"positionX",
+							mep::Type::Float,
+							mep::Importance::OptionalWithWarning,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> double						{ return 0.0; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_positionX(boost::get<double>(val)); }
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"positionY",
+							mep::Type::Float,
+							mep::Importance::OptionalWithWarning,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> double						{ return 0.0; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_positionY(boost::get<double>(val)); }
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"scale",
+							mep::Type::Float,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> double						{ return 1.0; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_scale(boost::get<double>(val)); }
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"direction",
+							mep::Type::Float,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> double						{ return 90.0; },		//90 degrees is upright for Scratch 2
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_direction(boost::get<double>(val)); }
+							)
+						)
+					})
+				),
+				ManifestEntry<Object>
+				(
+					"behavior",
+					mep::Type::Object,
+					mep::Importance::Optional,
+					std::make_tuple
+					(
+						/* condition */				[](Object* obj)								{ return (obj->getType() == op::Type::Generic); },
+						/* preProcessor */			nullptr,
+						/* elementPreProcessor */	nullptr,
+						/* elementPostProcessor */	nullptr,
+						/* postProcessor */			nullptr
+					),
+					ManifestStructure<Object>(
+					{
+						ManifestEntry<Object>
+						(
+							"rotationStyle",
+							mep::Type::String,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> std::string					{ return "normal"; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setBehavior_rotationStyle(op::jsonStringToRotationStyle(boost::get<std::string>(val))); }
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"isDraggable",
+							mep::Type::Boolean,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> bool							{ return false; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setBehavior_isDraggable(boost::get<bool>(val)); }
+							)
+						)
+					})
+				),
+				ManifestEntry<Object>
+				(
+					"appearance",
+					mep::Type::Object,
+					mep::Importance::OptionalWithWarning,
+					ManifestStructure<Object>(
+					{
+						ManifestEntry<Object>
+						(
+							"isVisible",
+							mep::Type::Boolean,
+							mep::Importance::Optional,
+							std::make_tuple
+							(
+								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* alternative */		[](Object* obj) -> bool							{ return true; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setAppearance_isVisible(boost::get<bool>(val)); }
+							)
+						),
+						ManifestEntry<Object>
+						(
+							"currentCostumeIndex",
+							mep::Type::Integer,
+							mep::Importance::OptionalWithWarning,
+							std::make_tuple
+							(
+								/* condition */			nullptr,
+								/* alternative */		[](Object* obj) -> int64_t						{ return 0; },
+								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setAppearance_currentCostumeIndex(boost::get<int64_t>(val)); }		//all costumes are available at this point
+							)
+						)
+					})
 				)
 			}));
 			const ManifestEntryValue<bool> rootEntryValueBase(rootEntry);

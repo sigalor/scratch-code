@@ -38,6 +38,6 @@ namespace sc
 {
 	namespace Translator
 	{
-		std::string												translate(std::shared_ptr<ast::StatementList> input, const std::string& filename);
+		void													translate(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
 	}
 }

@@ -26,11 +26,13 @@ namespace sc
 {
 	namespace ManifestEntryParams
 	{
-		const std::string typeToString(Type type)
+		const std::string typeToReadableString(Type type)
 		{
 			switch(type)
 			{
+				case Type::Boolean	: return "boolean";
 				case Type::Integer	: return "integer";
+				case Type::Float	: return "floating-point value";
 				case Type::String	: return "string";
 				case Type::Array	: return "array";
 				case Type::Object	: return "object";

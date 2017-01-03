@@ -82,7 +82,7 @@ namespace sc
 			void purgeNonPredefinedManifestEntries(rapidjson::Value& currValue, ManifestEntryValue<bool>& currPredefinedValues)			//purges all entries from the "manifest" object that were not there when the manifest was loaded
 			{
 				using namespace rapidjson;
-	
+				
 				if(!currValue.IsObject())
 					throw GeneralException("cannot purge manifest entries in JSON non-object");
 				if(currPredefinedValues.type != mep::Type::Object)
@@ -90,9 +90,13 @@ namespace sc
 		
 				for(ManifestEntryValue<bool>& e : currPredefinedValues.children)
 				{
+					//the condition (initially evaluated in ManifestStructure::validateJSON) also applies here, because when it has been previously false, one cannot expect the "currValue" has the specified member
+					if(!e.conditionResult)
+						continue;
+				
 					//here are quite some places for inconsistencies to happen... (but if no bugs are there, these are impossible)
 					if(!currValue.HasMember(e.attrName.c_str()))
-						throw GeneralException("inconsistency detected while trying to purge manifest entries");
+						throw GeneralException("inconsistency detected while trying to purge manifest entries (member '" + e.attrName + "' is missing)");
 			
 					//if the "value" member is false, the current manifest entry can definitely be removed. If it's not, arrays and objects need to processed recursively
 					//if currently the initialization is happening, only remove members that have an importance lower than or equal to "Optional"
@@ -104,7 +108,7 @@ namespace sc
 						{
 							Value& currArr = currValue[e.attrName.c_str()];
 							if(!currArr.IsArray())
-								throw GeneralException("inconsistency detected while trying to purge manifest entries");
+								throw GeneralException("inconsistency detected while trying to purge manifest entries (member '" + e.attrName + "' is not an array, although it is supposed to)");
 							for(Value::ValueIterator it = currArr.Begin(); it != currArr.End(); ++it)
 								purgeNonPredefinedManifestEntries(*it, e.children[it - currArr.Begin()]);
 						}

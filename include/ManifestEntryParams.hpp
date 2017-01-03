@@ -34,7 +34,9 @@ namespace sc
 		enum class Type
 		{
 			Invalid,
+			Boolean,
 			Integer,
+			Float,
 			String,
 			Array,
 			Object
@@ -48,8 +50,8 @@ namespace sc
 			Optional
 		};
 		
-		using TypeVariant = boost::variant<int, std::string>;
+		using TypeVariant = boost::variant<bool, int64_t, double, std::string>;
 		
-		const std::string										typeToString(Type type);
+		const std::string										typeToReadableString(Type type);
 	}
 }

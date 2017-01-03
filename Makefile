@@ -26,7 +26,7 @@ LIBRARIES=-lcrypto -lboost_filesystem -lboost_system -lpng -lzip -lfl -lscratch-
 
 # names and options for used programs
 CXX=g++
-CXXFLAGS=-g -std=c++14 -Wall $(INCLUDE_PATHS)
+CXXFLAGS=-g -std=c++14 -fdiagnostics-color -Wall $(INCLUDE_PATHS)
 CXXFLAGS_FLEXBISON=-g -std=c++14 -Wall -Wno-unused-function -Wno-sign-compare $(INCLUDE_PATHS)
 LDFLAGS=-Wall $(LIBRARY_PATHS) $(LIBRARIES) -Wl,-rpath,$(PROJECT_BINARY_RPATH)
 FLEX=flex

@@ -26,20 +26,22 @@ namespace sc
 {
 	namespace Translator
 	{
-		std::string translate(std::shared_ptr<ast::StatementList> input, const std::string& filename)
+		void translate(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc)
 		{
-			/*using namespace rapidjson;
+			using namespace rapidjson;
 			
-			Document doc;
-			Document::AllocatorType& alloc = doc.GetAllocator();
+			Value command(kArrayType), commandContents(kArrayType), commandContentsName(kArrayType), commandContentsAction(kArrayType);
 			
-			doc.SetArray();
-			
-			return Utilities::getDocumentString(doc, false);*/
-		
-			return "[[14, 14, [[\"whenGreenFlag\"], [\"wait:elapsed:from:\", 1]]]]";
-		
-			//ZipFile::AddFile("archive.zip", "testsource.sc");
+			valDest.SetArray();
+			commandContentsName.PushBack("whenGreenFlag", alloc);
+			commandContentsAction.PushBack("wait:elapsed:from:", alloc);
+			commandContentsAction.PushBack(1, alloc);
+			commandContents.PushBack(commandContentsName, alloc);
+			commandContents.PushBack(commandContentsAction, alloc);
+			command.PushBack(14, alloc);
+			command.PushBack(14, alloc);
+			command.PushBack(commandContents, alloc);
+			valDest.PushBack(command, alloc);
 		}
 	}
 }

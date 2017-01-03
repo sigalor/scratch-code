@@ -1,15 +1,30 @@
 {
     "objectName": "Bühne",
     "type": "stage",
-    "currentCostumeIndex": 0,
-    "sounds": [],
+    "paths": {
+		"costumesDirectory": "Kostüme",
+		"scriptsDirectory": "Skripte",
+		"soundsDirectory": "Töne",
+		"penLayer": "Malebene/Malebene.png"
+    },
     "costumes": [
         {
             "path": "backdrop1.png"
         }
     ],
-    "costumesDirectoryPath": "Kostüme",
-    "scriptsDirectoryPath": "Skripte",
-    "soundsDirectoryPath": "Töne",
-    "penLayerPath": "Malebene/Malebene.png"
+    "sounds": [],
+    "transformation": {
+    	"positionX": 0,
+    	"positionY": 0,
+    	"scale": 1,
+    	"direction": 90
+    },
+    "behavior": {
+    	"rotationStyle": "normal",
+    	"isDraggable": false
+    },
+    "appearance": {
+    	"isVisible": true,
+    	"currentCostumeIndex": 0
+    }
 }

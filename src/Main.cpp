@@ -33,7 +33,7 @@ void printBasicUsage(const std::string& appName)
 void processParameters(int argc, char** argv)
 {
 	std::string							appName = argv[0], action, projectName;
-	std::shared_ptr<sc::ProjectManager>	projMgr;
+	std::shared_ptr<sc::ProjectManager>	projMgr;																	//as sc::ProjectManager has no empty constructor, a std::shared_ptr is used to allow actually empty (i.e. nullptr) instances
 	
 	if(argc == 1)
 		printBasicUsage(appName);
@@ -45,7 +45,7 @@ void processParameters(int argc, char** argv)
 		{
 			if(argc == 2)
 			{
-				std::cout << "usage: " << argv[0] << " init <project_name>" << std::endl;
+				std::cout << "usage: " << appName << " init <project_name>" << std::endl;
 				std::exit(EXIT_SUCCESS);
 			}
 			projMgr = std::make_shared<sc::ProjectManager>(fs::current_path() / argv[2]);
@@ -58,7 +58,7 @@ void processParameters(int argc, char** argv)
 			{
 				if(argc == 2)
 				{
-					std::cout << "usage: " << argv[0] << " addobject <object_name>" << std::endl;
+					std::cout << "usage: " << appName << " addobject <object_name>" << std::endl;
 					std::exit(EXIT_SUCCESS);
 				}
 				projMgr->addObject(argv[2]);
@@ -74,6 +74,7 @@ void processParameters(int argc, char** argv)
 	catch(const sc::GeneralException& e)
 	{
 		std::cerr << action << " error: " << e.what() << std::endl;
+		std::exit(EXIT_FAILURE);
 	}
 }
 

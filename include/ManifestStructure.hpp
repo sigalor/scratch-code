@@ -79,19 +79,25 @@ namespace sc
 					//set the current member's location as a string for showing it to the user (when that is necessary)
 					currMemberLocation = parentHierarchy=="root" ? e.attrName : (parentHierarchy + "." + e.attrName);
 					
-					//if no condition is given, assume it is true. Just when the condition function returns 'false' or throws, ignore the current manifest entry
-					if(e.condition)
-					{
-						try
-							{ if(!e.condition(targetInstance)) continue; }
-						catch(const GeneralException& e)
-							{ continue; }
-					}
-					
 					//set the current manifest entry value object to the current member and trigger it only if that member actually exists in the manifest before any processing
 					ManifestEntryValue<U>& newCurrEntryValue = currEntryValue.getEntry(e.attrName);
 					if(manifestJSON.HasMember(e.attrName.c_str()))
 						newCurrEntryValue.value = triggeredEntryValue;
+					
+					//if no condition is given, assume it is true. Just when the condition function returns 'false' or throws, ignore the current manifest entry
+					if(e.condition)
+					{
+						bool doContinue = false;
+						try
+							{ if(!e.condition(targetInstance)) doContinue = true; }
+						catch(const GeneralException& e)
+							{ doContinue = true; }
+						if(doContinue)
+						{
+							newCurrEntryValue.conditionResult = false;
+							continue;
+						}
+					}
 					
 					//pre-processing takes place at the very beginning
 					Utilities::safeWorker("unable to pre-process member '" + currMemberLocation + "'", e.preProcessor, targetInstance);
@@ -101,14 +107,14 @@ namespace sc
 					{
 						//if the member is required and it does not exist, the manifest is malformed
 						if(e.importance == mep::Importance::Required)
-							throw GeneralException("missing " + mep::typeToString(e.type) + " member '" + currMemberLocation + "'");
+							throw GeneralException("missing " + mep::typeToReadableString(e.type) + " member '" + currMemberLocation + "'");
 						
-						warningMissingPrefix = "warning: in manifest at '" + fs::relative(filepath).string() + "': missing " + mep::typeToString(e.type) + " member '" + currMemberLocation + "'";
+						warningMissingPrefix = "warning: in manifest at '" + fs::relative(filepath).string() + "': missing " + mep::typeToReadableString(e.type) + " member '" + currMemberLocation + "'";
 						if(e.type == mep::Type::Array  ||  e.type == mep::Type::Object)
 						{
 							//arrays and objects do not have an alternative value, they just become empty
 							if(verboseOutput  &&  e.importance == mep::Importance::OptionalWithWarning)
-								std::cerr << warningMissingPrefix << ", defaulting to empty " << mep::typeToString(e.type) << std::endl;
+								std::cerr << warningMissingPrefix << ", defaulting to empty " << mep::typeToReadableString(e.type) << std::endl;
 							if(manifestJSON.HasMember(e.attrName.c_str()))
 								manifestJSON.RemoveMember(e.attrName.c_str());
 							Value emptyCompoundVal(e.type==mep::Type::Array ? kArrayType : kObjectType);
@@ -130,9 +136,11 @@ namespace sc
 								manifestJSON.RemoveMember(e.attrName.c_str());
 							switch(e.type)
 							{
-								case mep::Type::Integer	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<int>(currVal)), alloc); break;
+								case mep::Type::Boolean	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<bool>(currVal)), alloc); break;
+								case mep::Type::Integer	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<int64_t>(currVal)), alloc); break;
+								case mep::Type::Float	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<double>(currVal)), alloc); break;
 								case mep::Type::String	: manifestJSON.AddMember(Value(e.attrName.c_str(), alloc), Value(boost::get<std::string>(currVal).c_str(), alloc), alloc); break;
-								default					: throw GeneralException("cannot set JSON value for " + mep::typeToString(e.type));
+								default					: throw GeneralException("cannot set JSON value for " + mep::typeToReadableString(e.type));
 							}
 						}
 					}
@@ -161,10 +169,13 @@ namespace sc
 					}
 					else
 					{
+						Value& currMember = manifestJSON[e.attrName.c_str()];
 						switch(e.type)
 						{
-							case mep::Type::Integer	: currVal = manifestJSON[e.attrName.c_str()].GetInt(); break;
-							case mep::Type::String	: currVal = manifestJSON[e.attrName.c_str()].GetString(); break;
+							case mep::Type::Boolean	: currVal = currMember.GetBool(); break;
+							case mep::Type::Integer	: currVal = currMember.GetInt64(); break;
+							case mep::Type::Float	: currVal = (currMember.IsInt64() ? (double)currMember.GetInt64() : currMember.GetDouble()); break;
+							case mep::Type::String	: currVal = std::string(currMember.GetString()); break;
 							default					: break;
 						}
 						Utilities::safeWorker("unable to process member '" + currMemberLocation + "'", e.processor, targetInstance, currVal);

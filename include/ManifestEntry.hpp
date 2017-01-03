@@ -53,26 +53,28 @@ namespace sc
 			using ElementPostProcessingFunction = std::function<void(T*)>;
 			using PostProcessingFunction = std::function<void(T*)>;
 			using FunctionsTuple = std::tuple<ConditionFunction, AlternativeFunction, ProcessingFunction>;
-			using ArrayFunctionsTuple = std::tuple<ConditionFunction, PreProcessingFunction, ElementPreProcessingFunction, ElementPostProcessingFunction, PostProcessingFunction>;
+			using CompoundFunctionsTuple = std::tuple<ConditionFunction, PreProcessingFunction, ElementPreProcessingFunction, ElementPostProcessingFunction, PostProcessingFunction>;
 			
 			bool												isRoot;
 			std::string											attrName;
 			mep::Type											type;
 			mep::Importance										importance;
+			bool												conditionResult;
 			ConditionFunction									condition;
 			PreProcessingFunction								preProcessor;
 			ElementPreProcessingFunction						elementPreProcessor;
-			AlternativeFunction									alternative;										//only for Type::Integer and Type::String
+			AlternativeFunction									alternative;										//only for Bool, Integer, Float and String
 			ProcessingFunction									processor;											//like 'alternative'
 			ElementPostProcessingFunction						elementPostProcessor;
 			PostProcessingFunction								postProcessor;
-			ManifestStructure<T>								children;											//only for Type::Array
+			ManifestStructure<T>								children;											//only for Array and Object
 			
 			//constructor for root object
 			ManifestEntry(const ManifestStructure<T>& newChildren)
 				 :	isRoot(true),
 					type(mep::Type::Object),
 					importance(mep::Importance::Required),
+					conditionResult(true),
 					children(newChildren) { }
 			
 			//constructor for other types
@@ -81,29 +83,42 @@ namespace sc
 					attrName(newAttrName),
 					type(newType),
 					importance(newImportance),
+					conditionResult(true),
 					condition(std::get<0>(functions)),
 					alternative(std::get<1>(functions)),
 					processor(std::get<2>(functions)),
 					children({}) { }
 			
-			//constructor for mep::Type::Array and mep::Type::Object
-			ManifestEntry(const std::string& newAttrName, mep::Type newType, mep::Importance newImportance, const ArrayFunctionsTuple& arrayFunctions, const ManifestStructure<T>& newChildren)
+			//constructor for mep::Type::Array and mep::Type::Object which itself do not have any specific functions
+			ManifestEntry(const std::string& newAttrName, mep::Type newType, mep::Importance newImportance, const ManifestStructure<T>& newChildren)
 				 :	isRoot(false),
 					attrName(newAttrName),
 					type(newType),
 					importance(newImportance),
-					condition(std::get<0>(arrayFunctions)),
-					preProcessor(std::get<1>(arrayFunctions)),
-					elementPreProcessor(std::get<2>(arrayFunctions)),
-					elementPostProcessor(std::get<3>(arrayFunctions)),
-					postProcessor(std::get<4>(arrayFunctions)),
+					conditionResult(true),
+					children(newChildren) { }
+			
+			//constructor for mep::Type::Array and mep::Type::Object
+			ManifestEntry(const std::string& newAttrName, mep::Type newType, mep::Importance newImportance, const CompoundFunctionsTuple& compoundFunctions, const ManifestStructure<T>& newChildren)
+				 :	isRoot(false),
+					attrName(newAttrName),
+					type(newType),
+					importance(newImportance),
+					conditionResult(true),
+					condition(std::get<0>(compoundFunctions)),
+					preProcessor(std::get<1>(compoundFunctions)),
+					elementPreProcessor(std::get<2>(compoundFunctions)),
+					elementPostProcessor(std::get<3>(compoundFunctions)),
+					postProcessor(std::get<4>(compoundFunctions)),
 					children(newChildren) { }
 			
 			bool checkType(rapidjson::Value& val) const
 			{
 				switch(type)
 				{
-					case mep::Type::Integer	: return val.IsInt();
+					case mep::Type::Boolean	: return val.IsBool();
+					case mep::Type::Integer	: return val.IsInt64();
+					case mep::Type::Float	: return val.IsDouble()  ||  val.IsInt64();								//ints may be converted to floats internally
 					case mep::Type::String	: return val.IsString();
 					case mep::Type::Array	: return val.IsArray();
 					case mep::Type::Object	: return val.IsObject();

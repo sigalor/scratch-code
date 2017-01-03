@@ -36,6 +36,7 @@
 #include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
+#include "Translator.hpp"
 #include "ManifestEntry.hpp"
 #include "ManifestEntryValue.hpp"
 #include "ManifestEntryParams.hpp"
@@ -70,26 +71,41 @@ namespace sc
 			virtual void										reset();
 			
 			const boost::filesystem::path&						getObjectPath();
-			std::string											getName();
-			ObjectParams::Type									getType();
-			boost::filesystem::path								getCostumesDirectoryPath();
-			boost::filesystem::path								getScriptsDirectoryPath();
-			boost::filesystem::path								getSoundsDirectoryPath();
-			boost::filesystem::path								getPenLayerPath();
-			int													getCurrentCostumeIndex();
 			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();
 			std::vector<std::shared_ptr<Sound>>&				getSounds();
-			void												setName(const std::string& newName);
-			void												setType(ObjectParams::Type newType);
-			void												setCostumesDirectoryPath(const std::string& newCostumesDirectoryPath);
-			void												setScriptsDirectoryPath(const std::string& newScriptsDirectoryPath);
-			void												setSoundsDirectoryPath(const std::string& newSoundsDirectoryPath);
-			void												setPenLayerPath(const std::string& newPenLayerPath);
-			void												setCurrentCostumeIndex(int newCurrentCostumeIndex);
 			void												setPenLayer(std::shared_ptr<Costume> newPenLayer);
 			void												addCostume(std::shared_ptr<Costume> newCostume);
 			void												addSound(std::shared_ptr<Sound> newSound);
+			
+			std::string											getName();
+			ObjectParams::Type									getType();
+			boost::filesystem::path								getPaths_costumesDirectory();
+			boost::filesystem::path								getPaths_scriptsDirectory();
+			boost::filesystem::path								getPaths_soundsDirectory();
+			boost::filesystem::path								getPaths_penLayer();
+			double												getTransformation_positionX();
+			double												getTransformation_positionY();
+			double												getTransformation_scale();
+			double												getTransformation_direction();
+			ObjectParams::RotationStyle							getBehavior_rotationStyle();
+			bool												getBehavior_isDraggable();
+			bool												getAppearance_isVisible();
+			int64_t												getAppearance_currentCostumeIndex();
+			void												setName(const std::string& newName);
+			void												setType(ObjectParams::Type newType);
+			void												setPaths_costumesDirectory(const std::string& newVal);
+			void												setPaths_scriptsDirectory(const std::string& newVal);
+			void												setPaths_soundsDirectory(const std::string& newVal);
+			void												setPaths_penLayer(const std::string& newVal);
+			void												setTransformation_positionX(double newVal);
+			void												setTransformation_positionY(double newVal);
+			void												setTransformation_scale(double newVal);
+			void												setTransformation_direction(double newVal);
+			void												setBehavior_rotationStyle(ObjectParams::RotationStyle newVal);
+			void												setBehavior_isDraggable(bool newVal);
+			void												setAppearance_isVisible(bool newVal);
+			void												setAppearance_currentCostumeIndex(int64_t newVal);
 			
 			template<typename T>
 			typename std::enable_if_t<std::is_base_of<Resource, T>::value>

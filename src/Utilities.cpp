@@ -149,6 +149,13 @@ namespace sc
 			return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 		}
 		
+		void clearDirectory(const fs::path& dirpath)
+		{
+			validateFile(dirpath, fs::file_type::directory_file);
+			fs::remove_all(dirpath);
+			fs::create_directory(dirpath);
+		}
+		
 		
 			
 			

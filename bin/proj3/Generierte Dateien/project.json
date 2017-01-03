@@ -1,5 +1,20 @@
 {
     "objName": "Bühne",
+    "scripts": [
+        [
+            14,
+            14,
+            [
+                [
+                    "whenGreenFlag"
+                ],
+                [
+                    "wait:elapsed:from:",
+                    1
+                ]
+            ]
+        ]
+    ],
     "sounds": [],
     "costumes": [
         {
@@ -16,5 +31,10 @@
     "penLayerID": 0,
     "tempoBPM": 60,
     "videoAlpha": 0.5,
-    "children": []
+    "children": [],
+    "info": {
+        "spriteCount": 0,
+        "scriptCount": 0,
+        "userAgent": "scratch-code"
+    }
 }

@@ -63,28 +63,30 @@ namespace sc
 			void													loadAllObjects();
 			std::shared_ptr<Object>									getObject(const std::string& objName);
 			void													buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest);
+			void													addObjectInternal(const std::string& objName, const boost::filesystem::path& objPath, ObjectParams::Type objType=ObjectParams::Type::Generic);
 			
 		public:
 			ProjectManager(const boost::filesystem::path& newProjectPath);
 		
 			void													initialize();
-			void													addObject(const std::string& objName, const boost::filesystem::path& objPath, ObjectParams::Type objType=ObjectParams::Type::Generic);
 			void													addObject(const std::string& objName, ObjectParams::Type objType=ObjectParams::Type::Generic);
 			void													validate();
 			void													build();
-			void													clean();
+			void													clean(bool doValidation=true);
 			
 			const boost::filesystem::path&							getProjectPath();
 			std::string												getTitle();
 			std::string												getUsername();
-			boost::filesystem::path									getBinariesDirectoryPath();
-			boost::filesystem::path									getGeneratedFilesDirectoryPath();
-			boost::filesystem::path									getObjectsDirectoryPath();
+			boost::filesystem::path									getPaths_binariesDirectory();
+			boost::filesystem::path									getPaths_generatedFilesDirectory();
+			boost::filesystem::path									getPaths_objectsDirectory();
+			std::string												getInfo_userAgent();
 			void													setTitle(const std::string& newTitle);
 			void													setUsername(const std::string& newUsername);
-			void													setBinariesDirectoryPath(const std::string& newBinariesDirectoryPath);
-			void													setGeneratedFilesDirectoryPath(const std::string& newGeneratedFilesDirectoryPath);
-			void													setObjectsDirectoryPath(const std::string& newObjectsDirectoryPath);
+			void													setPaths_binariesDirectory(const std::string& newVal);
+			void													setPaths_generatedFilesDirectory(const std::string& newVal);
+			void													setPaths_objectsDirectory(const std::string& newVal);
+			void													setInfo_userAgent(const std::string& newVal);
 		
 		private:
 			template<typename T>
@@ -95,7 +97,7 @@ namespace sc
 				{
 					auto i = std::distance(resourceList.begin(), it);
 					auto p = (*it)->getResourcePath();
-					boost::filesystem::copy(p, getGeneratedFilesDirectoryPath() / (std::to_string(i) + p.extension().string()));
+					boost::filesystem::copy(p, getPaths_generatedFilesDirectory() / (std::to_string(i) + p.extension().string()));
 				}
 			}
 	};

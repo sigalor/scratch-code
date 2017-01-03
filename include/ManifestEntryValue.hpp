@@ -47,20 +47,21 @@ namespace sc
 			bool												isRoot;
 			mep::Type											type;
 			mep::Importance										importance;
+			bool												conditionResult;									//the condition result is set in ManifestStructure::validateJSON. Note that "false" generally has priority, i.e. if an Object's condition was false, all its children's conditions will be assumed to be "false" as well. Initially, all condition results are true
 			T													value;
 			std::vector<ManifestEntryValue<T>>					children;
 			
-			ManifestEntryValue() : isRoot(false), type(mep::Type::Invalid), value(T()) { }
-			ManifestEntryValue(mep::Type newType) : isRoot(false), type(newType), value(T()) { }
-			ManifestEntryValue(mep::Type newType, const std::vector<ManifestEntryValue<T>>& newChildren) : isRoot(false), type(newType), value(T()), children(newChildren) { }
+			ManifestEntryValue() : isRoot(false), type(mep::Type::Invalid), importance(mep::Importance::Invalid), value(T()) { }
+			ManifestEntryValue(mep::Type newType, mep::Importance newImportance, const std::vector<ManifestEntryValue<T>>& newChildren) : isRoot(false), type(newType), importance(newImportance), value(T()), children(newChildren) { }
 			
 			template<typename U>
-			ManifestEntryValue(const ManifestEntry<U>& original)
+			ManifestEntryValue(const ManifestEntry<U>& original)													//the resulting "ManifestEntryValue" will contain EVERY member of "original", INDEPENDENT from its condition result
 			{
 				attrName = original.attrName;
 				isRoot = original.isRoot;
 				type = original.type;
 				importance = original.importance;
+				conditionResult = true;
 				value = T();
 				
 				std::vector<ManifestEntryValue<T>> newChildren;
@@ -70,8 +71,46 @@ namespace sc
 				if(type == mep::Type::Object)
 					children.insert(children.begin(), newChildren.begin(), newChildren.end());
 				else if(type == mep::Type::Array)
-					children.push_back(ManifestEntryValue<T>(mep::Type::Object, newChildren));
+					children.push_back(ManifestEntryValue<T>(mep::Type::Object, importance, newChildren));			//note that an Array can only contain Objects. Here, a SINGLE instance of all objects is saved. This makes the function "addArrayEntry" much more comfortable
 			}
+			
+			/*template<typename U>
+			void assignConditionResults(U* targetInstance, const ManifestEntry<U>& currEntry)
+			{
+				if(currEntry.type != mep::Type::Object)
+					throw GeneralException("cannot assign condition results using manifest entry non-object");
+				
+				for(ManifestEntry<bool>& e : currPredefinedValues.children.entries)
+				{
+					
+				
+					//the condition (initially evaluated in ManifestStructure::validateJSON) also applies here, because when it has been previously false, one cannot expect the "currValue" has the specified member
+					if(!e.conditionResult)
+						continue;
+				
+					//here are quite some places for inconsistencies to happen... (but if no bugs are there, these are impossible)
+					if(!currValue.HasMember(e.attrName.c_str()))
+						throw GeneralException("inconsistency detected while trying to purge manifest entries (member '" + e.attrName + "' is missing)");
+			
+					//if the "value" member is false, the current manifest entry can definitely be removed. If it's not, arrays and objects need to processed recursively
+					//if currently the initialization is happening, only remove members that have an importance lower than or equal to "Optional"
+					if(e.value  ||  (isInitialization  &&  (e.importance == mep::Importance::Required  ||  e.importance == mep::Importance::OptionalWithWarning)))
+					{
+						if(e.type == mep::Type::Object)
+							purgeNonPredefinedManifestEntries(currValue[e.attrName.c_str()], e);
+						else if(e.type == mep::Type::Array)
+						{
+							Value& currArr = currValue[e.attrName.c_str()];
+							if(!currArr.IsArray())
+								throw GeneralException("inconsistency detected while trying to purge manifest entries (member '" + e.attrName + "' is not an array, although it is supposed to)");
+							for(Value::ValueIterator it = currArr.Begin(); it != currArr.End(); ++it)
+								purgeNonPredefinedManifestEntries(*it, e.children[it - currArr.Begin()]);
+						}
+					}
+					else
+						currValue.RemoveMember(e.attrName.c_str());
+				}
+			}*/
 			
 			typename std::vector<ManifestEntryValue<T>>::iterator getEntryIterator(const std::string& name)
 			{

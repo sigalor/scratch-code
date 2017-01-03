@@ -30,7 +30,7 @@ namespace sc
 {
 	void ProjectManager::loadAllObjects()
 	{
-		for(fs::directory_entry& e : fs::directory_iterator(getObjectsDirectoryPath()))
+		for(fs::directory_entry& e : fs::directory_iterator(getPaths_objectsDirectory()))
 		{
 			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
 			
@@ -62,15 +62,13 @@ namespace sc
 		return *retObject;
 	}
 	
-	
-	
-	
 	void ProjectManager::buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest)
 	{
 		using namespace rapidjson;
 		
 		Document::AllocatorType& alloc = docDest.GetAllocator();
-		Value tempValue, childrenArray(kArrayType);
+		Value tempValue, childrenArray(kArrayType), infoObject(kObjectType);
+		int64_t indexInLibraryCounter = 1;
 		
 		stageObject->buildJSON(docDest, alloc);
 		docDest.AddMember("penLayerMD5", Value((penLayer->getMD5Sum() + penLayer->getResourcePath().extension().string()).c_str(), alloc), alloc);
@@ -84,15 +82,42 @@ namespace sc
 			if(o->getType() != op::Type::Stage)
 			{
 				o->buildJSON(tempValue, alloc);
+				tempValue.AddMember("indexInLibrary", indexInLibraryCounter, alloc);
 				docDest["children"].PushBack(tempValue, alloc);
+				++indexInLibraryCounter;
 			}
 		}
+		
+		docDest.AddMember("info", infoObject, alloc);
+		docDest["info"].AddMember("spriteCount", objects.size()-1, alloc);											//subtract 1 from "objects.size()", as there always is a single stage object
+		docDest["info"].AddMember("scriptCount", 0, alloc);
+		docDest["info"].AddMember("userAgent", Value(getInfo_userAgent().c_str(), alloc), alloc);
 	}
-
-
-
-
-
+	
+	void ProjectManager::addObjectInternal(const std::string& objName, const fs::path& objPath, op::Type objType)
+	{
+		//important: no validation is happening here! It has been done either in "initialize()" or "addObject(...)"!
+		
+		//check for new object's uniqueness (in path and name)
+		if(fs::exists(objPath))
+			throw GeneralException("'" + fs::relative(objPath).string() + "' already exists as a " + Utilities::fileTypeToString(objPath));
+		std::shared_ptr<Object> objectWithSameName(getObject(objName));
+		if(objectWithSameName != nullptr)
+			throw GeneralException("object called '" + objName + "' already exists at '" + fs::relative(objectWithSameName->getObjectPath()).string() + "'");
+		
+		//load the object (while "verboseOutput" is false to suppress warnings and "isInitialization" is true), then do some changes, finally save the modified object's manifest on the disk and reload it
+		objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
+		objects.back()->setName(objName);
+		objects.back()->saveAndReload();
+		
+		//output final success message
+		std::cout << "successfully added object '" << objName << "' to project '" << getTitle() + "'" << std::endl;
+	}
+	
+	
+	
+	
+	
 	ProjectManager::ProjectManager(const fs::path& newProjectPath) : ManifestUser(newProjectPath / "manifest.json", ManifestDefinitions::ProjectManagerManifest::rootEntry, ManifestDefinitions::ProjectManagerManifest::rootEntryValueBase, false), projectPath(newProjectPath)
 	{
 		//empty
@@ -111,38 +136,17 @@ namespace sc
 		isInitialization = true;
 		
 		//stage object has to exist
-		addObject("Stage", getObjectsDirectoryPath() / "stage", op::Type::Stage);
+		addObjectInternal("Stage", getPaths_objectsDirectory() / "stage", op::Type::Stage);
 		
 		//output final input message indicating success
 		std::cout << "successfully created project tree for '" + getTitle() + "'" << std::endl;
-	}
-
-	void ProjectManager::addObject(const std::string& objName, const fs::path& objPath, op::Type objType)
-	{
-		//if "isInitialization == true", then this function was DEFINITELY called from "initialize()"
-		if(!isInitialization)
-			validate();
-		
-		//check for new object's uniqueness (in path and name)
-		if(fs::exists(objPath))
-			throw GeneralException("'" + fs::relative(objPath).string() + "' already exists as a " + Utilities::fileTypeToString(objPath));
-		std::shared_ptr<Object> objectWithSameName(getObject(objName));
-		if(objectWithSameName != nullptr)
-			throw GeneralException("object called '" + objName + "' already exists at '" + fs::relative(objectWithSameName->getObjectPath()).string() + "'");
-		
-		//load the object, then do some changes, then save the modified object's manifest on the disk and reload it
-		objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
-		objects.back()->setName(objName);
-		objects.back()->saveAndReload();
-		
-		//output final success message
-		std::cout << "successfully added object '" << objName << "' to project '" << getTitle() + "'" << std::endl;
 	}
 	
 	void ProjectManager::addObject(const std::string& objName, op::Type objType)
 	{
 		//this function is just a shortcut
-		addObject(objName, getObjectsDirectoryPath() / objName, objType);
+		validate();
+		addObjectInternal(objName, getPaths_objectsDirectory() / objName, objType);
 	}
 
 	void ProjectManager::validate()
@@ -199,8 +203,7 @@ namespace sc
 		
 		try
 		{
-			fs::remove_all(getGeneratedFilesDirectoryPath());
-			fs::create_directory(getGeneratedFilesDirectoryPath());
+			clean(false);
 			buildObjectResourceList(costumes);
 			buildObjectResourceList(sounds);
 		}
@@ -209,19 +212,24 @@ namespace sc
 		
 		rapidjson::Document doc;
 		buildProjectJSON(costumes[0], doc);
-		Utilities::writeDocumentToFile(getGeneratedFilesDirectoryPath() / "project.json", doc);
+		Utilities::writeDocumentToFile(getPaths_generatedFilesDirectory() / "project.json", doc);
 		
-		fs::path binaryPath(getBinariesDirectoryPath() / (getTitle() + ".sb2"));
+		fs::path binaryPath(getPaths_binariesDirectory() / (getTitle() + ".sb2"));
 		fs::remove(binaryPath);
-		for(fs::directory_entry& e : fs::directory_iterator(getGeneratedFilesDirectoryPath()))
+		for(fs::directory_entry& e : fs::directory_iterator(getPaths_generatedFilesDirectory()))
 			ZipFile::AddFile(binaryPath.string(), e.path().string());
 		
 		std::cout << "successfully built project '" << getTitle() << "'" << std::endl;
 	}
 
-	void ProjectManager::clean()
+	void ProjectManager::clean(bool doValidation)
 	{
-		validate();
+		if(doValidation)
+			validate();
+		Utilities::clearDirectory(getPaths_binariesDirectory());
+		Utilities::clearDirectory(getPaths_generatedFilesDirectory());
+		
+		std::cout << "successfully cleaned project '" << getTitle() << "'" << std::endl;
 	}
 	
 	
@@ -243,19 +251,24 @@ namespace sc
 		return manifest["username"].GetString();
 	}
 	
-	boost::filesystem::path ProjectManager::getBinariesDirectoryPath()
+	fs::path ProjectManager::getPaths_binariesDirectory()
 	{
-		return projectPath / manifest["binariesDirectoryPath"].GetString();
+		return projectPath / manifest["paths"]["binariesDirectory"].GetString();
 	}
 	
-	boost::filesystem::path ProjectManager::getGeneratedFilesDirectoryPath()
+	fs::path ProjectManager::getPaths_generatedFilesDirectory()
 	{
-		return projectPath / manifest["generatedFilesDirectoryPath"].GetString();
+		return projectPath / manifest["paths"]["generatedFilesDirectory"].GetString();
 	}
 	
-	boost::filesystem::path ProjectManager::getObjectsDirectoryPath()
+	fs::path ProjectManager::getPaths_objectsDirectory()
 	{
-		return projectPath / manifest["objectsDirectoryPath"].GetString();
+		return projectPath / manifest["paths"]["objectsDirectory"].GetString();
+	}
+	
+	std::string ProjectManager::getInfo_userAgent()
+	{
+		return manifest["info"]["userAgent"].GetString();
 	}
 
 	void ProjectManager::setTitle(const std::string& newTitle)
@@ -269,21 +282,26 @@ namespace sc
 		manifest["username"].SetString(newUsername.c_str(), manifest.GetAllocator());
 	}
 	
-	void ProjectManager::setBinariesDirectoryPath(const std::string& newBinariesDirectoryPath)
+	void ProjectManager::setPaths_binariesDirectory(const std::string& newVal)
 	{
-		Utilities::validateFile(projectPath / newBinariesDirectoryPath, fs::file_type::directory_file);
-		manifest["binariesDirectoryPath"].SetString(newBinariesDirectoryPath.c_str(), manifest.GetAllocator());
+		Utilities::validateFile(projectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["binariesDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
 	}
 	
-	void ProjectManager::setGeneratedFilesDirectoryPath(const std::string& newGeneratedFilesDirectoryPath)
+	void ProjectManager::setPaths_generatedFilesDirectory(const std::string& newVal)
 	{
-		Utilities::validateFile(projectPath / newGeneratedFilesDirectoryPath, fs::file_type::directory_file);
-		manifest["generatedFilesDirectoryPath"].SetString(newGeneratedFilesDirectoryPath.c_str(), manifest.GetAllocator());
+		Utilities::validateFile(projectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["generatedFilesDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
 	}
 	
-	void ProjectManager::setObjectsDirectoryPath(const std::string& newObjectsDirectoryPath)
+	void ProjectManager::setPaths_objectsDirectory(const std::string& newVal)
 	{
-		Utilities::validateFile(projectPath / newObjectsDirectoryPath, fs::file_type::directory_file);
-		manifest["objectsDirectoryPath"].SetString(newObjectsDirectoryPath.c_str(), manifest.GetAllocator());
+		Utilities::validateFile(projectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["objectsDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void ProjectManager::setInfo_userAgent(const std::string& newVal)
+	{
+		manifest["info"]["userAgent"].SetString(newVal.c_str(), manifest.GetAllocator());
 	}
 }

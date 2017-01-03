@@ -39,8 +39,18 @@ namespace sc
 			Generic
 		};
 		
+		enum class RotationStyle
+		{
+			Invalid,
+			Normal,
+			LeftRight,
+			None
+		};
+		
 		const std::string										typeToReadableString(Type type);
 		const std::string										typeToJSONString(Type type);
 		Type													jsonStringToType(const std::string& typeStr);
+		const std::string										rotationStyleToJSONString(RotationStyle rotationStyle);
+		RotationStyle											jsonStringToRotationStyle(const std::string& rotationStyleStr);
 	}
 }

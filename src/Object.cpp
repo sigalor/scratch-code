@@ -39,6 +39,8 @@ namespace sc
 		
 		objectPath = newObjectPath;
 		typeForInitialization = newTypeForInitialization;
+		if(isInitialization  &&  !fs::exists(newObjectPath))
+			fs::create_directory(newObjectPath);
 		Utilities::validateFile(objectPath, fs::file_type::directory_file);
 		loadManifestInternal(this, verboseOutput);
 	}
@@ -52,6 +54,10 @@ namespace sc
 		
 		valDest.SetObject();
 		valDest.AddMember("objName", Value(getName().c_str(), alloc), alloc);
+		
+		//add script
+		Translator::translate(nullptr, valueBuffer, alloc);
+		valDest.AddMember("scripts", valueBuffer, alloc);
 		
 		//add all sounds
 		valDest.AddMember("sounds", soundsArray, alloc);
@@ -69,7 +75,37 @@ namespace sc
 			valDest["costumes"].PushBack(valueBuffer, alloc);
 		}
 		
-		valDest.AddMember("currentCostumeIndex", getCurrentCostumeIndex(), alloc);
+		//add member which specifies the index of the costume currently active
+		valDest.AddMember("currentCostumeIndex", getAppearance_currentCostumeIndex(), alloc);
+		
+		//add members specifically for generic objects
+		if(getType() == op::Type::Generic)
+		{
+			//transformation
+			valDest.AddMember("scratchX", getTransformation_positionX(), alloc);
+			valDest.AddMember("scratchY", getTransformation_positionY(), alloc);
+			valDest.AddMember("scale", getTransformation_scale(), alloc);
+			valDest.AddMember("direction", getTransformation_direction(), alloc);
+			
+			//behavior
+			std::string rotationStyleString;
+			switch(getBehavior_rotationStyle())
+			{
+				case op::RotationStyle::Normal		: rotationStyleString = "normal"; break;
+				case op::RotationStyle::LeftRight	: rotationStyleString = "leftRight"; break;
+				case op::RotationStyle::None		: rotationStyleString = "none"; break;
+				default								: break;
+			}
+			valDest.AddMember("rotationStyle", Value(rotationStyleString.c_str(), alloc), alloc);
+			valDest.AddMember("isDraggable", getBehavior_isDraggable(), alloc);
+			
+			//appearance
+			valDest.AddMember("visible", getAppearance_isVisible(), alloc);
+			
+			//other
+			Value spriteInfoObject(kObjectType);
+			valDest.AddMember("spriteInfo", spriteInfoObject, alloc);
+		}
 	}
 	
 	void Object::saveAndReload(bool verboseOutput)
@@ -96,41 +132,6 @@ namespace sc
 		return objectPath;
 	}
 	
-	std::string Object::getName()
-	{
-		return manifest["objectName"].GetString();
-	}
-	
-	op::Type Object::getType()
-	{
-		return op::jsonStringToType(manifest["type"].GetString());
-	}
-	
-	fs::path Object::getCostumesDirectoryPath()
-	{
-		return objectPath / manifest["costumesDirectoryPath"].GetString();
-	}
-	
-	fs::path Object::getScriptsDirectoryPath()
-	{
-		return objectPath / manifest["scriptsDirectoryPath"].GetString();
-	}
-	
-	fs::path Object::getSoundsDirectoryPath()
-	{
-		return objectPath / manifest["soundsDirectoryPath"].GetString();
-	}
-	
-	fs::path Object::getPenLayerPath()
-	{
-		return objectPath / manifest["penLayerPath"].GetString();
-	}
-	
-	int Object::getCurrentCostumeIndex()
-	{
-		return manifest["currentCostumeIndex"].GetInt();
-	}
-	
 	std::shared_ptr<Costume> Object::getPenLayer()
 	{
 		if(getType() != op::Type::Stage)
@@ -148,47 +149,6 @@ namespace sc
 		return sounds;
 	}
 	
-	void Object::setName(const std::string& newName)
-	{
-		manifest["objectName"].SetString(newName.c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setType(op::Type newType)
-	{
-		manifest["type"].SetString(op::typeToJSONString(newType).c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setCostumesDirectoryPath(const std::string& newCostumesDirectoryPath)
-	{
-		Utilities::validateFile(objectPath / newCostumesDirectoryPath, fs::file_type::directory_file);
-		manifest["costumesDirectoryPath"].SetString(newCostumesDirectoryPath.c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setScriptsDirectoryPath(const std::string& newScriptsDirectoryPath)
-	{
-		Utilities::validateFile(objectPath / newScriptsDirectoryPath, fs::file_type::directory_file);
-		manifest["scriptsDirectoryPath"].SetString(newScriptsDirectoryPath.c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setSoundsDirectoryPath(const std::string& newSoundsDirectoryPath)
-	{
-		Utilities::validateFile(objectPath / newSoundsDirectoryPath, fs::file_type::directory_file);
-		manifest["soundsDirectoryPath"].SetString(newSoundsDirectoryPath.c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setPenLayerPath(const std::string& newPenLayerPath)
-	{
-		Utilities::validateFile(objectPath / newPenLayerPath, fs::file_type::regular_file);
-		manifest["penLayerPath"].SetString(newPenLayerPath.c_str(), manifest.GetAllocator());
-	}
-	
-	void Object::setCurrentCostumeIndex(int newCurrentCostumeIndex)
-	{
-		if(newCurrentCostumeIndex < 0  ||  newCurrentCostumeIndex >= (int)costumes.size())
-			throw GeneralException("costume index '" + std::to_string(newCurrentCostumeIndex) + "' is out of range (" + std::to_string(costumes.size()) + " costumes available)");
-		manifest["currentCostumeIndex"].SetInt(newCurrentCostumeIndex);
-	}
-	
 	void Object::setPenLayer(std::shared_ptr<Costume> newPenLayer)
 	{
 		if(getType() != op::Type::Stage)
@@ -204,6 +164,158 @@ namespace sc
 	void Object::addSound(std::shared_ptr<Sound> newSound)
 	{
 		sounds.push_back(newSound);
+	}
+	
+	
+	
+	
+	
+	std::string Object::getName()
+	{
+		return manifest["objectName"].GetString();
+	}
+	
+	op::Type Object::getType()
+	{
+		return op::jsonStringToType(manifest["type"].GetString());
+	}
+	
+	fs::path Object::getPaths_costumesDirectory()
+	{
+		return objectPath / manifest["paths"]["costumesDirectory"].GetString();
+	}
+	
+	fs::path Object::getPaths_scriptsDirectory()
+	{
+		return objectPath / manifest["paths"]["scriptsDirectory"].GetString();
+	}
+	
+	fs::path Object::getPaths_soundsDirectory()
+	{
+		return objectPath / manifest["paths"]["soundsDirectory"].GetString();
+	}
+	
+	fs::path Object::getPaths_penLayer()
+	{
+		return objectPath / manifest["paths"]["penLayer"].GetString();
+	}
+	
+	double Object::getTransformation_positionX()
+	{
+		return manifest["transformation"]["positionX"].GetDouble();
+	}
+	
+	double Object::getTransformation_positionY()
+	{
+		return manifest["transformation"]["positionY"].GetDouble();
+	}
+	
+	double Object::getTransformation_scale()
+	{
+		return manifest["transformation"]["scale"].GetDouble();
+	}
+	
+	double Object::getTransformation_direction()
+	{
+		return manifest["transformation"]["direction"].GetDouble();
+	}
+	
+	ObjectParams::RotationStyle Object::getBehavior_rotationStyle()
+	{
+		return op::jsonStringToRotationStyle(manifest["behavior"]["rotationStyle"].GetString());
+	}
+	
+	bool Object::getBehavior_isDraggable()
+	{
+		return manifest["behavior"]["isDraggable"].GetBool();
+	}
+	
+	bool Object::getAppearance_isVisible()
+	{
+		return manifest["appearance"]["isVisible"].GetBool();
+	}
+	
+	int64_t Object::getAppearance_currentCostumeIndex()
+	{
+		return manifest["appearance"]["currentCostumeIndex"].GetInt64();
+	}
+	
+	void Object::setName(const std::string& newName)
+	{
+		manifest["objectName"].SetString(newName.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setType(op::Type newType)
+	{
+		manifest["type"].SetString(op::typeToJSONString(newType).c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setPaths_costumesDirectory(const std::string& newVal)
+	{
+		Utilities::validateFile(objectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["costumesDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setPaths_scriptsDirectory(const std::string& newVal)
+	{
+		Utilities::validateFile(objectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["scriptsDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setPaths_soundsDirectory(const std::string& newVal)
+	{
+		Utilities::validateFile(objectPath / newVal, fs::file_type::directory_file);
+		manifest["paths"]["soundsDirectory"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setPaths_penLayer(const std::string& newVal)
+	{
+		Utilities::validateFile(objectPath / newVal, fs::file_type::regular_file);
+		manifest["paths"]["penLayer"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setTransformation_positionX(double newVal)
+	{
+		manifest["transformation"]["positionX"].SetDouble(newVal);
+	}
+	
+	void Object::setTransformation_positionY(double newVal)
+	{
+		manifest["transformation"]["positionY"].SetDouble(newVal);
+	}
+	
+	void Object::setTransformation_scale(double newVal)
+	{
+		if(newVal < 0.0)
+			throw GeneralException("scale value '" + std::to_string(newVal) + "' is out of range, may not be below 0");
+		manifest["transformation"]["scale"].SetDouble(newVal);
+	}
+	
+	void Object::setTransformation_direction(double newVal)
+	{
+		manifest["transformation"]["direction"].SetDouble(newVal);
+	}
+	
+	void Object::setBehavior_rotationStyle(ObjectParams::RotationStyle newVal)
+	{
+		manifest["behavior"]["rotationStyle"].SetString(op::rotationStyleToJSONString(newVal).c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setBehavior_isDraggable(bool newVal)
+	{
+		manifest["behavior"]["isDraggable"].SetBool(newVal);
+	}
+	
+	void Object::setAppearance_isVisible(bool newVal)
+	{
+		manifest["appearance"]["isVisible"].SetBool(newVal);
+	}
+	
+	void Object::setAppearance_currentCostumeIndex(int64_t newVal)
+	{
+		if(newVal < 0  ||  newVal >= (int64_t)costumes.size())
+			throw GeneralException("costume index '" + std::to_string(newVal) + "' is out of range (" + std::to_string(costumes.size()) + " costumes available)");
+		manifest["appearance"]["currentCostumeIndex"].SetInt64(newVal);
 	}
 	
 	

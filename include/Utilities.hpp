@@ -76,6 +76,7 @@ namespace sc
 		const std::string										fileTypeToString(const boost::filesystem::path& filepath);
 		void													createFile(const boost::filesystem::path& filepath, const std::string& contents="");
 		std::string												readFile(const boost::filesystem::path& filepath);
+		void													clearDirectory(const boost::filesystem::path& dirpath);
 		
 		void													readDocumentFromFile(const boost::filesystem::path& filepath, rapidjson::Document& doc);
 		std::string												getDocumentString(rapidjson::Document& doc, bool pretty);
