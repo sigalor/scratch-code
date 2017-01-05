@@ -412,7 +412,7 @@ localVariableDefinition:																							//returns ast::VariableDefinition
 	{
 		driver.throwIfDefined(@$, $1);
 		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1);
-		driver.nodeLocations[newVarDef] = @$;
+		driver.nodeLocations.emplace(newVarDef, @$);																//for some strange reason "driver.nodeLocations[newVarDef] = @$" fails with a floating-point exception during runtime. Maybe this is related (although both are for GCC 4.9): https://github.com/Andersbakken/rtags/issues/174, got the workaround from here: http://gcc-bugs.gcc.gnu.narkive.com/eTbliq2V/bug-libstdc-61143-new-arithmetic-exception-on-emplacing-into-unordered-map-moved-out
 		$$ = newVarDef;
 	};
 

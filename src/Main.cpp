@@ -82,21 +82,5 @@ int main(int argc, char** argv)
 {
 	processParameters(argc, argv);
 	
-
-
-	/*if(argv[i] == std::string("-l"))
-		driver.setTraceLexing(true);
-	else if(argv[i] == std::string("-p"))
-		driver.setTraceParsing(true);
-	else if((result = driver.parse(argv[i])) != 0)
-	{
-		std::cerr << "compilation terminated due to parsing error " << driver.getResult() << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-
-	if(result == 0)
-		std::cout << "\n" << ast::stringify(syntaxTree) << "\n";													//output the parsed abstract syntax tree
-	sc::Translator::translate(syntaxTree, outputFile);*/
-	
 	return 0;
 }

@@ -50,17 +50,20 @@ namespace sc
 		fclose(yyin);
 	}
 
-	int Driver::parse(const fs::path& newFilepath)
+	void Driver::parse(const fs::path& newFilepath)
 	{
 		yy::ScratchCodeParser parser(*this);
-
+		
+		if(syntaxTree == nullptr)
+			throw GeneralException("no syntax tree as target given");
 		filepath = newFilepath;
 		beginLexing();
 		parser.set_debug_level(traceParsing);
 		result = parser.parse();
 		endLexing();
-	
-		return result;
+		
+		if(result != 0)
+			throw GeneralException("compilation terminated due to parsing error " + std::to_string(result) + ":\n" + errorMessageBuffer);
 	}
 
 	std::string Driver::locationToString(const yy::location& loc)
@@ -70,12 +73,12 @@ namespace sc
 
 	void Driver::handleError(const yy::location& loc, const std::string& message)
 	{
-		std::cerr << locationToString(loc) << ": " << message << std::endl;
+		errorMessageBuffer = locationToString(loc) + ": " + message;												//one should not just throw an exception here, as the bison parser then may not clean up properly
 	}
 
 	void Driver::handleError(const std::string& message)
 	{
-		std::cerr << message << std::endl;
+		errorMessageBuffer = message;
 	}
 
 	const fs::path& Driver::getFilepath()

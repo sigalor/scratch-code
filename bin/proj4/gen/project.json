@@ -2,15 +2,68 @@
     "objName": "Stage",
     "scripts": [
         [
-            14,
-            14,
+            10,
+            10,
             [
                 [
-                    "whenGreenFlag"
+                    "procDef",
+                    "test( %s , %n , %n )",
+                    [
+                        "param1",
+                        "param2",
+                        "param3"
+                    ],
+                    [
+                        "",
+                        1,
+                        1
+                    ],
+                    false
                 ],
                 [
-                    "wait:elapsed:from:",
-                    1
+                    "doIfElse",
+                    false,
+                    null,
+                    null
+                ]
+            ]
+        ],
+        [
+            10,
+            30,
+            [
+                [
+                    "procDef",
+                    "test2( %b , %n , %s )",
+                    [
+                        "doStuff",
+                        "pi",
+                        "name"
+                    ],
+                    [
+                        false,
+                        1,
+                        ""
+                    ],
+                    false
+                ],
+                [
+                    "doIf",
+                    false,
+                    [
+                        [
+                            "doIfElse",
+                            false,
+                            null,
+                            [
+                                [
+                                    "doIf",
+                                    false,
+                                    null
+                                ]
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ]
@@ -19,7 +72,7 @@
     "costumes": [
         {
             "costumeName": "backdrop1",
-            "baseLayerID": 3,
+            "baseLayerID": 1,
             "baseLayerMD5": "1db4812ba9e5c9b0c3561df1a661b84e.png",
             "bitmapResolution": 1,
             "rotationCenterX": 240,
@@ -31,88 +84,9 @@
     "penLayerID": 0,
     "tempoBPM": 60,
     "videoAlpha": 0.5,
-    "children": [
-        {
-            "objName": "cat",
-            "scripts": [
-                [
-                    14,
-                    14,
-                    [
-                        [
-                            "whenGreenFlag"
-                        ],
-                        [
-                            "wait:elapsed:from:",
-                            1
-                        ]
-                    ]
-                ]
-            ],
-            "sounds": [],
-            "costumes": [
-                {
-                    "costumeName": "costume1",
-                    "baseLayerID": 1,
-                    "baseLayerMD5": "46ead2a024bd27574d6ba36f0b47d793.png",
-                    "bitmapResolution": 1,
-                    "rotationCenterX": 50,
-                    "rotationCenterY": 50
-                }
-            ],
-            "currentCostumeIndex": 0,
-            "scratchX": 0.0,
-            "scratchY": 0.0,
-            "scale": 1.0,
-            "direction": 90.0,
-            "rotationStyle": "normal",
-            "isDraggable": false,
-            "visible": true,
-            "spriteInfo": {},
-            "indexInLibrary": 1
-        },
-        {
-            "objName": "boop",
-            "scripts": [
-                [
-                    14,
-                    14,
-                    [
-                        [
-                            "whenGreenFlag"
-                        ],
-                        [
-                            "wait:elapsed:from:",
-                            1
-                        ]
-                    ]
-                ]
-            ],
-            "sounds": [],
-            "costumes": [
-                {
-                    "costumeName": "costume1",
-                    "baseLayerID": 2,
-                    "baseLayerMD5": "46ead2a024bd27574d6ba36f0b47d793.png",
-                    "bitmapResolution": 1,
-                    "rotationCenterX": 50,
-                    "rotationCenterY": 50
-                }
-            ],
-            "currentCostumeIndex": 0,
-            "scratchX": 189.123,
-            "scratchY": 12.0,
-            "scale": 1.0,
-            "direction": 90.0,
-            "rotationStyle": "normal",
-            "isDraggable": false,
-            "visible": true,
-            "spriteInfo": {},
-            "indexInLibrary": 2
-        }
-    ],
+    "children": [],
     "info": {
-        "spriteCount": 2,
+        "spriteCount": 0,
         "scriptCount": 0,
         "userAgent": "scratch-code"
     }

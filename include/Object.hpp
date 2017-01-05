@@ -36,6 +36,7 @@
 #include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
+#include "Driver.hpp"
 #include "Translator.hpp"
 #include "ManifestEntry.hpp"
 #include "ManifestEntryValue.hpp"
@@ -84,6 +85,7 @@ namespace sc
 			boost::filesystem::path								getPaths_scriptsDirectory();
 			boost::filesystem::path								getPaths_soundsDirectory();
 			boost::filesystem::path								getPaths_penLayer();
+			boost::filesystem::path								getMainScriptFile();
 			double												getTransformation_positionX();
 			double												getTransformation_positionY();
 			double												getTransformation_scale();
@@ -98,6 +100,7 @@ namespace sc
 			void												setPaths_scriptsDirectory(const std::string& newVal);
 			void												setPaths_soundsDirectory(const std::string& newVal);
 			void												setPaths_penLayer(const std::string& newVal);
+			void												setMainScriptFile(const std::string& newVal);
 			void												setTransformation_positionX(double newVal);
 			void												setTransformation_positionY(double newVal);
 			void												setTransformation_scale(double newVal);

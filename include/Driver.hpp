@@ -54,6 +54,7 @@ namespace sc
 			int													result;
 			boost::filesystem::path								filepath;
 			bool												traceLexing, traceParsing;
+			std::string											errorMessageBuffer;
 
 		public:
 			std::shared_ptr<ast::StatementList>					syntaxTree;
@@ -69,7 +70,7 @@ namespace sc
 		
 			void												beginLexing();
 			void												endLexing();
-			int													parse(const boost::filesystem::path& newFilepath);
+			void												parse(const boost::filesystem::path& newFilepath);
 			std::string											locationToString(const yy::location& loc);
 			void												handleError(const yy::location& loc, const std::string& message);
 			void												handleError(const std::string& message);

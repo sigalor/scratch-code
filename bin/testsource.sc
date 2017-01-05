@@ -1,6 +1,6 @@
 int a, b;
 
-real abc()
+real abc)
 {
 	return (real)f();
 }

@@ -1322,7 +1322,7 @@ namespace yy {
     {
 		driver.throwIfDefined(yylhs.location, yystack_[0].value.as< std::string > ());
 		auto newVarDef = std::make_shared<ast::VariableDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, yystack_[0].value.as< std::string > ());
-		driver.nodeLocations[newVarDef] = yylhs.location;
+		driver.nodeLocations.emplace(newVarDef, yylhs.location);																//for some strange reason "driver.nodeLocations[newVarDef] = @$" fails with a floating-point exception during runtime. Maybe this is related (although both are for GCC 4.9): https://github.com/Andersbakken/rtags/issues/174, got the workaround from here: http://gcc-bugs.gcc.gnu.narkive.com/eTbliq2V/bug-libstdc-61143-new-arithmetic-exception-on-emplacing-into-unordered-map-moved-out
 		yylhs.value.as< std::shared_ptr<ast::VariableDefinition> > () = newVarDef;
 	}
 #line 1329 "gen/scratch-code.tab.cpp" // lalr1.cc:859

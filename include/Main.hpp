@@ -26,9 +26,11 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <ast/AST.hpp>
 
 #include "ProjectManager.hpp"
 #include "GeneralException.hpp"
+#include "Driver.hpp"
 
 
 

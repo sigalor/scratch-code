@@ -24,6 +24,7 @@
 
 #include <cstdlib>
 #include <string>
+#include <vector>
 #include <fstream>
 #include <memory>
 
@@ -38,6 +39,26 @@ namespace sc
 {
 	namespace Translator
 	{
+		/*class BlockTuple
+		{
+			private:
+				std::string										opcode;
+				std::vector<rapidjson::Value>					arguments;
+			
+			public:
+				BlockTuple();
+				BlockTuple(const std::string& newOpcode);
+				
+				rapidjson::Value&								addArgument();
+		};*/
+		
+		void													translateStatement(std::shared_ptr<ast::Node> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+		void													translateFunctionDefinition(std::shared_ptr<ast::FunctionDefinition> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+		void													translateValue(std::shared_ptr<ast::Value> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+		void													translateControlFlowStatement(std::shared_ptr<ast::ControlFlowStatement> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+		void													translateConditional(std::shared_ptr<ast::Conditional> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
+		void													translateStatementList(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc, bool append=false);
+		
 		void													translate(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
 	}
 }

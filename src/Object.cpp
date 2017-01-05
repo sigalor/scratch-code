@@ -56,7 +56,7 @@ namespace sc
 		valDest.AddMember("objName", Value(getName().c_str(), alloc), alloc);
 		
 		//add script
-		Translator::translate(nullptr, valueBuffer, alloc);
+		Translator::translate(scripts, valueBuffer, alloc);
 		valDest.AddMember("scripts", valueBuffer, alloc);
 		
 		//add all sounds
@@ -200,6 +200,11 @@ namespace sc
 		return objectPath / manifest["paths"]["penLayer"].GetString();
 	}
 	
+	fs::path Object::getMainScriptFile()
+	{
+		return getPaths_scriptsDirectory() / manifest["mainScriptFile"].GetString();
+	}
+	
 	double Object::getTransformation_positionX()
 	{
 		return manifest["transformation"]["positionX"].GetDouble();
@@ -272,6 +277,18 @@ namespace sc
 	{
 		Utilities::validateFile(objectPath / newVal, fs::file_type::regular_file);
 		manifest["paths"]["penLayer"].SetString(newVal.c_str(), manifest.GetAllocator());
+	}
+	
+	void Object::setMainScriptFile(const std::string& newVal)
+	{
+		Utilities::validateFile(getPaths_scriptsDirectory() / newVal, fs::file_type::regular_file);
+		manifest["mainScriptFile"].SetString(newVal.c_str(), manifest.GetAllocator());
+		
+		//actually parse the source file ("driver.parse" will throw an exception when a syntax error occurs)
+		//TODO: what about "driver.setTraceLexing(true);" and "driver.setTraceParsing(true);"? Command-line parameters?
+		scripts = std::make_shared<ast::StatementList>(nullptr);
+		Driver driver(scripts);
+		driver.parse(getMainScriptFile());
 	}
 	
 	void Object::setTransformation_positionX(double newVal)

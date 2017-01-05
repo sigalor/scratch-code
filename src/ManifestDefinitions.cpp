@@ -268,6 +268,23 @@ namespace sc
 				),
 				ManifestEntry<Object>
 				(
+					"mainScriptFile",
+					mep::Type::String,
+					mep::Importance::OptionalWithWarning,
+					std::make_tuple
+					(
+						/* condition */			nullptr,
+						/* alternative */		[](Object* obj) -> std::string					{ return "main.sc"; },
+						/* processor */			[](Object* obj, const mep::TypeVariant& val)
+												{
+													if(obj->getIsInitialization())
+														Utilities::createFile(obj->getPaths_scriptsDirectory() / boost::get<std::string>(val), "\n");
+													obj->setMainScriptFile(boost::get<std::string>(val));
+												}
+					)
+				),
+				ManifestEntry<Object>
+				(
 					"costumes",
 					mep::Type::Array,
 					mep::Importance::OptionalWithWarning,
@@ -317,7 +334,7 @@ namespace sc
 															rootEntry.children.validateJSON(obj, obj->getManifest()["costumes"][0], alloc, rootEntry.children.getEntry("costumes").children, obj->getManifestPath(), costumesEntryValue.children.back(), false, true, false);
 													
 															//output final info message (do not use "obj->getName()" here, as the "ProjectManager::addObject" function sets the desired name later)
-															std::cerr << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object at '" << fs::relative(obj->getObjectPath()).string() << "'" << std::endl;
+															std::cout << "successfully added costume '" << obj->getCostumes().back()->getName() << "' to object at '" << fs::relative(obj->getObjectPath()).string() << "'" << std::endl;
 														}
 														obj->checkResourceNameUniqueness("costumes", obj->getCostumes());
 													}

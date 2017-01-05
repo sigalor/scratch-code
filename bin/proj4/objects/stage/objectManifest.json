@@ -4,6 +4,7 @@
     "appearance": {
         "currentCostumeIndex": 0
     },
+    "mainScriptFile": "main.sc",
     "costumes": [
         {
             "path": "backdrop1.png"
