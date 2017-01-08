@@ -23,6 +23,7 @@
 
 
 #include <string>
+#include <functional>
 
 #include "GeneralException.hpp"
 
@@ -30,6 +31,8 @@
 
 namespace sc
 {
+	class Object;
+
 	namespace ObjectParams
 	{
 		enum class Type
@@ -47,6 +50,8 @@ namespace sc
 			None
 		};
 		
+		extern const std::function<bool(Object*)>				isStageCondition, isGenericCondition;
+		
 		const std::string										typeToReadableString(Type type);
 		const std::string										typeToJSONString(Type type);
 		Type													jsonStringToType(const std::string& typeStr);
@@ -54,3 +59,8 @@ namespace sc
 		RotationStyle											jsonStringToRotationStyle(const std::string& rotationStyleStr);
 	}
 }
+
+
+
+//I hate to do this, but circular dependencies are horrible.
+#include "Object.hpp"

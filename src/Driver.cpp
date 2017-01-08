@@ -132,10 +132,10 @@ namespace sc
 	{
 		auto defFunc = getDefinedFunction(name);
 		if(defFunc != nullptr)
-			throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope here: function at " + locationToString(nodeLocations[defFunc]));
+			throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope " + (nodeLocations.find(defFunc)==nodeLocations.end() ? "as a function" : ("here: function at " + locationToString(nodeLocations[defFunc]))));
 	
 		auto defVar = getDefinedVariable(name);
 		if(defVar != nullptr)
-			throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope here: variable at " + locationToString(nodeLocations[defVar]));
+			throw yy::ScratchCodeParser::syntax_error(loc, "identifier called '" + name + "' is already defined in this scope " + (nodeLocations.find(defVar)==nodeLocations.end() ? "as a variable" : ("here: variable at " + locationToString(nodeLocations[defVar]))));
 	}
 }

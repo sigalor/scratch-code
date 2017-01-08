@@ -119,7 +119,7 @@ true|false           { std::string str(yytext, yyleng); return yy::ScratchCodePa
 [1-9][0-9]*          { std::string str(yytext, yyleng); uint64_t val; try { val = boost::lexical_cast<uint64_t>(str); } catch(const boost::bad_lexical_cast& ex) { throw yy::ScratchCodeParser::syntax_error(loc, "invalid integer value: " + str + ": " + ex.what()); } return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, val), loc); }		//there are no [+-]? at the beginning, as + and - become UnaryOperations
 (([1-9][0-9]*\.?[0-9]*)|(\.[0-9]+))([Ee][+-]?[0-9]+)? { std::string str(yytext, yyleng); double val; try { val = boost::lexical_cast<double>(str); } catch(const boost::bad_lexical_cast& ex) { throw yy::ScratchCodeParser::syntax_error(loc, "invalid floating point value: " + str + ": " + ex.what()); } return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, val), loc); }		//regex from http://stackoverflow.com/a/2293793
 \".*\"               { std::string str(yytext+1, yyleng-2); return yy::ScratchCodeParser::make_RVALUE_VALUE(std::make_shared<ast::RValueValue>(nullptr, str), loc); }
-[a-zA-Z][0-9a-zA-Z]* { return yy::ScratchCodeParser::make_IDENTIFIER(yytext, loc); }
+[_a-zA-Z][_0-9a-zA-Z]* { return yy::ScratchCodeParser::make_IDENTIFIER(yytext, loc); }
 .                    { throw yy::ScratchCodeParser::syntax_error(loc, "invalid character: '" + std::string(yytext, yyleng) + "'"); }		//from http://stackoverflow.com/a/18888761
 <<EOF>>              { return yy::ScratchCodeParser::make_END(loc); }
 %%

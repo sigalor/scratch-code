@@ -36,7 +36,6 @@
 #include "Translator.hpp"
 #include "GeneralException.hpp"
 #include "Object.hpp"
-#include "ObjectParams.hpp"
 #include "Resource.hpp"
 #include "Costume.hpp"
 #include "Sound.hpp"
@@ -45,6 +44,7 @@
 #include "ManifestEntryParams.hpp"
 #include "ManifestUser.hpp"
 #include "ManifestDefinitions.hpp"
+#include "ObjectParams.hpp"
 #include "Utilities.hpp"
 
 
@@ -52,6 +52,11 @@
 namespace sc
 {
 	class Object;
+	namespace ObjectParams
+	{
+		enum class Type;
+		enum class RotationStyle;
+	}
 	
 	class ProjectManager : public ManifestUser<ProjectManager>
 	{
@@ -63,13 +68,13 @@ namespace sc
 			void													loadAllObjects();
 			std::shared_ptr<Object>									getObject(const std::string& objName);
 			void													buildProjectJSON(std::shared_ptr<Costume> penLayer, rapidjson::Document& docDest);
-			void													addObjectInternal(const std::string& objName, const boost::filesystem::path& objPath, ObjectParams::Type objType=ObjectParams::Type::Generic);
+			void													addObjectInternal(const std::string& objName, const boost::filesystem::path& objPath, ObjectParams::Type objType);
 			
 		public:
 			ProjectManager(const boost::filesystem::path& newProjectPath);
 		
 			void													initialize();
-			void													addObject(const std::string& objName, ObjectParams::Type objType=ObjectParams::Type::Generic);
+			void													addObject(const std::string& objName, ObjectParams::Type objType);
 			void													validate();
 			void													build();
 			void													clean(bool doValidation=true);

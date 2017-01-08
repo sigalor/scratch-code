@@ -249,7 +249,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj) { return (obj->getType() == op::Type::Stage); },	//pen layer is only needed when the object is a stage (otherwise it's ignored and "alternative" and "processor" will NOT be executed)
+								/* condition */			op::isStageCondition,																//pen layer is only needed when the object is a stage (otherwise it's ignored and "alternative" and "processor" will NOT be executed)
 								/* alternative */		[](Object* obj) -> std::string { return "penLayer/penLayer.png"; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)
 														{
@@ -447,7 +447,7 @@ namespace sc
 					mep::Importance::OptionalWithWarning,
 					std::make_tuple
 					(
-						/* condition */				[](Object* obj)								{ return (obj->getType() == op::Type::Generic); },
+						/* condition */				op::isGenericCondition,
 						/* preProcessor */			nullptr,
 						/* elementPreProcessor */	nullptr,
 						/* elementPostProcessor */	nullptr,
@@ -462,7 +462,7 @@ namespace sc
 							mep::Importance::OptionalWithWarning,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> double						{ return 0.0; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_positionX(boost::get<double>(val)); }
 							)
@@ -474,7 +474,7 @@ namespace sc
 							mep::Importance::OptionalWithWarning,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> double						{ return 0.0; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_positionY(boost::get<double>(val)); }
 							)
@@ -486,7 +486,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> double						{ return 1.0; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_scale(boost::get<double>(val)); }
 							)
@@ -498,7 +498,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> double						{ return 90.0; },		//90 degrees is upright for Scratch 2
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setTransformation_direction(boost::get<double>(val)); }
 							)
@@ -512,7 +512,7 @@ namespace sc
 					mep::Importance::Optional,
 					std::make_tuple
 					(
-						/* condition */				[](Object* obj)								{ return (obj->getType() == op::Type::Generic); },
+						/* condition */				op::isGenericCondition,
 						/* preProcessor */			nullptr,
 						/* elementPreProcessor */	nullptr,
 						/* elementPostProcessor */	nullptr,
@@ -527,7 +527,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> std::string					{ return "normal"; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setBehavior_rotationStyle(op::jsonStringToRotationStyle(boost::get<std::string>(val))); }
 							)
@@ -539,7 +539,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> bool							{ return false; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setBehavior_isDraggable(boost::get<bool>(val)); }
 							)
@@ -560,7 +560,7 @@ namespace sc
 							mep::Importance::Optional,
 							std::make_tuple
 							(
-								/* condition */			[](Object* obj)									{ return (obj->getType() == op::Type::Generic); },
+								/* condition */			op::isGenericCondition,
 								/* alternative */		[](Object* obj) -> bool							{ return true; },
 								/* processor */			[](Object* obj, const mep::TypeVariant& val)	{ obj->setAppearance_isVisible(boost::get<bool>(val)); }
 							)

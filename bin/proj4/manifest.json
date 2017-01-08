@@ -1,4 +1,15 @@
 {
     "username": "your_username",
-    "title": "proj4"
+    "title": "proj4",
+    "scratchFunctions":
+	[
+		{
+			"opcode": "say:",
+			"alias": "scratch_say"
+		},
+		{
+			"opcode": "think:",
+			"alias": "scratch_think"
+		}
+	]
 }

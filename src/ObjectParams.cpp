@@ -26,6 +26,13 @@ namespace sc
 {
 	namespace ObjectParams
 	{
+		const std::function<bool(Object*)> isStageCondition  ([](Object* obj) -> bool { return (obj->getType() == Type::Stage); });
+		const std::function<bool(Object*)> isGenericCondition([](Object* obj) -> bool { return (obj->getType() == Type::Generic); });
+		
+		
+		
+		
+	
 		const std::string typeToReadableString(Type type)															//these are the string representations the user shall see in program outputs (which means they may be translated), NOT the ones that are for the JSON file!
 		{
 			switch(type)

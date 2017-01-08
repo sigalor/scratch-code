@@ -23,8 +23,15 @@ obj/Translator.o: src/Translator.cpp include/Translator.hpp \
  ext/scratch-code-ast/include/ast/ForLoop.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
- ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
- include/Utilities.hpp include/GeneralException.hpp
+ ext/scratch-code-ast/include/ast/ReturnStatement.hpp include/Driver.hpp \
+ include/Utilities.hpp include/GeneralException.hpp \
+ gen/scratch-code.tab.hpp gen/stack.hh gen/location.hh gen/position.hh \
+ include/OpcodeAliases.hpp include/Object.hpp include/Resource.hpp \
+ include/Costume.hpp include/Sound.hpp include/ManifestEntry.hpp \
+ include/ManifestEntryParams.hpp include/ManifestStructure.hpp \
+ include/ManifestEntryValue.hpp include/ManifestUser.hpp \
+ include/ManifestDefinitions.hpp include/ProjectManager.hpp \
+ include/ObjectParams.hpp
 
 include/Translator.hpp:
 
@@ -78,6 +85,42 @@ ext/scratch-code-ast/include/ast/LoopControlStatement.hpp:
 
 ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
+include/Driver.hpp:
+
 include/Utilities.hpp:
 
 include/GeneralException.hpp:
+
+gen/scratch-code.tab.hpp:
+
+gen/stack.hh:
+
+gen/location.hh:
+
+gen/position.hh:
+
+include/OpcodeAliases.hpp:
+
+include/Object.hpp:
+
+include/Resource.hpp:
+
+include/Costume.hpp:
+
+include/Sound.hpp:
+
+include/ManifestEntry.hpp:
+
+include/ManifestEntryParams.hpp:
+
+include/ManifestStructure.hpp:
+
+include/ManifestEntryValue.hpp:
+
+include/ManifestUser.hpp:
+
+include/ManifestDefinitions.hpp:
+
+include/ProjectManager.hpp:
+
+include/ObjectParams.hpp:

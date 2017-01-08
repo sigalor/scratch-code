@@ -27,10 +27,11 @@ obj/ManifestDefinitions.o: src/ManifestDefinitions.cpp \
  ext/scratch-code-ast/include/ast/ForLoop.hpp \
  ext/scratch-code-ast/include/ast/WhileLoop.hpp \
  ext/scratch-code-ast/include/ast/LoopControlStatement.hpp \
- ext/scratch-code-ast/include/ast/ReturnStatement.hpp include/Object.hpp \
- include/Resource.hpp include/Costume.hpp include/Sound.hpp \
- include/Driver.hpp gen/scratch-code.tab.hpp gen/stack.hh gen/location.hh \
- gen/position.hh include/ManifestUser.hpp include/ObjectParams.hpp
+ ext/scratch-code-ast/include/ast/ReturnStatement.hpp include/Driver.hpp \
+ gen/scratch-code.tab.hpp gen/stack.hh gen/location.hh gen/position.hh \
+ include/OpcodeAliases.hpp include/Object.hpp include/Resource.hpp \
+ include/Costume.hpp include/Sound.hpp include/ManifestUser.hpp \
+ include/ObjectParams.hpp
 
 include/ManifestDefinitions.hpp:
 
@@ -100,14 +101,6 @@ ext/scratch-code-ast/include/ast/LoopControlStatement.hpp:
 
 ext/scratch-code-ast/include/ast/ReturnStatement.hpp:
 
-include/Object.hpp:
-
-include/Resource.hpp:
-
-include/Costume.hpp:
-
-include/Sound.hpp:
-
 include/Driver.hpp:
 
 gen/scratch-code.tab.hpp:
@@ -117,6 +110,16 @@ gen/stack.hh:
 gen/location.hh:
 
 gen/position.hh:
+
+include/OpcodeAliases.hpp:
+
+include/Object.hpp:
+
+include/Resource.hpp:
+
+include/Costume.hpp:
+
+include/Sound.hpp:
 
 include/ManifestUser.hpp:
 

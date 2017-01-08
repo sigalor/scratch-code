@@ -264,7 +264,10 @@ unit:																												//this is the ONLY rule that writes to driver.s
 				ast::Conditional::uniqueId,
 				[&](std::shared_ptr<ast::Node> obj)
 				{
-				
+					auto conditional = std::static_pointer_cast<ast::Conditional>(obj);
+					ast::Lexer::ParsedVariableType condType = conditional->getCondition()->getEffectiveType();
+					if(condType != ast::Lexer::ParsedVariableType::Bool)
+						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(conditional), "if condition needs to be of type '" + ast::Lexer::getString(ast::Lexer::ParsedVariableType::Bool) + "', not '" + ast::Lexer::getString(condType) + "'");
 				}
 			},
 			{

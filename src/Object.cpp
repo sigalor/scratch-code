@@ -51,12 +51,13 @@ namespace sc
 		
 		Value valueBuffer;
 		Value costumesArray(kArrayType), soundsArray(kArrayType);
+		Translator translator(this, parsingDriver, alloc);
 		
 		valDest.SetObject();
 		valDest.AddMember("objName", Value(getName().c_str(), alloc), alloc);
 		
 		//add script
-		Translator::translate(scripts, valueBuffer, alloc);
+		translator.translate(scripts, valueBuffer);
 		valDest.AddMember("scripts", valueBuffer, alloc);
 		
 		//add all sounds
@@ -102,7 +103,7 @@ namespace sc
 			//appearance
 			valDest.AddMember("visible", getAppearance_isVisible(), alloc);
 			
-			//other
+			//other (sprite info is currently always empty)
 			Value spriteInfoObject(kObjectType);
 			valDest.AddMember("spriteInfo", spriteInfoObject, alloc);
 		}
@@ -284,11 +285,12 @@ namespace sc
 		Utilities::validateFile(getPaths_scriptsDirectory() / newVal, fs::file_type::regular_file);
 		manifest["mainScriptFile"].SetString(newVal.c_str(), manifest.GetAllocator());
 		
-		//actually parse the source file ("driver.parse" will throw an exception when a syntax error occurs)
+		//actually parse the source file ("parsingDriver.parse" will throw a sc::GeneralException when a syntax error occurs)
 		//TODO: what about "driver.setTraceLexing(true);" and "driver.setTraceParsing(true);"? Command-line parameters?
 		scripts = std::make_shared<ast::StatementList>(nullptr);
-		Driver driver(scripts);
-		driver.parse(getMainScriptFile());
+		parsingDriver = std::make_shared<Driver>(scripts);
+		parsingDriver->functionDefinitions.insert(parsingDriver->functionDefinitions.end(), OpcodeAliases::aliasFunctionDefinitions.begin(), OpcodeAliases::aliasFunctionDefinitions.end());
+		parsingDriver->parse(getMainScriptFile());
 	}
 	
 	void Object::setTransformation_positionX(double newVal)

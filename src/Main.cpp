@@ -61,7 +61,7 @@ void processParameters(int argc, char** argv)
 					std::cout << "usage: " << appName << " addobject <object_name>" << std::endl;
 					std::exit(EXIT_SUCCESS);
 				}
-				projMgr->addObject(argv[2]);
+				projMgr->addObject(argv[2], sc::ObjectParams::Type::Generic);
 			}
 			else if(action == "build")
 				projMgr->build();

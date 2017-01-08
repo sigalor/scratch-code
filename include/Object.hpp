@@ -44,6 +44,7 @@
 #include "ManifestUser.hpp"
 #include "ManifestDefinitions.hpp"
 #include "ObjectParams.hpp"
+#include "OpcodeAliases.hpp"
 #include "Utilities.hpp"
 
 
@@ -57,6 +58,7 @@ namespace sc
 			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;
 			std::vector<std::shared_ptr<Sound>>					sounds;
+			std::shared_ptr<Driver>								parsingDriver;
 			std::shared_ptr<ast::StatementList>					scripts;
 			
 			ObjectParams::Type									typeForInitialization;

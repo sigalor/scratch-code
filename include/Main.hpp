@@ -28,6 +28,7 @@
 #include <memory>
 #include <ast/AST.hpp>
 
+#include "ObjectParams.hpp"
 #include "ProjectManager.hpp"
 #include "GeneralException.hpp"
 #include "Driver.hpp"

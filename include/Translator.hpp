@@ -27,38 +27,42 @@
 #include <vector>
 #include <fstream>
 #include <memory>
+#include <utility>
 
+#include <boost/variant.hpp>
 #include <rapidjson/document.h>
 #include <ast/AST.hpp>
 
+#include "Driver.hpp"
+#include "OpcodeAliases.hpp"
 #include "Utilities.hpp"
+#include "GeneralException.hpp"
+#include "Object.hpp"
 
 
 
 namespace sc
 {
-	namespace Translator
+	class Object;
+
+	class Translator
 	{
-		/*class BlockTuple
-		{
-			private:
-				std::string										opcode;
-				std::vector<rapidjson::Value>					arguments;
-			
-			public:
-				BlockTuple();
-				BlockTuple(const std::string& newOpcode);
-				
-				rapidjson::Value&								addArgument();
-		};*/
+		private:
+			Object*												targetObject;
+			std::shared_ptr<Driver>								parsingDriver;
+			rapidjson::Document::AllocatorType&					alloc;
+			void												translateStatement(std::shared_ptr<ast::Statement> input, rapidjson::Value& valDest);
+			void												translateFunctionDefinition(std::shared_ptr<ast::FunctionDefinition> input, rapidjson::Value& valDest);
+			void												translateValue(std::shared_ptr<ast::Value> input, rapidjson::Value& valDest);
+			void												translateRValue(std::shared_ptr<ast::RValue> input, rapidjson::Value& valDest);
+			void												translateRValueValue(std::shared_ptr<ast::RValueValue> input, rapidjson::Value& valDest);
+			void												translateFunctionCall(std::shared_ptr<ast::FunctionCall> input, rapidjson::Value& valDest);
+			void												translateControlFlowStatement(std::shared_ptr<ast::ControlFlowStatement> input, rapidjson::Value& valDest);
+			void												translateConditional(std::shared_ptr<ast::Conditional> input, rapidjson::Value& valDest);
+			void												translateStatementList(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, bool append=false);
 		
-		void													translateStatement(std::shared_ptr<ast::Node> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-		void													translateFunctionDefinition(std::shared_ptr<ast::FunctionDefinition> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-		void													translateValue(std::shared_ptr<ast::Value> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-		void													translateControlFlowStatement(std::shared_ptr<ast::ControlFlowStatement> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-		void													translateConditional(std::shared_ptr<ast::Conditional> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-		void													translateStatementList(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc, bool append=false);
-		
-		void													translate(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
-	}
+		public:
+			Translator(Object* newTargetObject, std::shared_ptr<Driver> newParsingDriver, rapidjson::Document::AllocatorType& newAlloc);
+			void												translate(std::shared_ptr<ast::StatementList> input, rapidjson::Value& valDest);
+	};
 }
