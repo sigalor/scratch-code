@@ -27,6 +27,7 @@
 #include <utility>
 #include <memory>
 #include <functional>
+#include <boost/variant.hpp>
 #include <ast/AST.hpp>
 
 #include "Object.hpp"
@@ -55,9 +56,23 @@ namespace sc
 				}
 		};
 		
+		class FunctionModifier
+		{
+			public:
+				ast::Lexer::ParsedFunctionModifier				modifier;
+				std::function<void(Object*, std::shared_ptr<ast::ValueList>)> argValidator;
+				OpcodeAlias										opcodeAlias;
+				
+				FunctionModifier(ast::Lexer::ParsedFunctionModifier newModifier, const std::function<void(Object*, std::shared_ptr<ast::ValueList>)>& newArgValidator, const OpcodeAlias& newOpcodeAlias) : modifier(newModifier), argValidator(newArgValidator), opcodeAlias(newOpcodeAlias)
+				{
+					//empty
+				}
+		};
+		
 		extern const std::function<void(Object*)>				isStageCondition, isGenericCondition;				//in contrast to ObjectParams::isStageCondition, this one THROWS a sc::GeneralException with a message instead of returning 'bool'. THIS is what OpcodeAlias::condition expects. It has NOTHING to do with the condition needed by 'ManifestDefinitions'/'ManifestEntry'.
 		extern const std::vector<OpcodeAlias>					opcodeAliases;
-		extern const std::vector<std::shared_ptr<ast::FunctionDefinition>> aliasFunctionDefinitions;
+		extern const std::vector<FunctionModifier>				functionModifiers;
+		extern const std::vector<std::shared_ptr<ast::FunctionDefinition>> nativeFunctionDefinitions;				//combines the ast::FunctionDefinitions from 'opcodeAliases' and 'functionModifiers'
 		
 		std::shared_ptr<ast::VariableDefinitionList>			constructOpcodeArgs(std::shared_ptr<ast::Node> parent, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);
 		std::shared_ptr<ast::FunctionDefinition>				constructOpcodeAlias(const std::string& alias, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);

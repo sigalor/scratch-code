@@ -288,8 +288,8 @@ namespace sc
 		//actually parse the source file ("parsingDriver.parse" will throw a sc::GeneralException when a syntax error occurs)
 		//TODO: what about "driver.setTraceLexing(true);" and "driver.setTraceParsing(true);"? Command-line parameters?
 		scripts = std::make_shared<ast::StatementList>(nullptr);
-		parsingDriver = std::make_shared<Driver>(scripts);
-		parsingDriver->functionDefinitions.insert(parsingDriver->functionDefinitions.end(), OpcodeAliases::aliasFunctionDefinitions.begin(), OpcodeAliases::aliasFunctionDefinitions.end());
+		parsingDriver = std::make_shared<Driver>(scripts, this);
+		parsingDriver->functionDefinitions.insert(parsingDriver->functionDefinitions.end(), OpcodeAliases::nativeFunctionDefinitions.begin(), OpcodeAliases::nativeFunctionDefinitions.end());
 		parsingDriver->parse(getMainScriptFile());
 	}
 	

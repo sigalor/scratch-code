@@ -46,11 +46,77 @@ namespace sc
 			OpcodeAlias(nullptr,			"say:duration:elapsed:from:",	constructOpcodeAlias("scratch_sayDuration",	{ ast::Lexer::ParsedVariableType::String, ast::Lexer::ParsedVariableType::Real }))
 		};
 		
-		const std::vector<std::shared_ptr<ast::FunctionDefinition>> aliasFunctionDefinitions([&]()
+		const std::vector<FunctionModifier> functionModifiers =
+		{
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnGreenFlag,
+				nullptr,
+				OpcodeAlias(nullptr, "whenGreenFlag", constructOpcodeAlias("scratch_onGreenFlag", {}))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnKeyPressed,
+				[](Object* targetObject, std::shared_ptr<ast::ValueList> modifierArgs)
+				{
+					std::string keyStr(boost::get<std::string>(std::static_pointer_cast<ast::RValueValue>(modifierArgs->getValues()[0])->getValue()));
+					if(keyStr == "any"  ||  keyStr == "space"  ||  keyStr == "up arrow"  ||  keyStr == "down arrow"  ||  keyStr == "right arrow"  ||  keyStr == "left arrow")
+						return;
+					if(keyStr.size() == 1  &&  ((keyStr[0] >= 'a'  &&  keyStr[0] <= 'z')  ||  (keyStr[0] >= '0'  &&  keyStr[0] <= '9')))
+						return;
+					throw GeneralException("invalid key: '" + keyStr + "'");
+				},
+				OpcodeAlias(nullptr, "whenKeyPressed", constructOpcodeAlias("scratch_onKeyPressed", { ast::Lexer::ParsedVariableType::String }))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnThisClicked,
+				nullptr,
+				OpcodeAlias(nullptr, "whenClicked", constructOpcodeAlias("scratch_onThisClicked", {}))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnBackdropSwitch,
+				[](Object* targetObject, std::shared_ptr<ast::ValueList> modifierArgs)
+				{
+					std::string sensorStr(boost::get<std::string>(std::static_pointer_cast<ast::RValueValue>(modifierArgs->getValues()[1])->getValue()));
+					if(sensorStr != "loudness"  &&  sensorStr != "timer"  &&  sensorStr != "video motion")
+						throw GeneralException("invalid sensor: '" + sensorStr + "'");
+				},
+				OpcodeAlias(nullptr, "whenSceneStarts", constructOpcodeAlias("scratch_onBackdropSwitch", { ast::Lexer::ParsedVariableType::String }))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnSensorGreaterThan,
+				[](Object* targetObject, std::shared_ptr<ast::ValueList> modifierArgs)
+				{
+					std::string sensorStr(boost::get<std::string>(std::static_pointer_cast<ast::RValueValue>(modifierArgs->getValues()[1])->getValue()));
+					if(sensorStr != "loudness"  &&  sensorStr != "timer"  &&  sensorStr != "video motion")
+						throw GeneralException("invalid sensor: '" + sensorStr + "'");
+				},
+				OpcodeAlias(nullptr, "whenSensorGreaterThan", constructOpcodeAlias("scratch_onSensorGreaterThan", { ast::Lexer::ParsedVariableType::String, ast::Lexer::ParsedVariableType::Int }))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnReceive,
+				nullptr,
+				OpcodeAlias(nullptr, "whenIReceive", constructOpcodeAlias("scratch_onReceive", { ast::Lexer::ParsedVariableType::String }))
+			),
+			FunctionModifier
+			(
+				ast::Lexer::ParsedFunctionModifier::OnClone,
+				nullptr,
+				OpcodeAlias(isGenericCondition, "whenCloned", constructOpcodeAlias("scratch_onClone", {}))
+			)
+		};
+		
+		const std::vector<std::shared_ptr<ast::FunctionDefinition>> nativeFunctionDefinitions([&]()
 		{
 			std::vector<std::shared_ptr<ast::FunctionDefinition>> ret;
 			for(auto& x : opcodeAliases)
 				ret.push_back(x.aliasFuncDef);
+			for(auto& x : functionModifiers)
+				ret.push_back(x.opcodeAlias.aliasFuncDef);
 			return ret;
 		}());
 		
@@ -75,7 +141,7 @@ namespace sc
 		std::shared_ptr<ast::FunctionDefinition> constructOpcodeAlias(const std::string& alias, const std::vector<ast::Lexer::ParsedVariableType>& argTypes)
 		{
 			Utilities::validateIdentifier("opcode alias", alias);
-			std::shared_ptr<ast::FunctionDefinition> ret = std::make_shared<ast::FunctionDefinition>(nullptr, ast::Lexer::ParsedVariableType::Void, alias, nullptr, nullptr);
+			std::shared_ptr<ast::FunctionDefinition> ret = std::make_shared<ast::FunctionDefinition>(nullptr, ast::Lexer::ParsedVariableType::Void, alias, nullptr, ast::Lexer::ParsedFunctionModifier::Invalid, nullptr, nullptr);
 			
 			ret->setArgs(constructOpcodeArgs(ret, argTypes));
 			ret->setBody(std::make_shared<ast::StatementList>(ret));

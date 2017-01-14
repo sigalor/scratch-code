@@ -1,0 +1,116 @@
+{
+    "objName": "Stage",
+    "scripts": [
+        [
+            10,
+            10,
+            [
+                [
+                    "procDef",
+                    "test( %s , %n , %n )",
+                    [
+                        "param1",
+                        "param2",
+                        "param3"
+                    ],
+                    [
+                        "",
+                        1,
+                        1
+                    ],
+                    false
+                ],
+                [
+                    "doIfElse",
+                    true,
+                    null,
+                    null
+                ],
+                [
+                    "say:duration:elapsed:from:",
+                    null,
+                    1.0
+                ]
+            ]
+        ],
+        [
+            10,
+            30,
+            [
+                [
+                    "whenGreenFlag"
+                ],
+                [
+                    "doIf",
+                    true,
+                    [
+                        [
+                            "doIfElse",
+                            null,
+                            null,
+                            [
+                                [
+                                    "doIf",
+                                    false,
+                                    null
+                                ]
+                            ]
+                        ],
+                        [
+                            "say:duration:elapsed:from:",
+                            "Hello",
+                            2.0
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        [
+            10,
+            50,
+            [
+                [
+                    "whenIReceive",
+                    "bye"
+                ],
+                [
+                    "say:duration:elapsed:from:",
+                    "Goodbye",
+                    1.0
+                ]
+            ]
+        ],
+        [
+            10,
+            70,
+            [
+                [
+                    "whenKeyPressed",
+                    "space"
+                ]
+            ]
+        ]
+    ],
+    "sounds": [],
+    "costumes": [
+        {
+            "costumeName": "backdrop1",
+            "baseLayerID": 1,
+            "baseLayerMD5": "1db4812ba9e5c9b0c3561df1a661b84e.png",
+            "bitmapResolution": 1,
+            "rotationCenterX": 240,
+            "rotationCenterY": 180
+        }
+    ],
+    "currentCostumeIndex": 0,
+    "penLayerMD5": "09a305453199b5e6ddcb5c2618dcd872.png",
+    "penLayerID": 0,
+    "tempoBPM": 60,
+    "videoAlpha": 0.5,
+    "children": [],
+    "info": {
+        "spriteCount": 0,
+        "scriptCount": 0,
+        "userAgent": "scratch-code"
+    }
+}

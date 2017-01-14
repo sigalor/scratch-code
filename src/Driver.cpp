@@ -28,8 +28,8 @@ namespace sc
 {
 	Driver::Driver() : result(0), traceLexing(false), traceParsing(false) { }
 	Driver::Driver(bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing) { }
-	Driver::Driver(std::shared_ptr<ast::StatementList> newSyntaxTree) : result(0), traceLexing(false), traceParsing(false), syntaxTree(newSyntaxTree) { }
-	Driver::Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing), syntaxTree(newSyntaxTree) { }
+	Driver::Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, Object* newTargetObject) : result(0), traceLexing(false), traceParsing(false), syntaxTree(newSyntaxTree), targetObject(newTargetObject) { }
+	Driver::Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, Object* newTargetObject, bool newTraceLexing, bool newTraceParsing) : result(0), traceLexing(newTraceLexing), traceParsing(newTraceParsing), syntaxTree(newSyntaxTree), targetObject(newTargetObject) { }
 	Driver::~Driver() { }
 
 	void Driver::beginLexing()

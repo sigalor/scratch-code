@@ -43,14 +43,16 @@
 #line 29 "src/scratch-code.ypp" // lalr1.cc:377
 
 	#include <string>
+	#include <vector>
 	#include <algorithm>
 	#include <memory>
+	#include <utility>
 	#include <typeinfo>
 	#include <ast/AST.hpp>
 	
-	namespace sc { class Driver; }																					//one cannot simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
+	namespace sc { class Driver; }																					//one does not simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
 
-#line 54 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 56 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -127,7 +129,7 @@
 
 
 namespace yy {
-#line 131 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 133 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 
@@ -307,6 +309,7 @@ namespace yy {
       // forLoop
       char dummy4[sizeof(std::shared_ptr<ast::ForLoop>)];
 
+      // functionModifier
       // functionCall
       char dummy5[sizeof(std::shared_ptr<ast::FunctionCall>)];
 
@@ -399,51 +402,52 @@ namespace yy {
         TOK_CURLY_BRACKET_CLOSED = 268,
         TOK_COMMA = 269,
         TOK_SEMICOLON = 270,
-        TOK_OP_PLUS = 271,
-        TOK_OP_MINUS = 272,
-        TOK_OP_INCREMENT = 273,
-        TOK_OP_DECREMENT = 274,
-        TOK_OP_LOGICAL_NOT = 275,
-        TOK_OP_BITWISE_NOT = 276,
-        TOK_OP_TYPECAST_BOOL = 277,
-        TOK_OP_TYPECAST_INT = 278,
-        TOK_OP_TYPECAST_REAL = 279,
-        TOK_OP_TYPECAST_STRING = 280,
-        TOK_OP_MULTIPLY = 281,
-        TOK_OP_DIVIDE = 282,
-        TOK_OP_MODULO = 283,
-        TOK_OP_BITWISE_AND = 284,
-        TOK_OP_BITWISE_OR = 285,
-        TOK_OP_BITWISE_XOR = 286,
-        TOK_OP_BITSHIFT_LEFT = 287,
-        TOK_OP_BITSHIFT_RIGHT = 288,
-        TOK_OP_LOGICAL_AND = 289,
-        TOK_OP_LOGICAL_OR = 290,
-        TOK_OP_LESS_THAN = 291,
-        TOK_OP_LESS_THAN_OR_EQUAL = 292,
-        TOK_OP_GREATER_THAN = 293,
-        TOK_OP_GREATER_THAN_OR_EQUAL = 294,
-        TOK_OP_EQUAL = 295,
-        TOK_OP_NOT_EQUAL = 296,
-        TOK_OP_ASSIGNMENT = 297,
-        TOK_OP_ADD_ASSIGNMENT = 298,
-        TOK_OP_SUBTRACT_ASSIGNMENT = 299,
-        TOK_OP_MULTIPLY_ASSIGNMENT = 300,
-        TOK_OP_DIVIDE_ASSIGNMENT = 301,
-        TOK_OP_MODULO_ASSIGNMENT = 302,
-        TOK_OP_BITWISE_AND_ASSIGNMENT = 303,
-        TOK_OP_BITWISE_OR_ASSIGNMENT = 304,
-        TOK_OP_BITWISE_XOR_ASSIGNMENT = 305,
-        TOK_OP_BITSHIFT_LEFT_ASSIGNMENT = 306,
-        TOK_OP_BITSHIFT_RIGHT_ASSIGNMENT = 307,
-        TOK_IDENTIFIER = 308,
-        TOK_VARIABLE_TYPE = 309,
-        TOK_LOOP_CONTROL_STATEMENT = 310,
-        TOK_RVALUE_VALUE = 311,
-        TOK_UNOP_UNARY_PLUS = 313,
-        TOK_UNOP_UNARY_MINUS = 314,
-        TOK_UNOP_POSTFIX_INCREMENT = 315,
-        TOK_UNOP_POSTFIX_DECREMENT = 316
+        TOK_COLON = 271,
+        TOK_OP_PLUS = 272,
+        TOK_OP_MINUS = 273,
+        TOK_OP_INCREMENT = 274,
+        TOK_OP_DECREMENT = 275,
+        TOK_OP_LOGICAL_NOT = 276,
+        TOK_OP_BITWISE_NOT = 277,
+        TOK_OP_TYPECAST_BOOL = 278,
+        TOK_OP_TYPECAST_INT = 279,
+        TOK_OP_TYPECAST_REAL = 280,
+        TOK_OP_TYPECAST_STRING = 281,
+        TOK_OP_MULTIPLY = 282,
+        TOK_OP_DIVIDE = 283,
+        TOK_OP_MODULO = 284,
+        TOK_OP_BITWISE_AND = 285,
+        TOK_OP_BITWISE_OR = 286,
+        TOK_OP_BITWISE_XOR = 287,
+        TOK_OP_BITSHIFT_LEFT = 288,
+        TOK_OP_BITSHIFT_RIGHT = 289,
+        TOK_OP_LOGICAL_AND = 290,
+        TOK_OP_LOGICAL_OR = 291,
+        TOK_OP_LESS_THAN = 292,
+        TOK_OP_LESS_THAN_OR_EQUAL = 293,
+        TOK_OP_GREATER_THAN = 294,
+        TOK_OP_GREATER_THAN_OR_EQUAL = 295,
+        TOK_OP_EQUAL = 296,
+        TOK_OP_NOT_EQUAL = 297,
+        TOK_OP_ASSIGNMENT = 298,
+        TOK_OP_ADD_ASSIGNMENT = 299,
+        TOK_OP_SUBTRACT_ASSIGNMENT = 300,
+        TOK_OP_MULTIPLY_ASSIGNMENT = 301,
+        TOK_OP_DIVIDE_ASSIGNMENT = 302,
+        TOK_OP_MODULO_ASSIGNMENT = 303,
+        TOK_OP_BITWISE_AND_ASSIGNMENT = 304,
+        TOK_OP_BITWISE_OR_ASSIGNMENT = 305,
+        TOK_OP_BITWISE_XOR_ASSIGNMENT = 306,
+        TOK_OP_BITSHIFT_LEFT_ASSIGNMENT = 307,
+        TOK_OP_BITSHIFT_RIGHT_ASSIGNMENT = 308,
+        TOK_IDENTIFIER = 309,
+        TOK_VARIABLE_TYPE = 310,
+        TOK_LOOP_CONTROL_STATEMENT = 311,
+        TOK_RVALUE_VALUE = 312,
+        TOK_UNOP_UNARY_PLUS = 314,
+        TOK_UNOP_UNARY_MINUS = 315,
+        TOK_UNOP_POSTFIX_INCREMENT = 316,
+        TOK_UNOP_POSTFIX_DECREMENT = 317
       };
     };
 
@@ -643,6 +647,10 @@ namespace yy {
     static inline
     symbol_type
     make_SEMICOLON (const location_type& l);
+
+    static inline
+    symbol_type
+    make_COLON (const location_type& l);
 
     static inline
     symbol_type
@@ -1029,12 +1037,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 798,     ///< Last index in yytable_.
-      yynnts_ = 28,  ///< Number of nonterminal symbols.
+      yylast_ = 834,     ///< Last index in yytable_.
+      yynnts_ = 29,  ///< Number of nonterminal symbols.
       yyfinal_ = 3, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 62  ///< Number of tokens.
+      yyntokens_ = 63  ///< Number of tokens.
     };
 
 
@@ -1082,9 +1090,9 @@ namespace yy {
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
       35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
-      55,    56,    57,    58,    59,    60,    61
+      55,    56,    57,    58,    59,    60,    61,    62
     };
-    const unsigned int user_token_number_max_ = 316;
+    const unsigned int user_token_number_max_ = 317;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -1117,93 +1125,94 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 55: // "loop control statement"
+      case 56: // "loop control statement"
         value.copy< ast::Lexer::ParsedLoopControlStatement > (other.value);
         break;
 
-      case 54: // "variable type"
+      case 55: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (other.value);
         break;
 
-      case 71: // conditional
-      case 72: // conditionalIf
+      case 72: // conditional
+      case 73: // conditionalIf
         value.copy< std::shared_ptr<ast::Conditional> > (other.value);
         break;
 
-      case 74: // forLoop
+      case 75: // forLoop
         value.copy< std::shared_ptr<ast::ForLoop> > (other.value);
         break;
 
-      case 86: // functionCall
+      case 82: // functionModifier
+      case 88: // functionCall
         value.copy< std::shared_ptr<ast::FunctionCall> > (other.value);
         break;
 
-      case 77: // functionDefinition
+      case 78: // functionDefinition
         value.copy< std::shared_ptr<ast::FunctionDefinition> > (other.value);
         break;
 
-      case 84: // lValue
+      case 86: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (other.value);
         break;
 
-      case 76: // loopControlStatement
+      case 77: // loopControlStatement
         value.copy< std::shared_ptr<ast::LoopControlStatement> > (other.value);
         break;
 
-      case 89: // operation
+      case 91: // operation
         value.copy< std::shared_ptr<ast::Operation> > (other.value);
         break;
 
-      case 85: // rValue
+      case 87: // rValue
         value.copy< std::shared_ptr<ast::RValue> > (other.value);
         break;
 
-      case 56: // "rvalue value"
+      case 57: // "rvalue value"
         value.copy< std::shared_ptr<ast::RValueValue> > (other.value);
         break;
 
-      case 81: // returnStatement
+      case 83: // returnStatement
         value.copy< std::shared_ptr<ast::ReturnStatement> > (other.value);
         break;
 
-      case 64: // statement
+      case 65: // statement
         value.copy< std::shared_ptr<ast::Statement> > (other.value);
         break;
 
-      case 65: // statements
-      case 66: // statementsBlockInternal
-      case 67: // statementsBlock
+      case 66: // statements
+      case 67: // statementsBlockInternal
+      case 68: // statementsBlock
         value.copy< std::shared_ptr<ast::StatementList> > (other.value);
         break;
 
-      case 82: // valueStandalone
-      case 83: // value
+      case 84: // valueStandalone
+      case 85: // value
         value.copy< std::shared_ptr<ast::Value> > (other.value);
         break;
 
-      case 73: // forLoopHeader
-      case 87: // functionCallParameters
-      case 88: // functionCallParametersMore
+      case 74: // forLoopHeader
+      case 89: // functionCallParameters
+      case 90: // functionCallParametersMore
         value.copy< std::shared_ptr<ast::ValueList> > (other.value);
         break;
 
-      case 70: // localVariableDefinition
-      case 80: // functionDefinitionParameter
+      case 71: // localVariableDefinition
+      case 81: // functionDefinitionParameter
         value.copy< std::shared_ptr<ast::VariableDefinition> > (other.value);
         break;
 
-      case 68: // localVariableDefinitionList
-      case 69: // localVariableDefinitions
-      case 78: // functionDefinitionParameters
-      case 79: // functionDefinitionParametersMore
+      case 69: // localVariableDefinitionList
+      case 70: // localVariableDefinitions
+      case 79: // functionDefinitionParameters
+      case 80: // functionDefinitionParametersMore
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (other.value);
         break;
 
-      case 75: // whileLoop
+      case 76: // whileLoop
         value.copy< std::shared_ptr<ast::WhileLoop> > (other.value);
         break;
 
-      case 53: // "identifier"
+      case 54: // "identifier"
         value.copy< std::string > (other.value);
         break;
 
@@ -1224,93 +1233,94 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 55: // "loop control statement"
+      case 56: // "loop control statement"
         value.copy< ast::Lexer::ParsedLoopControlStatement > (v);
         break;
 
-      case 54: // "variable type"
+      case 55: // "variable type"
         value.copy< ast::Lexer::ParsedVariableType > (v);
         break;
 
-      case 71: // conditional
-      case 72: // conditionalIf
+      case 72: // conditional
+      case 73: // conditionalIf
         value.copy< std::shared_ptr<ast::Conditional> > (v);
         break;
 
-      case 74: // forLoop
+      case 75: // forLoop
         value.copy< std::shared_ptr<ast::ForLoop> > (v);
         break;
 
-      case 86: // functionCall
+      case 82: // functionModifier
+      case 88: // functionCall
         value.copy< std::shared_ptr<ast::FunctionCall> > (v);
         break;
 
-      case 77: // functionDefinition
+      case 78: // functionDefinition
         value.copy< std::shared_ptr<ast::FunctionDefinition> > (v);
         break;
 
-      case 84: // lValue
+      case 86: // lValue
         value.copy< std::shared_ptr<ast::LValue> > (v);
         break;
 
-      case 76: // loopControlStatement
+      case 77: // loopControlStatement
         value.copy< std::shared_ptr<ast::LoopControlStatement> > (v);
         break;
 
-      case 89: // operation
+      case 91: // operation
         value.copy< std::shared_ptr<ast::Operation> > (v);
         break;
 
-      case 85: // rValue
+      case 87: // rValue
         value.copy< std::shared_ptr<ast::RValue> > (v);
         break;
 
-      case 56: // "rvalue value"
+      case 57: // "rvalue value"
         value.copy< std::shared_ptr<ast::RValueValue> > (v);
         break;
 
-      case 81: // returnStatement
+      case 83: // returnStatement
         value.copy< std::shared_ptr<ast::ReturnStatement> > (v);
         break;
 
-      case 64: // statement
+      case 65: // statement
         value.copy< std::shared_ptr<ast::Statement> > (v);
         break;
 
-      case 65: // statements
-      case 66: // statementsBlockInternal
-      case 67: // statementsBlock
+      case 66: // statements
+      case 67: // statementsBlockInternal
+      case 68: // statementsBlock
         value.copy< std::shared_ptr<ast::StatementList> > (v);
         break;
 
-      case 82: // valueStandalone
-      case 83: // value
+      case 84: // valueStandalone
+      case 85: // value
         value.copy< std::shared_ptr<ast::Value> > (v);
         break;
 
-      case 73: // forLoopHeader
-      case 87: // functionCallParameters
-      case 88: // functionCallParametersMore
+      case 74: // forLoopHeader
+      case 89: // functionCallParameters
+      case 90: // functionCallParametersMore
         value.copy< std::shared_ptr<ast::ValueList> > (v);
         break;
 
-      case 70: // localVariableDefinition
-      case 80: // functionDefinitionParameter
+      case 71: // localVariableDefinition
+      case 81: // functionDefinitionParameter
         value.copy< std::shared_ptr<ast::VariableDefinition> > (v);
         break;
 
-      case 68: // localVariableDefinitionList
-      case 69: // localVariableDefinitions
-      case 78: // functionDefinitionParameters
-      case 79: // functionDefinitionParametersMore
+      case 69: // localVariableDefinitionList
+      case 70: // localVariableDefinitions
+      case 79: // functionDefinitionParameters
+      case 80: // functionDefinitionParametersMore
         value.copy< std::shared_ptr<ast::VariableDefinitionList> > (v);
         break;
 
-      case 75: // whileLoop
+      case 76: // whileLoop
         value.copy< std::shared_ptr<ast::WhileLoop> > (v);
         break;
 
-      case 53: // "identifier"
+      case 54: // "identifier"
         value.copy< std::string > (v);
         break;
 
@@ -1495,93 +1505,94 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 55: // "loop control statement"
+      case 56: // "loop control statement"
         value.template destroy< ast::Lexer::ParsedLoopControlStatement > ();
         break;
 
-      case 54: // "variable type"
+      case 55: // "variable type"
         value.template destroy< ast::Lexer::ParsedVariableType > ();
         break;
 
-      case 71: // conditional
-      case 72: // conditionalIf
+      case 72: // conditional
+      case 73: // conditionalIf
         value.template destroy< std::shared_ptr<ast::Conditional> > ();
         break;
 
-      case 74: // forLoop
+      case 75: // forLoop
         value.template destroy< std::shared_ptr<ast::ForLoop> > ();
         break;
 
-      case 86: // functionCall
+      case 82: // functionModifier
+      case 88: // functionCall
         value.template destroy< std::shared_ptr<ast::FunctionCall> > ();
         break;
 
-      case 77: // functionDefinition
+      case 78: // functionDefinition
         value.template destroy< std::shared_ptr<ast::FunctionDefinition> > ();
         break;
 
-      case 84: // lValue
+      case 86: // lValue
         value.template destroy< std::shared_ptr<ast::LValue> > ();
         break;
 
-      case 76: // loopControlStatement
+      case 77: // loopControlStatement
         value.template destroy< std::shared_ptr<ast::LoopControlStatement> > ();
         break;
 
-      case 89: // operation
+      case 91: // operation
         value.template destroy< std::shared_ptr<ast::Operation> > ();
         break;
 
-      case 85: // rValue
+      case 87: // rValue
         value.template destroy< std::shared_ptr<ast::RValue> > ();
         break;
 
-      case 56: // "rvalue value"
+      case 57: // "rvalue value"
         value.template destroy< std::shared_ptr<ast::RValueValue> > ();
         break;
 
-      case 81: // returnStatement
+      case 83: // returnStatement
         value.template destroy< std::shared_ptr<ast::ReturnStatement> > ();
         break;
 
-      case 64: // statement
+      case 65: // statement
         value.template destroy< std::shared_ptr<ast::Statement> > ();
         break;
 
-      case 65: // statements
-      case 66: // statementsBlockInternal
-      case 67: // statementsBlock
+      case 66: // statements
+      case 67: // statementsBlockInternal
+      case 68: // statementsBlock
         value.template destroy< std::shared_ptr<ast::StatementList> > ();
         break;
 
-      case 82: // valueStandalone
-      case 83: // value
+      case 84: // valueStandalone
+      case 85: // value
         value.template destroy< std::shared_ptr<ast::Value> > ();
         break;
 
-      case 73: // forLoopHeader
-      case 87: // functionCallParameters
-      case 88: // functionCallParametersMore
+      case 74: // forLoopHeader
+      case 89: // functionCallParameters
+      case 90: // functionCallParametersMore
         value.template destroy< std::shared_ptr<ast::ValueList> > ();
         break;
 
-      case 70: // localVariableDefinition
-      case 80: // functionDefinitionParameter
+      case 71: // localVariableDefinition
+      case 81: // functionDefinitionParameter
         value.template destroy< std::shared_ptr<ast::VariableDefinition> > ();
         break;
 
-      case 68: // localVariableDefinitionList
-      case 69: // localVariableDefinitions
-      case 78: // functionDefinitionParameters
-      case 79: // functionDefinitionParametersMore
+      case 69: // localVariableDefinitionList
+      case 70: // localVariableDefinitions
+      case 79: // functionDefinitionParameters
+      case 80: // functionDefinitionParametersMore
         value.template destroy< std::shared_ptr<ast::VariableDefinitionList> > ();
         break;
 
-      case 75: // whileLoop
+      case 76: // whileLoop
         value.template destroy< std::shared_ptr<ast::WhileLoop> > ();
         break;
 
-      case 53: // "identifier"
+      case 54: // "identifier"
         value.template destroy< std::string > ();
         break;
 
@@ -1608,93 +1619,94 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 55: // "loop control statement"
+      case 56: // "loop control statement"
         value.move< ast::Lexer::ParsedLoopControlStatement > (s.value);
         break;
 
-      case 54: // "variable type"
+      case 55: // "variable type"
         value.move< ast::Lexer::ParsedVariableType > (s.value);
         break;
 
-      case 71: // conditional
-      case 72: // conditionalIf
+      case 72: // conditional
+      case 73: // conditionalIf
         value.move< std::shared_ptr<ast::Conditional> > (s.value);
         break;
 
-      case 74: // forLoop
+      case 75: // forLoop
         value.move< std::shared_ptr<ast::ForLoop> > (s.value);
         break;
 
-      case 86: // functionCall
+      case 82: // functionModifier
+      case 88: // functionCall
         value.move< std::shared_ptr<ast::FunctionCall> > (s.value);
         break;
 
-      case 77: // functionDefinition
+      case 78: // functionDefinition
         value.move< std::shared_ptr<ast::FunctionDefinition> > (s.value);
         break;
 
-      case 84: // lValue
+      case 86: // lValue
         value.move< std::shared_ptr<ast::LValue> > (s.value);
         break;
 
-      case 76: // loopControlStatement
+      case 77: // loopControlStatement
         value.move< std::shared_ptr<ast::LoopControlStatement> > (s.value);
         break;
 
-      case 89: // operation
+      case 91: // operation
         value.move< std::shared_ptr<ast::Operation> > (s.value);
         break;
 
-      case 85: // rValue
+      case 87: // rValue
         value.move< std::shared_ptr<ast::RValue> > (s.value);
         break;
 
-      case 56: // "rvalue value"
+      case 57: // "rvalue value"
         value.move< std::shared_ptr<ast::RValueValue> > (s.value);
         break;
 
-      case 81: // returnStatement
+      case 83: // returnStatement
         value.move< std::shared_ptr<ast::ReturnStatement> > (s.value);
         break;
 
-      case 64: // statement
+      case 65: // statement
         value.move< std::shared_ptr<ast::Statement> > (s.value);
         break;
 
-      case 65: // statements
-      case 66: // statementsBlockInternal
-      case 67: // statementsBlock
+      case 66: // statements
+      case 67: // statementsBlockInternal
+      case 68: // statementsBlock
         value.move< std::shared_ptr<ast::StatementList> > (s.value);
         break;
 
-      case 82: // valueStandalone
-      case 83: // value
+      case 84: // valueStandalone
+      case 85: // value
         value.move< std::shared_ptr<ast::Value> > (s.value);
         break;
 
-      case 73: // forLoopHeader
-      case 87: // functionCallParameters
-      case 88: // functionCallParametersMore
+      case 74: // forLoopHeader
+      case 89: // functionCallParameters
+      case 90: // functionCallParametersMore
         value.move< std::shared_ptr<ast::ValueList> > (s.value);
         break;
 
-      case 70: // localVariableDefinition
-      case 80: // functionDefinitionParameter
+      case 71: // localVariableDefinition
+      case 81: // functionDefinitionParameter
         value.move< std::shared_ptr<ast::VariableDefinition> > (s.value);
         break;
 
-      case 68: // localVariableDefinitionList
-      case 69: // localVariableDefinitions
-      case 78: // functionDefinitionParameters
-      case 79: // functionDefinitionParametersMore
+      case 69: // localVariableDefinitionList
+      case 70: // localVariableDefinitions
+      case 79: // functionDefinitionParameters
+      case 80: // functionDefinitionParametersMore
         value.move< std::shared_ptr<ast::VariableDefinitionList> > (s.value);
         break;
 
-      case 75: // whileLoop
+      case 76: // whileLoop
         value.move< std::shared_ptr<ast::WhileLoop> > (s.value);
         break;
 
-      case 53: // "identifier"
+      case 54: // "identifier"
         value.move< std::string > (s.value);
         break;
 
@@ -1759,7 +1771,7 @@ namespace yy {
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
      295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
      305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     315,   316
+     315,   316,   317
     };
     return static_cast<token_type> (yytoken_number_[type]);
   }
@@ -1846,6 +1858,12 @@ namespace yy {
   ScratchCodeParser::make_SEMICOLON (const location_type& l)
   {
     return symbol_type (token::TOK_SEMICOLON, l);
+  }
+
+  ScratchCodeParser::symbol_type
+  ScratchCodeParser::make_COLON (const location_type& l)
+  {
+    return symbol_type (token::TOK_COLON, l);
   }
 
   ScratchCodeParser::symbol_type
@@ -2121,7 +2139,7 @@ namespace yy {
 
 
 } // yy
-#line 2125 "gen/scratch-code.tab.hpp" // lalr1.cc:377
+#line 2143 "gen/scratch-code.tab.hpp" // lalr1.cc:377
 
 
 

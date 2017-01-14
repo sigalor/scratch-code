@@ -45,15 +45,20 @@
 #include "ManifestDefinitions.hpp"
 #include "ObjectParams.hpp"
 #include "OpcodeAliases.hpp"
+#include "ProjectManager.hpp"
 #include "Utilities.hpp"
 
 
 
 namespace sc
 {
+	class Driver;
+	class ProjectManager;
+	
 	class Object : public ManifestUser<Object>
 	{
-		private:			
+		private:
+			ProjectManager*										parentProjectManager;
 			boost::filesystem::path								objectPath;
 			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;

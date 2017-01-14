@@ -44,6 +44,7 @@
 namespace sc
 {
 	class Object;
+	class Driver;
 
 	class Translator
 	{

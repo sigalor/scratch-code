@@ -1,10 +1,10 @@
 int test(string param1, int param2, real param3)
 {
 	if(true) { } else { }
-	scratch_say(param1);
+	scratch_sayDuration(param1, 1.0);
 }
 
-void test2(bool doStuff, real pi, string name)
+void test2() : scratch_onGreenFlag()
 {
 	if(true)
 	{
@@ -13,4 +13,13 @@ void test2(bool doStuff, real pi, string name)
 			if(false) { }
 		scratch_sayDuration("Hello", 2.0);
 	}
+}
+
+void test3() : scratch_onReceive("bye")
+{
+	scratch_sayDuration("Goodbye", 1.0);
+}
+
+void test4() : scratch_onKeyPressed("space")
+{
 }

@@ -28,12 +28,14 @@
 %code requires
 {
 	#include <string>
+	#include <vector>
 	#include <algorithm>
 	#include <memory>
+	#include <utility>
 	#include <typeinfo>
 	#include <ast/AST.hpp>
 	
-	namespace sc { class Driver; }																					//one cannot simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
+	namespace sc { class Driver; }																					//one does not simply    do "class sc::Driver;" (from http://stackoverflow.com/q/2059665)
 }
 
 
@@ -56,6 +58,8 @@
 %code
 {
 	#include "Driver.hpp"
+	#include "OpcodeAliases.hpp"
+	#include "GeneralException.hpp"
 }
 
 %define api.token.prefix {TOK_}
@@ -74,6 +78,7 @@
 	CURLY_BRACKET_CLOSED "}"
 	COMMA ","
 	SEMICOLON ";"
+	COLON ":"
 
 	OP_PLUS "+"
 	OP_MINUS "-"
@@ -135,7 +140,7 @@
 %type <std::shared_ptr<ast::Value>>						value valueStandalone;
 %type <std::shared_ptr<ast::LValue>>					lValue;
 %type <std::shared_ptr<ast::RValue>>					rValue;
-%type <std::shared_ptr<ast::FunctionCall>>				functionCall;
+%type <std::shared_ptr<ast::FunctionCall>>				functionModifier functionCall;
 %type <std::shared_ptr<ast::ValueList>>					functionCallParameters functionCallParametersMore;
 %type <std::shared_ptr<ast::Operation>>					operation;
 %printer { yyoutput << ast::Lexer::getString($$); } <ast::Lexer::ParsedVariableType>
@@ -279,6 +284,60 @@ unit:																												//this is the ONLY rule that writes to driver.s
 					ast::Lexer::ParsedVariableType forLoopCondType = (forLoop->getCondition()==nullptr ? ast::Lexer::ParsedVariableType::Bool : forLoop->getCondition()->getEffectiveType());
 					if(forLoopCondType != ast::Lexer::ParsedVariableType::Bool)
 						throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(forLoop), "for loop condition needs to be of type '" + ast::Lexer::getString(ast::Lexer::ParsedVariableType::Bool) + "', not '" + ast::Lexer::getString(forLoopCondType) + "'");
+				}
+			},
+			{
+				//check that function definition modifier is valid (it has to exist and arguments may only be RValueValues)
+				ast::FunctionDefinition::uniqueId,
+				[&](std::shared_ptr<ast::Node> obj)
+				{
+					auto funcDef = std::static_pointer_cast<ast::FunctionDefinition>(obj);
+					auto modFuncCall = funcDef->getModifierFunctionCall();
+					if(modFuncCall != nullptr)
+					{
+						//find function modifier
+						auto funcModIter = std::find_if(sc::OpcodeAliases::functionModifiers.begin(), sc::OpcodeAliases::functionModifiers.end(), [&](auto& x)
+							{ return (x.opcodeAlias.aliasFuncDef->getName() == modFuncCall->getAssocFunc()->getName()); });
+						if(funcModIter == sc::OpcodeAliases::functionModifiers.end())
+							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(modFuncCall), "'" + modFuncCall->getAssocFunc()->getName() + "' is not a function modifier");
+						
+						//check function modifier condition
+						if(funcModIter->opcodeAlias.condition)														//from Translator::translateFunctionCall
+						{
+							try
+								{ funcModIter->opcodeAlias.condition(driver.targetObject); }
+							catch(const sc::GeneralException& e)
+								{ throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(modFuncCall), "object '" + driver.targetObject->getName() + "' is not qualified for the use of the function modifier '" + funcModIter->opcodeAlias.aliasFuncDef->getName() + "': " + e.what()); }
+						}
+						
+						//only RValueValues are allowed as parameters
+						std::shared_ptr<ast::ValueList> funcModParams = std::make_shared<ast::ValueList>(nullptr);
+						for(auto v : modFuncCall->getArgs()->getValues())
+						{
+							if(!v->isA<ast::RValueValue>())
+								throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(modFuncCall), "parameters for function modifier '" + funcModIter->opcodeAlias.aliasFuncDef->getName() + "' may only be rvalue values");
+							funcModParams->addValue(v);
+						}
+						
+						//functions using modifiers may not have any arguments or return value
+						if(funcDef->getReturnType() != ast::Lexer::ParsedVariableType::Void)
+							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(funcDef), "function definition '" + funcDef->getName() + "' may only return '" + ast::Lexer::getString(ast::Lexer::ParsedVariableType::Void) + "', because of the '" + modFuncCall->getAssocFunc()->getName() + "' modifier");
+						if(funcDef->getArgs()->getVarDefs().size() != 0)
+							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(funcDef), "function definition '" + funcDef->getName() + "' may not have any arguments, because of the '" + modFuncCall->getAssocFunc()->getName() + "' modifier");
+						
+						//do the validations for the modifier values (if one such function exists)
+						if(funcModIter->argValidator)
+						{
+							try
+								{ funcModIter->argValidator(driver.targetObject, funcModParams); }
+							catch(const sc::GeneralException& e)
+								{ throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(modFuncCall), "parameters for function modifier '" + funcModIter->opcodeAlias.aliasFuncDef->getName() + "' is invalid: " + e.what()); }
+						}
+						
+						//finally set the found values
+						funcDef->setModifier(funcModIter->modifier);
+						funcDef->setModifierArgs(funcModParams);
+					}
 				}
 			},
 			{
@@ -485,12 +544,14 @@ loopControlStatement:																								//returns ast::LoopControlStatement
 
 
 functionDefinition:																									//returns ast::FunctionDefinition
-	VARIABLE_TYPE IDENTIFIER "(" functionDefinitionParameters ")" statementsBlock
+	VARIABLE_TYPE IDENTIFIER "(" functionDefinitionParameters ")" functionModifier statementsBlock
 	{
 		driver.throwIfDefined(@$, $2);
-		auto newFuncDef = std::make_shared<ast::FunctionDefinition>(nullptr, $1, $2, $4, $6);
+		auto newFuncDef = std::make_shared<ast::FunctionDefinition>(nullptr, $1, $2, $4, $6, $7);
 		$4->setParent(newFuncDef);
-		$6->setParent(newFuncDef);
+		if($6 != nullptr)
+			$6->setParent(newFuncDef);
+		$7->setParent(newFuncDef);
 		driver.functionDefinitions.push_back(newFuncDef);
 		driver.nodeLocations[newFuncDef] = @$;
 		
@@ -536,6 +597,16 @@ functionDefinitionParameter:																						//returns ast::VariableDefinit
 		driver.nodeLocations[newVarDef] = @$;
 		$$ = newVarDef;
 	};
+functionModifier:																									//returns ast::FunctionCall
+	%empty
+	{
+		$$ = nullptr;
+	}
+  | ":" functionCall
+	{
+		$$ = $2;
+	};
+
 returnStatement:																									//returns ast::ReturnStatement
 	"return" ";"
 	{
@@ -622,7 +693,7 @@ functionCall:																										//returns ast::FunctionCall
 	{
 		//associated function is searched for at the very end to not make function predeclarations necessary
 		//also use a dummy function for later that just keeps the function's name
-		auto newFuncCall = std::make_shared<ast::FunctionCall>(nullptr, std::make_shared<ast::FunctionDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1, nullptr, nullptr), $3);
+		auto newFuncCall = std::make_shared<ast::FunctionCall>(nullptr, std::make_shared<ast::FunctionDefinition>(nullptr, ast::Lexer::ParsedVariableType::Invalid, $1, nullptr, ast::Lexer::ParsedFunctionModifier::Invalid, nullptr, nullptr), $3);
 		$3->setParent(newFuncCall);
 		driver.nodeLocations[newFuncCall] = @$;
 		$$ = newFuncCall;

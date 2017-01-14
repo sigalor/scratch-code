@@ -37,6 +37,7 @@
 
 #include "Utilities.hpp"
 #include "GeneralException.hpp"
+#include "Object.hpp"
 #include "scratch-code.tab.hpp"
 #define YY_DECL yy::ScratchCodeParser::symbol_type yylex(sc::Driver& driver)
 
@@ -48,6 +49,8 @@ extern FILE* yyin;
 
 namespace sc
 {
+	class Object;
+	
 	class Driver
 	{
 		private:
@@ -58,14 +61,15 @@ namespace sc
 
 		public:
 			std::shared_ptr<ast::StatementList>					syntaxTree;
+			Object*												targetObject;
 			std::vector<std::shared_ptr<ast::FunctionDefinition>> functionDefinitions;
 			std::vector<std::shared_ptr<ast::VariableDefinition>> variableDefinitions;
 			std::unordered_map<std::shared_ptr<ast::Node>, yy::location> nodeLocations;								//needed for nodes where the location needs to be stored for later
 	
 			Driver();
 			Driver(bool newTraceLexing, bool newTraceParsing);
-			Driver(std::shared_ptr<ast::StatementList> newSyntaxTree);
-			Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, bool newTraceLexing, bool newTraceParsing);
+			Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, Object* newTargetObject);
+			Driver(std::shared_ptr<ast::StatementList> newSyntaxTree, Object* newTargetObject, bool newTraceLexing, bool newTraceParsing);
 			virtual ~Driver();
 		
 			void												beginLexing();

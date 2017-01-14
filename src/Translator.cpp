@@ -38,47 +38,65 @@ namespace sc
 	{
 		using namespace rapidjson;
 		
-		Value head(kArrayType), argNames(kArrayType), argDefaultValues(kArrayType), bodyContents(kArrayType);
-		std::string signature(input->getName() + "( ");
-		std::size_t argCounter = 0;
+		Value head(kArrayType);
 		
-		for(auto arg : input->getArgs()->getVarDefs())
+		if(input->getModifier() != ast::Lexer::ParsedFunctionModifier::Invalid)
 		{
-			signature += (argCounter==0 ? "" : " , ");
-			switch(arg->getType())
+			//add the opcode and all arguments to the head, e.g.   scratch_onReceive("hello")   will become   [ "whenIReceive", "hello" ]   in project.json
+			OpcodeAliases::OpcodeAlias funcModOpcodeAlias = std::find_if(OpcodeAliases::functionModifiers.begin(), OpcodeAliases::functionModifiers.end(), [&](auto& x)
+				{ return (x.modifier == input->getModifier()); })->opcodeAlias;
+			head.PushBack(Value(funcModOpcodeAlias.opcode.c_str(), alloc), alloc);
+			for(auto arg : input->getModifierArgs()->getValues())
 			{
-				case ast::Lexer::ParsedVariableType::Bool:
-				{
-					signature += "%b";
-					argDefaultValues.PushBack(false, alloc);
-					break;
-				}
-				case ast::Lexer::ParsedVariableType::Int:
-				case ast::Lexer::ParsedVariableType::Real:
-				{
-					signature += "%n";
-					argDefaultValues.PushBack(1, alloc);
-					break;
-				}
-				case ast::Lexer::ParsedVariableType::String:
-				{
-					signature += "%s";
-					argDefaultValues.PushBack("", alloc);
-					break;
-				}
-				default: break;
+				const std::string argStr(std::static_pointer_cast<ast::RValueValue>(arg)->getValueString());
+				head.PushBack(Value(argStr.c_str(), alloc), alloc);
 			}
-			argNames.PushBack(Value(arg->getName().c_str(), alloc), alloc);
-			++argCounter;
 		}
-		signature += " )";
+		else
+		{
+			Value argNames(kArrayType), argDefaultValues(kArrayType);
+			std::string signature(input->getName() + "( ");
+			std::size_t argCounter = 0;
+		
+			for(auto arg : input->getArgs()->getVarDefs())
+			{
+				signature += (argCounter==0 ? "" : " , ");
+				switch(arg->getType())
+				{
+					case ast::Lexer::ParsedVariableType::Bool:
+					{
+						signature += "%b";
+						argDefaultValues.PushBack(false, alloc);
+						break;
+					}
+					case ast::Lexer::ParsedVariableType::Int:
+					case ast::Lexer::ParsedVariableType::Real:
+					{
+						signature += "%n";
+						argDefaultValues.PushBack(1, alloc);
+						break;
+					}
+					case ast::Lexer::ParsedVariableType::String:
+					{
+						signature += "%s";
+						argDefaultValues.PushBack("", alloc);
+						break;
+					}
+					default: break;
+				}
+				argNames.PushBack(Value(arg->getName().c_str(), alloc), alloc);
+				++argCounter;
+			}
+			signature += " )";
+		
+			head.PushBack("procDef", alloc);
+			head.PushBack(Value(signature.c_str(), alloc), alloc);
+			head.PushBack(argNames, alloc);
+			head.PushBack(argDefaultValues, alloc);
+			head.PushBack(false, alloc);																			//TODO: what about "execute without screen refresh"? It's currently always false
+		}
 		
 		valDest.SetArray();
-		head.PushBack("procDef", alloc);
-		head.PushBack(Value(signature.c_str(), alloc), alloc);
-		head.PushBack(argNames, alloc);
-		head.PushBack(argDefaultValues, alloc);
-		head.PushBack(false, alloc);
 		valDest.PushBack(head, alloc);
 		translateStatementList(input->getBody(), valDest, true);
 	}
