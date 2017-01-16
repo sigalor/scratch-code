@@ -58,8 +58,8 @@ namespace sc
 	class Object : public ManifestUser<Object>
 	{
 		private:
-			ProjectManager*										parentProjectManager;
 			boost::filesystem::path								objectPath;
+			ProjectManager*										parentProjectManager;
 			std::shared_ptr<Costume>							penLayer;											//only needed when getType()==Type::Stage
 			std::vector<std::shared_ptr<Costume>>				costumes;
 			std::vector<std::shared_ptr<Sound>>					sounds;
@@ -71,7 +71,7 @@ namespace sc
 			std::shared_ptr<Sound>								currentlyProcessedSound;
 			
 		public:
-			Object(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, bool newIsInitialization=false, ObjectParams::Type newTypeForInitialization=ObjectParams::Type::Generic);
+			Object(const boost::filesystem::path& newObjectPath, ProjectManager* newParentProjectManager, bool verboseOutput=true, bool newIsInitialization=false, ObjectParams::Type newTypeForInitialization=ObjectParams::Type::Generic);
 			
 			void												loadFromPath(const boost::filesystem::path& newObjectPath, bool verboseOutput=true, ObjectParams::Type newTypeForInitialization=ObjectParams::Type::Generic);
 			void												buildJSON(rapidjson::Value& valDest, rapidjson::Document::AllocatorType& alloc);
@@ -79,6 +79,7 @@ namespace sc
 			virtual void										reset();
 			
 			const boost::filesystem::path&						getObjectPath();
+			ProjectManager*										getParentProjectManager();
 			std::shared_ptr<Costume>							getPenLayer();
 			std::vector<std::shared_ptr<Costume>>&				getCostumes();
 			std::vector<std::shared_ptr<Sound>>&				getSounds();

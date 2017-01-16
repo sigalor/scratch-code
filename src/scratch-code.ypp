@@ -325,16 +325,7 @@ unit:																												//this is the ONLY rule that writes to driver.s
 						if(funcDef->getArgs()->getVarDefs().size() != 0)
 							throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(funcDef), "function definition '" + funcDef->getName() + "' may not have any arguments, because of the '" + modFuncCall->getAssocFunc()->getName() + "' modifier");
 						
-						//do the validations for the modifier values (if one such function exists)
-						if(funcModIter->argValidator)
-						{
-							try
-								{ funcModIter->argValidator(driver.targetObject, funcModParams); }
-							catch(const sc::GeneralException& e)
-								{ throw yy::ScratchCodeParser::syntax_error(driver.nodeLocations.at(modFuncCall), "parameters for function modifier '" + funcModIter->opcodeAlias.aliasFuncDef->getName() + "' is invalid: " + e.what()); }
-						}
-						
-						//finally set the found values
+						//finally set the found values (note that the argument validation is NOT here, instead, it is in 'Translator::translateFunctionDefinition')
 						funcDef->setModifier(funcModIter->modifier);
 						funcDef->setModifierArgs(funcModParams);
 					}

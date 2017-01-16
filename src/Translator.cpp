@@ -24,6 +24,30 @@
 
 namespace sc
 {
+	void Translator::validateFunctionCall(std::shared_ptr<ast::FunctionCall> input, const OpcodeAliases::OpcodeAlias& opcodeAlias)
+	{
+		std::size_t paramCounter = 0;
+		
+		if(input->getAssocFunc() != opcodeAlias.aliasFuncDef)
+			throw GeneralException("inconsistent functions passed");
+		
+		for(auto v : input->getArgs()->getValues())
+		{
+			if(opcodeAlias.validators[paramCounter])
+			{
+				try
+					{ opcodeAlias.validators[paramCounter](targetObject, v); }
+				catch(const GeneralException& e)
+					{ throw GeneralException("parameter " + std::to_string(paramCounter+1) + " to '" + opcodeAlias.aliasFuncDef->getName() + "' is invalid: " + e.what()); }
+			}
+			++paramCounter;
+		}
+	}
+	
+	
+	
+	
+	
 	void Translator::translateStatement(std::shared_ptr<ast::Statement> input, rapidjson::Value& valDest)
 	{
 		if(input->isA<ast::FunctionDefinition>())
@@ -38,19 +62,43 @@ namespace sc
 	{
 		using namespace rapidjson;
 		
-		Value head(kArrayType);
+		Value scriptContents(kArrayType), head(kArrayType);
 		
 		if(input->getModifier() != ast::Lexer::ParsedFunctionModifier::Invalid)
 		{
-			//add the opcode and all arguments to the head, e.g.   scratch_onReceive("hello")   will become   [ "whenIReceive", "hello" ]   in project.json
+			//validate the function modifier parameters, add the opcode and all arguments to the head, e.g.   scratch_onReceive("hello")   will become   [ "whenIReceive", "hello" ]   in project.json
 			OpcodeAliases::OpcodeAlias funcModOpcodeAlias = std::find_if(OpcodeAliases::functionModifiers.begin(), OpcodeAliases::functionModifiers.end(), [&](auto& x)
 				{ return (x.modifier == input->getModifier()); })->opcodeAlias;
+			Value argBuffer;
+			
+			try
+				{ validateFunctionCall(input->getModifierFunctionCall(), funcModOpcodeAlias); }
+			catch(const GeneralException& e)
+				{ throw GeneralException(parsingDriver->locationToString(parsingDriver->nodeLocations.at(input->getModifierFunctionCall())) + ": " + e.what()); }
+			
 			head.PushBack(Value(funcModOpcodeAlias.opcode.c_str(), alloc), alloc);
 			for(auto arg : input->getModifierArgs()->getValues())
 			{
-				const std::string argStr(std::static_pointer_cast<ast::RValueValue>(arg)->getValueString());
-				head.PushBack(Value(argStr.c_str(), alloc), alloc);
+				translateValue(arg, argBuffer);
+				head.PushBack(argBuffer, alloc);
 			}
+			
+			//a modified function actually just calls a user-defined function with the actual function contents, to make it callable again
+			auto savedModifier = input->getModifier();
+			input->setModifier(ast::Lexer::ParsedFunctionModifier::Invalid);
+			translateFunctionDefinition(input, valDest);
+			input->setModifier(savedModifier);
+			
+			//establish the statement that calls the previously defined function
+			std::shared_ptr<ast::StatementList> callerStatementList = std::make_shared<ast::StatementList>(input);
+			std::shared_ptr<ast::FunctionCall> callerFunctionCall = std::make_shared<ast::FunctionCall>(callerStatementList, input, nullptr);
+			std::shared_ptr<ast::ValueList> callerFunctionCallArgs = std::make_shared<ast::ValueList>(callerFunctionCall);
+			callerFunctionCall->setArgs(callerFunctionCallArgs);
+			callerStatementList->addStatement(callerFunctionCall);
+			
+			//establish the caller function that uses a modifier
+			scriptContents.PushBack(head, alloc);
+			translateStatementList(callerStatementList, scriptContents, true);
 		}
 		else
 		{
@@ -88,17 +136,18 @@ namespace sc
 				++argCounter;
 			}
 			signature += " )";
+			functionSignatures[input] = signature;
 		
 			head.PushBack("procDef", alloc);
 			head.PushBack(Value(signature.c_str(), alloc), alloc);
 			head.PushBack(argNames, alloc);
 			head.PushBack(argDefaultValues, alloc);
 			head.PushBack(false, alloc);																			//TODO: what about "execute without screen refresh"? It's currently always false
+			
+			scriptContents.PushBack(head, alloc);
+			translateStatementList(input->getBody(), scriptContents, true);
 		}
-		
-		valDest.SetArray();
-		valDest.PushBack(head, alloc);
-		translateStatementList(input->getBody(), valDest, true);
+		valDest.PushBack(scriptContents, alloc);
 	}
 	
 	void Translator::translateValue(std::shared_ptr<ast::Value> input, rapidjson::Value& valDest)
@@ -132,33 +181,44 @@ namespace sc
 	{
 		using namespace rapidjson;
 		
+		Value argBuffer;
 		auto opcodeIter = OpcodeAliases::getIteratorFromAlias(input->getAssocFunc()->getName());
 		
+		//check if the called function is a native Scratch function
 		valDest.SetArray();
 		if(opcodeIter != OpcodeAliases::opcodeAliases.end())
 		{
-			Value argBuffer;
-			
 			//of course only call the condition when it's set at all; when it is, use try-catch, because it can throw exceptions (e.g. when a "say" block is used in a stage object)
 			if(opcodeIter->condition)
 			{
 				try
 					{ opcodeIter->condition(targetObject); }
 				catch(const GeneralException& e)
-					{ throw GeneralException(parsingDriver->locationToString(parsingDriver->nodeLocations[input]) + ": object '" + targetObject->getName() + "' is not qualified for the use of the function '" + input->getAssocFunc()->getName() + "': " + e.what()); }
+					{ throw GeneralException(parsingDriver->locationToString(parsingDriver->nodeLocations.at(input)) + ": object '" + targetObject->getName() + "' is not qualified for the use of the function '" + input->getAssocFunc()->getName() + "': " + e.what()); }
 			}
 			
-			//translate all arguments
+			//validate the arguments
+			try
+				{ validateFunctionCall(input, *opcodeIter); }
+			catch(const GeneralException& e)
+				{ throw GeneralException(parsingDriver->locationToString(parsingDriver->nodeLocations.at(input)) + ": " + e.what()); }
+			
+			//add the opcode string
 			valDest.PushBack(Value(opcodeIter->opcode.c_str(), alloc), alloc);
-			for(auto v : input->getArgs()->getValues())
-			{
-				translateValue(v, argBuffer);
-				valDest.PushBack(argBuffer, alloc);
-			}
+			
 		}
 		else
 		{
-			//TODO (custom function calls)
+			//add the string "call" and the function signature
+			valDest.PushBack("call", alloc);
+			valDest.PushBack(Value(functionSignatures.at(input->getAssocFunc()).c_str(), alloc), alloc);
+		}
+		
+		//translate all arguments
+		for(auto v : input->getArgs()->getValues())
+		{
+			translateValue(v, argBuffer);
+			valDest.PushBack(argBuffer, alloc);
 		}
 	}
 	
@@ -215,22 +275,31 @@ namespace sc
 	{
 		using namespace rapidjson;
 		
-		Value translatedStatementBuffer, blockBuffer;
+		Value translatedScriptBlocksBuffer, blockBuffer;
 		int xCoord = 10, yCoord = 10;
 		
-		valDest.SetArray();
-		for(auto stmt : input->getStatements())
+		try
 		{
-			if(stmt->isA<ast::FunctionDefinition>())
+			valDest.SetArray();
+			for(auto stmt : input->getStatements())
 			{
-				translateStatement(stmt, translatedStatementBuffer);
-				blockBuffer.SetArray();
-				blockBuffer.PushBack(xCoord, alloc);
-				blockBuffer.PushBack(yCoord, alloc);
-				blockBuffer.PushBack(translatedStatementBuffer, alloc);
-				valDest.PushBack(blockBuffer, alloc);
-				yCoord += 20;
+				if(stmt->isA<ast::FunctionDefinition>())
+				{
+					translatedScriptBlocksBuffer.SetArray();
+					translateStatement(stmt, translatedScriptBlocksBuffer);											//because 'stmt' is an 'ast::FunctionDefinition', 'translatedScriptBlocksBuffer' will be able to contain multiple script blocks (e.g. "scratch_onGreenFlag" creates a "whenGreenFlag" block THAT CALLS a user-defined function with the actual function contents)
+					for(rapidjson::SizeType i=0; i<translatedScriptBlocksBuffer.Size(); ++i)
+					{
+						blockBuffer.SetArray();
+						blockBuffer.PushBack(xCoord, alloc);
+						blockBuffer.PushBack(yCoord, alloc);
+						blockBuffer.PushBack(translatedScriptBlocksBuffer[i], alloc);
+						valDest.PushBack(blockBuffer, alloc);
+						yCoord += 100;																				//TODO: any simple method for determining the actual height of a script?
+					}
+				}
 			}
 		}
+		catch(const GeneralException& e)
+			{ throw GeneralException(std::string("compilation terminated due to translation error:\n") + e.what()); }
 	}
 }

@@ -28,6 +28,7 @@
 #include <fstream>
 #include <memory>
 #include <utility>
+#include <unordered_map>
 
 #include <boost/variant.hpp>
 #include <rapidjson/document.h>
@@ -45,6 +46,7 @@ namespace sc
 {
 	class Object;
 	class Driver;
+	namespace OpcodeAliases { class OpcodeAlias; }
 
 	class Translator
 	{
@@ -52,6 +54,10 @@ namespace sc
 			Object*												targetObject;
 			std::shared_ptr<Driver>								parsingDriver;
 			rapidjson::Document::AllocatorType&					alloc;
+			std::unordered_map<std::shared_ptr<ast::FunctionDefinition>, std::string> functionSignatures;
+			
+			void												validateFunctionCall(std::shared_ptr<ast::FunctionCall> input, const OpcodeAliases::OpcodeAlias& opcodeAlias);
+			
 			void												translateStatement(std::shared_ptr<ast::Statement> input, rapidjson::Value& valDest);
 			void												translateFunctionDefinition(std::shared_ptr<ast::FunctionDefinition> input, rapidjson::Value& valDest);
 			void												translateValue(std::shared_ptr<ast::Value> input, rapidjson::Value& valDest);

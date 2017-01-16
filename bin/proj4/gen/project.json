@@ -35,10 +35,14 @@
         ],
         [
             10,
-            30,
+            110,
             [
                 [
-                    "whenGreenFlag"
+                    "procDef",
+                    "test2(  )",
+                    [],
+                    [],
+                    false
                 ],
                 [
                     "doIf",
@@ -67,11 +71,27 @@
         ],
         [
             10,
-            50,
+            210,
             [
                 [
-                    "whenIReceive",
-                    "bye"
+                    "whenGreenFlag"
+                ],
+                [
+                    "call",
+                    "test2(  )"
+                ]
+            ]
+        ],
+        [
+            10,
+            310,
+            [
+                [
+                    "procDef",
+                    "test3(  )",
+                    [],
+                    [],
+                    false
                 ],
                 [
                     "say:duration:elapsed:from:",
@@ -82,11 +102,53 @@
         ],
         [
             10,
-            70,
+            410,
             [
                 [
-                    "whenKeyPressed",
-                    "space"
+                    "whenIReceive",
+                    "bye"
+                ],
+                [
+                    "call",
+                    "test3(  )"
+                ]
+            ]
+        ],
+        [
+            10,
+            510,
+            [
+                [
+                    "procDef",
+                    "test4(  )",
+                    [],
+                    [],
+                    false
+                ],
+                [
+                    "call",
+                    "test2(  )"
+                ],
+                [
+                    "call",
+                    "test( %s , %n , %n )",
+                    "hello",
+                    123,
+                    3.14
+                ]
+            ]
+        ],
+        [
+            10,
+            610,
+            [
+                [
+                    "whenSceneStarts",
+                    "backdrop1"
+                ],
+                [
+                    "call",
+                    "test4(  )"
                 ]
             ]
         ]

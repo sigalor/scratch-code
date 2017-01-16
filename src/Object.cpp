@@ -28,15 +28,13 @@ namespace op = sc::ObjectParams;
 
 namespace sc
 {	
-	Object::Object(const fs::path& newObjectPath, bool verboseOutput, bool newIsInitialization, op::Type newTypeForInitialization) : ManifestUser(newObjectPath / "objectManifest.json", ManifestDefinitions::ObjectManifest::rootEntry, ManifestDefinitions::ObjectManifest::rootEntryValueBase, newIsInitialization)
+	Object::Object(const fs::path& newObjectPath, ProjectManager* newParentProjectManager, bool verboseOutput, bool newIsInitialization, op::Type newTypeForInitialization) : ManifestUser(newObjectPath / "objectManifest.json", ManifestDefinitions::ObjectManifest::rootEntry, ManifestDefinitions::ObjectManifest::rootEntryValueBase, newIsInitialization), parentProjectManager(newParentProjectManager)
 	{
 		loadFromPath(newObjectPath, verboseOutput, newTypeForInitialization);
 	}
 	
 	void Object::loadFromPath(const fs::path& newObjectPath, bool verboseOutput, op::Type newTypeForInitialization)
 	{
-		using namespace rapidjson;
-		
 		objectPath = newObjectPath;
 		typeForInitialization = newTypeForInitialization;
 		if(isInitialization  &&  !fs::exists(newObjectPath))
@@ -131,6 +129,11 @@ namespace sc
 	const fs::path& Object::getObjectPath()
 	{
 		return objectPath;
+	}
+	
+	ProjectManager* Object::getParentProjectManager()
+	{
+		return parentProjectManager;
 	}
 	
 	std::shared_ptr<Costume> Object::getPenLayer()

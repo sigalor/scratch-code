@@ -26,8 +26,7 @@ obj/Object.o: src/Object.cpp include/Object.hpp \
  ext/scratch-code-ast/include/ast/ReturnStatement.hpp \
  include/Resource.hpp include/Utilities.hpp include/GeneralException.hpp \
  include/Costume.hpp include/Sound.hpp include/Driver.hpp \
- gen/scratch-code.tab.hpp gen/stack.hh gen/location.hh gen/position.hh \
- include/Translator.hpp include/OpcodeAliases.hpp \
+ scratch-code.tab.hpp include/Translator.hpp include/OpcodeAliases.hpp \
  include/ObjectParams.hpp include/ManifestEntry.hpp \
  include/ManifestEntryParams.hpp include/ManifestStructure.hpp \
  include/ManifestEntryValue.hpp include/ManifestUser.hpp \
@@ -97,13 +96,7 @@ include/Sound.hpp:
 
 include/Driver.hpp:
 
-gen/scratch-code.tab.hpp:
-
-gen/stack.hh:
-
-gen/location.hh:
-
-gen/position.hh:
+scratch-code.tab.hpp:
 
 include/Translator.hpp:
 

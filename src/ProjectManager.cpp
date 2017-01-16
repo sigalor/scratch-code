@@ -32,7 +32,7 @@ namespace sc
 	{
 		for(fs::directory_entry& e : fs::directory_iterator(getPaths_objectsDirectory()))
 		{
-			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path());
+			std::shared_ptr<Object> newObject = std::make_shared<Object>(e.path(), this);
 			
 			auto otherStageObject = std::find_if(objects.begin(), objects.end(), [](std::shared_ptr<Object> obj) { return (obj->getType() == op::Type::Stage); });
 			if(newObject->getType() == op::Type::Stage)
@@ -106,7 +106,7 @@ namespace sc
 			throw GeneralException("object called '" + objName + "' already exists at '" + fs::relative(objectWithSameName->getObjectPath()).string() + "'");
 		
 		//load the object (while "verboseOutput" is false to suppress warnings and "isInitialization" is true), then do some changes, finally save the modified object's manifest on the disk and reload it
-		objects.push_back(std::make_shared<Object>(objPath, false, true, objType));
+		objects.push_back(std::make_shared<Object>(objPath, this, false, true, objType));
 		objects.back()->setName(objName);
 		objects.back()->saveAndReload();
 		
@@ -239,6 +239,11 @@ namespace sc
 	const fs::path& ProjectManager::getProjectPath()
 	{
 		return projectPath;
+	}
+	
+	std::shared_ptr<Object> ProjectManager::getStageObject()
+	{
+		return stageObject;
 	}
 	
 	std::string ProjectManager::getTitle()

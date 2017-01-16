@@ -63,7 +63,7 @@ namespace sc
 		endLexing();
 		
 		if(result != 0)
-			throw GeneralException("compilation terminated due to parsing error " + std::to_string(result) + ":\n" + errorMessageBuffer);
+			throw GeneralException("compilation terminated due to parsing error:\n" + errorMessageBuffer);
 	}
 
 	std::string Driver::locationToString(const yy::location& loc)

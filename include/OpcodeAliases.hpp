@@ -43,30 +43,39 @@ namespace sc
 
 	namespace OpcodeAliases
 	{
+		using ArgumentValidator = std::function<void(Object*, std::shared_ptr<ast::Value>)>;
+		
+		std::shared_ptr<ast::VariableDefinitionList>			constructOpcodeArgs(std::shared_ptr<ast::Node> parent, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);
+		std::shared_ptr<ast::FunctionDefinition>				constructOpcodeAlias(const std::string& alias, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);
+		
+		class OpcodeAliasArgument
+		{
+			public:
+				ast::Lexer::ParsedVariableType					type;
+				ArgumentValidator								validator;
+				
+				OpcodeAliasArgument(ast::Lexer::ParsedVariableType newType);
+				OpcodeAliasArgument(ast::Lexer::ParsedVariableType newType, const ArgumentValidator& newValidator);
+		};
+		
 		class OpcodeAlias
 		{
 			public:
 				std::function<void(Object*)>					condition;
 				std::string										opcode;
 				std::shared_ptr<ast::FunctionDefinition>		aliasFuncDef;
+				std::vector<ArgumentValidator>					validators;
 				
-				OpcodeAlias(const std::function<void(Object*)>& newCondition, const std::string& newOpcode, std::shared_ptr<ast::FunctionDefinition> newAliasFuncDef) : condition(newCondition), opcode(newOpcode), aliasFuncDef(newAliasFuncDef)
-				{
-					//empty
-				}
+				OpcodeAlias(const std::function<void(Object*)>& newCondition, const std::string& newOpcode, const std::string& newAlias, const std::vector<OpcodeAliasArgument>& arguments={});
 		};
 		
 		class FunctionModifier
 		{
 			public:
 				ast::Lexer::ParsedFunctionModifier				modifier;
-				std::function<void(Object*, std::shared_ptr<ast::ValueList>)> argValidator;
 				OpcodeAlias										opcodeAlias;
 				
-				FunctionModifier(ast::Lexer::ParsedFunctionModifier newModifier, const std::function<void(Object*, std::shared_ptr<ast::ValueList>)>& newArgValidator, const OpcodeAlias& newOpcodeAlias) : modifier(newModifier), argValidator(newArgValidator), opcodeAlias(newOpcodeAlias)
-				{
-					//empty
-				}
+				FunctionModifier(ast::Lexer::ParsedFunctionModifier newModifier, const OpcodeAlias& newOpcodeAlias);
 		};
 		
 		extern const std::function<void(Object*)>				isStageCondition, isGenericCondition;				//in contrast to ObjectParams::isStageCondition, this one THROWS a sc::GeneralException with a message instead of returning 'bool'. THIS is what OpcodeAlias::condition expects. It has NOTHING to do with the condition needed by 'ManifestDefinitions'/'ManifestEntry'.
@@ -74,8 +83,6 @@ namespace sc
 		extern const std::vector<FunctionModifier>				functionModifiers;
 		extern const std::vector<std::shared_ptr<ast::FunctionDefinition>> nativeFunctionDefinitions;				//combines the ast::FunctionDefinitions from 'opcodeAliases' and 'functionModifiers'
 		
-		std::shared_ptr<ast::VariableDefinitionList>			constructOpcodeArgs(std::shared_ptr<ast::Node> parent, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);
-		std::shared_ptr<ast::FunctionDefinition>				constructOpcodeAlias(const std::string& alias, const std::vector<ast::Lexer::ParsedVariableType>& argTypes);
 		decltype(opcodeAliases)::const_iterator					getIteratorFromAlias(const std::string& alias);
 		bool													hasAlias(const std::string& alias);
 		const std::string&										getOpcodeFromAlias(Object* targetObject, const std::string& alias);

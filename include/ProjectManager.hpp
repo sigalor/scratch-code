@@ -80,6 +80,7 @@ namespace sc
 			void													clean(bool doValidation=true);
 			
 			const boost::filesystem::path&							getProjectPath();
+			std::shared_ptr<Object>									getStageObject();
 			std::string												getTitle();
 			std::string												getUsername();
 			boost::filesystem::path									getPaths_binariesDirectory();

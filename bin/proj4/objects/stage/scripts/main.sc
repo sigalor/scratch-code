@@ -20,6 +20,8 @@ void test3() : scratch_onReceive("bye")
 	scratch_sayDuration("Goodbye", 1.0);
 }
 
-void test4() : scratch_onKeyPressed("space")
+void test4() : scratch_onBackdropSwitch("backdrop1")
 {
+	test2();
+	test("hello", 123, 3.14);
 }
